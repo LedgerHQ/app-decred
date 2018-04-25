@@ -17,6 +17,7 @@
 
 #include "btchip_internal.h"
 #include "btchip_apdu_constants.h"
+#include "blake256.h"
 
 const unsigned char TRANSACTION_OUTPUT_SCRIPT_PRE[] = {
     0x19, 0x76, 0xA9,
@@ -170,13 +171,14 @@ void btchip_retrieve_keypair_discard(unsigned char WIDE *privateComponent,
 void btchip_public_key_hash160(unsigned char WIDE *in, unsigned short inlen,
                                unsigned char *out) {
     union {
-        cx_sha256_t shasha;
+        BLAKE256_CTX shasha;
         cx_ripemd160_t riprip;
     } u;
     unsigned char buffer[32];
 
-    cx_sha256_init(&u.shasha);
-    cx_hash(&u.shasha.header, CX_LAST, in, inlen, buffer);
+    blake256_Init(&u.shasha);
+    blake256_Update(&u.shasha, in, inlen);
+    blake256_Final(&u.shasha, buffer);
     cx_ripemd160_init(&u.riprip);
     cx_hash(&u.riprip.header, CX_LAST, buffer, 32, out);
 }
@@ -204,10 +206,12 @@ unsigned short btchip_public_key_to_encoded_base58(
         os_memmove(tmpBuffer, in, 20 + versionSize);
     }
 
-    cx_sha256_init(&hash);
-    cx_hash(&hash.header, CX_LAST, tmpBuffer, 20 + versionSize, checksumBuffer);
-    cx_sha256_init(&hash);
-    cx_hash(&hash.header, CX_LAST, checksumBuffer, 32, checksumBuffer);
+    blake256_Init(&hash);
+    blake256_Update(&hash, tmpBuffer, 20 + versionSize);
+    blake256_Final(&hash, checksumBuffer);
+    blake256_Init(&hash);
+    blake256_Update(&hash, checksumBuffer, 32);
+    blake256_Final(&hash, checksumBuffer);
 
     L_DEBUG_BUF(("Checksum\n", checksumBuffer, 4));
     os_memmove(tmpBuffer + 20 + versionSize, checksumBuffer, 4);

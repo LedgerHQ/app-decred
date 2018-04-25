@@ -24,12 +24,17 @@
 #define P2_NEW_SEGWIT 0x02
 #define P2_CONTINUE 0x80
 
-unsigned short btchip_apdu_hash_input_start() {
+
+unsigned short btchip_apdu_hash_input_start()
+{
     unsigned char apduLength;
     apduLength = G_io_apdu_buffer[ISO_OFFSET_LC];
 
+    PRINTF("%.*H\n", 100, G_io_apdu_buffer);
+
     SB_CHECK(N_btchip.bkp.config.operationMode);
-    switch (SB_GET(N_btchip.bkp.config.operationMode)) {
+    switch (SB_GET(N_btchip.bkp.config.operationMode))
+    {
     case BTCHIP_MODE_WALLET:
     case BTCHIP_MODE_RELAXED_WALLET:
     case BTCHIP_MODE_SERVER:
@@ -38,21 +43,26 @@ unsigned short btchip_apdu_hash_input_start() {
         return BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
     }
 
-    if (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_FIRST) {
+    if (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_FIRST)
+    {
         // Initialize
         btchip_context_D.transactionContext.transactionState =
             BTCHIP_TRANSACTION_NONE;
         btchip_set_check_internal_structure_integrity(1);
         btchip_context_D.transactionHashOption = TRANSACTION_HASH_BOTH;
-    } else if (G_io_apdu_buffer[ISO_OFFSET_P1] != P1_NEXT) {
+    }
+    else if (G_io_apdu_buffer[ISO_OFFSET_P1] != P1_NEXT)
+    {
         return BTCHIP_SW_INCORRECT_P1_P2;
     }
 
     if ((G_io_apdu_buffer[ISO_OFFSET_P2] == P2_NEW) ||
-        (G_io_apdu_buffer[ISO_OFFSET_P2] == P2_NEW_SEGWIT)) {
+        (G_io_apdu_buffer[ISO_OFFSET_P2] == P2_NEW_SEGWIT))
+    {
         // btchip_context_D.transactionContext.consumeP2SH =
         // ((N_btchip.bkp.config.options & BTCHIP_OPTION_SKIP_2FA_P2SH) != 0);
-        if (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_FIRST) {
+        if (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_FIRST)
+        {
             unsigned char usingSegwit =
                 (G_io_apdu_buffer[ISO_OFFSET_P2] == P2_NEW_SEGWIT);
             // Request PIN validation
@@ -62,7 +72,8 @@ unsigned short btchip_apdu_hash_input_start() {
             // background without
             // requiring to disable autolock/autopoweroff
             if (!btchip_context_D.transactionContext.firstSigned &&
-                !os_global_pin_is_validated()) {
+                !os_global_pin_is_validated())
+            {
                 return BTCHIP_SW_SECURITY_STATUS_NOT_SATISFIED;
             }
             // Master transaction reset
@@ -77,7 +88,9 @@ unsigned short btchip_apdu_hash_input_start() {
                       sizeof(btchip_context_D.tmpCtx.output));
             btchip_context_D.tmpCtx.output.changeAccepted = 1;
         }
-    } else if (G_io_apdu_buffer[ISO_OFFSET_P2] != P2_CONTINUE) {
+    }
+    else if (G_io_apdu_buffer[ISO_OFFSET_P2] != P2_CONTINUE)
+    {
         return BTCHIP_SW_INCORRECT_P1_P2;
     }
 

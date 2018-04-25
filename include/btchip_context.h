@@ -22,6 +22,7 @@
 #include "os.h"
 #include "btchip_secure_value.h"
 #include "btchip_filesystem_tx.h"
+#include "blake256.h"
 
 #define MAX_OUTPUT_TO_CHECK 200
 #define MAX_COIN_ID 13
@@ -168,9 +169,10 @@ struct btchip_context_s {
     /** Non protected transaction context */
 
     /** Full transaction hash context */
-    cx_sha256_t transactionHashFull;
+    //cx_sha256_t transactionHashFull;
+    BLAKE256_CTX transactionHashFull;
     /** Authorization transaction hash context */
-    cx_sha256_t transactionHashAuthorization;
+    BLAKE256_CTX transactionHashAuthorization; // used as witness hash in decred
     /** Current hash to perform (TRANSACTION_HASH_) */
     unsigned char transactionHashOption;
 

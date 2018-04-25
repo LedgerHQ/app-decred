@@ -48,7 +48,8 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 #include "qrcodegen.h"
 
 union {
-    struct {
+    struct
+    {
         char addressSummary[40]; // beginning of the output address ... end of
         char fullAmount[65];     // full amount
         char fullAddress[65];
@@ -56,7 +57,8 @@ union {
         char feesAmount[40]; // fees
     } tmp;
 
-    struct {
+    struct
+    {
         char addressSummary[MAX_CHAR_PER_LINE + 1];
         bagl_icon_details_t icon_details;
         unsigned int colors[2];
@@ -70,7 +72,8 @@ union {
 #else
 
 union {
-    struct {
+    struct
+    {
         // char addressSummary[40]; // beginning of the output address ... end
         // of
 
@@ -109,7 +112,8 @@ ux_state_t ux;
 unsigned int ux_step;
 unsigned int ux_step_count;
 
-const bagl_element_t *ui_menu_item_out_over(const bagl_element_t *e) {
+const bagl_element_t *ui_menu_item_out_over(const bagl_element_t *e)
+{
     // the selection rectangle is after the none|touchable
     e = (const bagl_element_t *)(((unsigned int)e) + sizeof(bagl_element_t));
     return e;
@@ -218,7 +222,8 @@ const bagl_element_t ui_idle_blue[] = {
 };
 
 unsigned int ui_idle_blue_button(unsigned int button_mask,
-                                 unsigned int button_mask_counter) {
+                                 unsigned int button_mask_counter)
+{
     return 0;
 }
 #endif // #if defined(TARGET_BLUE)
@@ -248,7 +253,8 @@ typedef void (*callback_t)(void);
 callback_t ui_details_back_callback;
 
 // don't perform any draw/color change upon finger event over settings
-const bagl_element_t *ui_settings_out_over(const bagl_element_t *e) {
+const bagl_element_t *ui_settings_out_over(const bagl_element_t *e)
+{
     return NULL;
 }
 
@@ -256,7 +262,8 @@ const char *ui_details_title;
 const char *ui_details_content;
 
 const bagl_element_t *
-ui_details_blue_back_callback(const bagl_element_t *element) {
+ui_details_blue_back_callback(const bagl_element_t *element)
+{
     ui_details_back_callback();
     return 0;
 }
@@ -425,14 +432,19 @@ const bagl_element_t ui_details_blue[] = {
      NULL},
 };
 
-const bagl_element_t *ui_details_blue_prepro(const bagl_element_t *element) {
-    if (element->component.userid == 1) {
+const bagl_element_t *ui_details_blue_prepro(const bagl_element_t *element)
+{
+    if (element->component.userid == 1)
+    {
         os_memmove(&tmp_element, element, sizeof(bagl_element_t));
         tmp_element.text = ui_details_title;
         return &tmp_element;
-    } else if (element->component.userid > 0) {
+    }
+    else if (element->component.userid > 0)
+    {
         unsigned int length = strlen(ui_details_content);
-        if (length >= (element->component.userid & 0xF) * MAX_CHAR_PER_LINE) {
+        if (length >= (element->component.userid & 0xF) * MAX_CHAR_PER_LINE)
+        {
             os_memset(vars.tmp.addressSummary, 0, MAX_CHAR_PER_LINE + 1);
             os_memmove(
                 vars.tmp.addressSummary,
@@ -450,12 +462,14 @@ const bagl_element_t *ui_details_blue_prepro(const bagl_element_t *element) {
 }
 
 unsigned int ui_details_blue_button(unsigned int button_mask,
-                                    unsigned int button_mask_counter) {
+                                    unsigned int button_mask_counter)
+{
     return 0;
 }
 
 void ui_details_init(const char *title, const char *content,
-                     callback_t back_callback) {
+                     callback_t back_callback)
+{
     ui_details_title = title;
     ui_details_content = content;
     ui_details_back_callback = back_callback;
@@ -468,12 +482,14 @@ void ui_transaction_blue_init(void);
 bagl_element_callback_t ui_transaction_blue_ok;
 bagl_element_callback_t ui_transaction_blue_cancel;
 
-const bagl_element_t *ui_transaction_blue_ok_callback(const bagl_element_t *e) {
+const bagl_element_t *ui_transaction_blue_ok_callback(const bagl_element_t *e)
+{
     return ui_transaction_blue_ok(e);
 }
 
 const bagl_element_t *
-ui_transaction_blue_cancel_callback(const bagl_element_t *e) {
+ui_transaction_blue_cancel_callback(const bagl_element_t *e)
+{
     return ui_transaction_blue_cancel(e);
 }
 
@@ -491,13 +507,20 @@ const char *ui_transaction_blue_values[3];
 const char *const ui_transaction_blue_details_name[][5] = {
     /*TRANSACTION_FULL*/
     {
-        "AMOUNT", "ADDRESS", "FEES", "CONFIRM TRANSACTION",
+        "AMOUNT",
+        "ADDRESS",
+        "FEES",
+        "CONFIRM TRANSACTION",
         "Transaction details",
     },
 
     /*TRANSACTION_OUTPUT*/
     {
-        "OUTPUT#", "ADDRESS", "AMOUNT", "CONFIRM OUTPUT", "Transaction output",
+        "OUTPUT#",
+        "ADDRESS",
+        "AMOUNT",
+        "CONFIRM OUTPUT",
+        "Transaction output",
     },
 
     /*TRANSACTION_FINALIZE*/
@@ -505,19 +528,29 @@ const char *const ui_transaction_blue_details_name[][5] = {
 
     /*TRANSACTION_P2SH*/
     {
-        NULL, NULL, NULL, "CONFIRM P2SH", "P2SH Transaction",
+        NULL,
+        NULL,
+        NULL,
+        "CONFIRM P2SH",
+        "P2SH Transaction",
     },
 
     /*TRANSACTION_MESSAGE*/
     {
-        "HASH", NULL, NULL, "SIGN MESSAGE", "Message signature",
+        "HASH",
+        NULL,
+        NULL,
+        "SIGN MESSAGE",
+        "Message signature",
     },
 };
 
-const bagl_element_t *ui_transaction_blue_1_details(const bagl_element_t *e) {
+const bagl_element_t *ui_transaction_blue_1_details(const bagl_element_t *e)
+{
     if (strlen(ui_transaction_blue_values[0]) *
             BAGL_FONT_OPEN_SANS_LIGHT_16_22PX_AVG_WIDTH >=
-        160) {
+        160)
+    {
         // display details screen
         ui_details_init(
             ui_transaction_blue_details_name[G_ui_transaction_blue_state][0],
@@ -526,10 +559,12 @@ const bagl_element_t *ui_transaction_blue_1_details(const bagl_element_t *e) {
     return 0;
 };
 
-const bagl_element_t *ui_transaction_blue_2_details(const bagl_element_t *e) {
+const bagl_element_t *ui_transaction_blue_2_details(const bagl_element_t *e)
+{
     if (strlen(ui_transaction_blue_values[1]) *
             BAGL_FONT_OPEN_SANS_REGULAR_10_13PX_AVG_WIDTH >=
-        160) {
+        160)
+    {
         ui_details_init(
             ui_transaction_blue_details_name[G_ui_transaction_blue_state][1],
             ui_transaction_blue_values[1], ui_transaction_blue_init);
@@ -537,10 +572,12 @@ const bagl_element_t *ui_transaction_blue_2_details(const bagl_element_t *e) {
     return 0;
 };
 
-const bagl_element_t *ui_transaction_blue_3_details(const bagl_element_t *e) {
+const bagl_element_t *ui_transaction_blue_3_details(const bagl_element_t *e)
+{
     if (strlen(ui_transaction_blue_values[2]) *
             BAGL_FONT_OPEN_SANS_REGULAR_10_13PX_AVG_WIDTH >=
-        160) {
+        160)
+    {
         ui_details_init(
             ui_transaction_blue_details_name[G_ui_transaction_blue_state][2],
             ui_transaction_blue_values[2], ui_transaction_blue_init);
@@ -803,15 +840,21 @@ const bagl_element_t ui_transaction_blue[] = {
 };
 
 const bagl_element_t *
-ui_transaction_blue_prepro(const bagl_element_t *element) {
-    if (element->component.userid == 0) {
+ui_transaction_blue_prepro(const bagl_element_t *element)
+{
+    if (element->component.userid == 0)
+    {
         return 1;
     }
     // none elements are skipped
-    if ((element->component.type & (~BAGL_FLAG_TOUCHABLE)) == BAGL_NONE) {
+    if ((element->component.type & (~BAGL_FLAG_TOUCHABLE)) == BAGL_NONE)
+    {
         return 0;
-    } else {
-        switch (element->component.userid & 0xF0) {
+    }
+    else
+    {
+        switch (element->component.userid & 0xF0)
+        {
         // icon
         case 0x40:
             return 1;
@@ -839,7 +882,8 @@ ui_transaction_blue_prepro(const bagl_element_t *element) {
         case 0x70:
             if (!ui_transaction_blue_details_name[G_ui_transaction_blue_state]
                                                  [element->component.userid &
-                                                  0xF]) {
+                                                  0xF])
+            {
                 return NULL;
             }
             os_memmove(&tmp_element, element, sizeof(bagl_element_t));
@@ -854,7 +898,8 @@ ui_transaction_blue_prepro(const bagl_element_t *element) {
             // won't display
             if (!ui_transaction_blue_details_name[G_ui_transaction_blue_state]
                                                  [element->component.userid &
-                                                  0xF]) {
+                                                  0xF])
+            {
                 return NULL;
             }
             // always display the value
@@ -866,7 +911,8 @@ ui_transaction_blue_prepro(const bagl_element_t *element) {
             if (strlen(ui_transaction_blue_values[(element->component.userid &
                                                    0xF)]) *
                     BAGL_FONT_OPEN_SANS_LIGHT_16_22PX_AVG_WIDTH >=
-                160) {
+                160)
+            {
                 tmp_element.component.x -= 18;
             }
             return &tmp_element;
@@ -876,13 +922,15 @@ ui_transaction_blue_prepro(const bagl_element_t *element) {
         case 0x20:
             if (!ui_transaction_blue_details_name[G_ui_transaction_blue_state]
                                                  [element->component.userid &
-                                                  0xF]) {
+                                                  0xF])
+            {
                 return NULL;
             }
             if (strlen(ui_transaction_blue_values[(element->component.userid &
                                                    0xF)]) *
                     BAGL_FONT_OPEN_SANS_LIGHT_16_22PX_AVG_WIDTH <
-                160) {
+                160)
+            {
                 return NULL;
             }
 
@@ -898,7 +946,8 @@ ui_transaction_blue_prepro(const bagl_element_t *element) {
     return element;
 }
 unsigned int ui_transaction_blue_button(unsigned int button_mask,
-                                        unsigned int button_mask_counter) {
+                                        unsigned int button_mask_counter)
+{
     return 0;
 }
 
@@ -1007,14 +1056,18 @@ const bagl_element_t ui_display_address_blue[] = {
      NULL},
 };
 
-unsigned int ui_display_address_blue_prepro(const bagl_element_t *element) {
+unsigned int ui_display_address_blue_prepro(const bagl_element_t *element)
+{
     bagl_icon_details_t *icon_details = &vars.tmpqr.icon_details;
     bagl_element_t *icon_component = element;
-    if (element->component.userid > 0) {
+    if (element->component.userid > 0)
+    {
         unsigned int length = strlen(G_io_apdu_buffer + 200);
-        switch (element->component.userid) {
+        switch (element->component.userid)
+        {
         // qrcode, need magnifying
-        case 0x02: {
+        case 0x02:
+        {
             unsigned int x, y, x_off, y_off, bit;
 #define PIXEL_SIZE 5
             os_memmove(&tmp_element, element, sizeof(bagl_element_t));
@@ -1037,8 +1090,10 @@ unsigned int ui_display_address_blue_prepro(const bagl_element_t *element) {
             x = 1;
             goto send_and_next;
 
-            for (y = 0; y < vars.tmpqr.qrcode[0]; y++) {
-                for (x = 0; x < vars.tmpqr.qrcode[0]; x++) {
+            for (y = 0; y < vars.tmpqr.qrcode[0]; y++)
+            {
+                for (x = 0; x < vars.tmpqr.qrcode[0]; x++)
+                {
                 send_and_next:
                     io_seproxyhal_display(&tmp_element);
                     // tmp_element.component.fgcolor =
@@ -1066,7 +1121,8 @@ unsigned int ui_display_address_blue_prepro(const bagl_element_t *element) {
         case 0x11:
         default:
             if (length >=
-                (element->component.userid & 0xF) * MAX_CHAR_PER_LINE) {
+                (element->component.userid & 0xF) * MAX_CHAR_PER_LINE)
+            {
                 os_memset(vars.tmpqr.addressSummary, 0, MAX_CHAR_PER_LINE + 1);
                 os_memmove(vars.tmpqr.addressSummary,
                            G_io_apdu_buffer + 200 +
@@ -1086,7 +1142,8 @@ unsigned int ui_display_address_blue_prepro(const bagl_element_t *element) {
     return 1;
 }
 unsigned int ui_display_address_blue_button(unsigned int button_mask,
-                                            unsigned int button_mask_counter) {
+                                            unsigned int button_mask_counter)
+{
     return 0;
 }
 #endif // #if defined(TARGET_BLUE)
@@ -1172,11 +1229,15 @@ const bagl_element_t ui_display_address_nanos[] = {
     //NULL, NULL },
 };
 
-unsigned int ui_display_address_nanos_prepro(const bagl_element_t *element) {
-    if (element->component.userid > 0) {
+unsigned int ui_display_address_nanos_prepro(const bagl_element_t *element)
+{
+    if (element->component.userid > 0)
+    {
         unsigned int display = (ux_step == element->component.userid - 1);
-        if (display) {
-            switch (element->component.userid) {
+        if (display)
+        {
+            switch (element->component.userid)
+            {
             case 1:
                 UX_CALLBACK_SET_INTERVAL(2000);
                 break;
@@ -1490,11 +1551,15 @@ unsigned int ui_finalize_nanos_button(unsigned int button_mask,
                                       unsigned int button_mask_counter);
 
 // display or not according to step, and adjust delay
-unsigned int ui_verify_prepro(const bagl_element_t *element) {
-    if (element->component.userid > 0) {
+unsigned int ui_verify_prepro(const bagl_element_t *element)
+{
+    if (element->component.userid > 0)
+    {
         unsigned int display = (ux_step == element->component.userid - 1);
-        if (display) {
-            switch (element->component.userid) {
+        if (display)
+        {
+            switch (element->component.userid)
+            {
             case 1:
                 UX_CALLBACK_SET_INTERVAL(2000);
                 break;
@@ -1511,11 +1576,15 @@ unsigned int ui_verify_prepro(const bagl_element_t *element) {
     return 1;
 }
 
-unsigned int ui_verify_output_prepro(const bagl_element_t *element) {
-    if (element->component.userid > 0) {
+unsigned int ui_verify_output_prepro(const bagl_element_t *element)
+{
+    if (element->component.userid > 0)
+    {
         unsigned int display = (ux_step == element->component.userid - 1);
-        if (display) {
-            switch (element->component.userid) {
+        if (display)
+        {
+            switch (element->component.userid)
+            {
             case 1:
                 UX_CALLBACK_SET_INTERVAL(2000);
                 break;
@@ -1531,11 +1600,15 @@ unsigned int ui_verify_output_prepro(const bagl_element_t *element) {
     return 1;
 }
 
-unsigned int ui_finalize_prepro(const bagl_element_t *element) {
-    if (element->component.userid > 0) {
+unsigned int ui_finalize_prepro(const bagl_element_t *element)
+{
+    if (element->component.userid > 0)
+    {
         unsigned int display = (ux_step == element->component.userid - 1);
-        if (display) {
-            switch (element->component.userid) {
+        if (display)
+        {
+            switch (element->component.userid)
+            {
             case 1:
                 UX_CALLBACK_SET_INTERVAL(2000);
                 break;
@@ -1628,11 +1701,15 @@ unsigned int
 ui_verify_message_signature_nanos_button(unsigned int button_mask,
                                          unsigned int button_mask_counter);
 
-unsigned int ui_verify_message_prepro(const bagl_element_t *element) {
-    if (element->component.userid > 0) {
+unsigned int ui_verify_message_prepro(const bagl_element_t *element)
+{
+    if (element->component.userid > 0)
+    {
         unsigned int display = (ux_step == element->component.userid - 1);
-        if (display) {
-            switch (element->component.userid) {
+        if (display)
+        {
+            switch (element->component.userid)
+            {
             case 1:
                 UX_CALLBACK_SET_INTERVAL(2000);
                 break;
@@ -1649,7 +1726,8 @@ unsigned int ui_verify_message_prepro(const bagl_element_t *element) {
 
 #endif // #if defined(TARGET_NANOS)
 
-void ui_idle(void) {
+void ui_idle(void)
+{
     ux_step_count = 0;
 
 #if defined(TARGET_BLUE)
@@ -1660,30 +1738,36 @@ void ui_idle(void) {
 }
 
 #ifdef TARGET_BLUE
-unsigned int io_seproxyhal_touch_settings(const bagl_element_t *e) {
+unsigned int io_seproxyhal_touch_settings(const bagl_element_t *e)
+{
     UX_DISPLAY(ui_settings_blue, ui_settings_blue_prepro);
     return 0; // do not redraw button, screen has switched
 }
 
-unsigned int io_seproxyhal_touch_exit(const bagl_element_t *e) {
+unsigned int io_seproxyhal_touch_exit(const bagl_element_t *e)
+{
     // go back to the home screen
     os_sched_exit(0);
     return 0; // DO NOT REDRAW THE BUTTON
 }
 #endif // TARGET_BLUE
 
-unsigned int io_seproxyhal_touch_verify_cancel(const bagl_element_t *e) {
+unsigned int io_seproxyhal_touch_verify_cancel(const bagl_element_t *e)
+{
     // user denied the transaction, tell the USB side
-    if (!btchip_bagl_user_action(0)) {
+    if (!btchip_bagl_user_action(0))
+    {
         // redraw ui
         ui_idle();
     }
     return 0; // DO NOT REDRAW THE BUTTON
 }
 
-unsigned int io_seproxyhal_touch_verify_ok(const bagl_element_t *e) {
+unsigned int io_seproxyhal_touch_verify_ok(const bagl_element_t *e)
+{
     // user accepted the transaction, tell the USB side
-    if (!btchip_bagl_user_action(1)) {
+    if (!btchip_bagl_user_action(1))
+    {
         // redraw ui
         ui_idle();
     }
@@ -1691,7 +1775,8 @@ unsigned int io_seproxyhal_touch_verify_ok(const bagl_element_t *e) {
 }
 
 unsigned int
-io_seproxyhal_touch_message_signature_verify_cancel(const bagl_element_t *e) {
+io_seproxyhal_touch_message_signature_verify_cancel(const bagl_element_t *e)
+{
     // user denied the transaction, tell the USB side
     btchip_bagl_user_action_message_signing(0);
     // redraw ui
@@ -1700,7 +1785,8 @@ io_seproxyhal_touch_message_signature_verify_cancel(const bagl_element_t *e) {
 }
 
 unsigned int
-io_seproxyhal_touch_message_signature_verify_ok(const bagl_element_t *e) {
+io_seproxyhal_touch_message_signature_verify_ok(const bagl_element_t *e)
+{
     // user accepted the transaction, tell the USB side
     btchip_bagl_user_action_message_signing(1);
     // redraw ui
@@ -1708,7 +1794,8 @@ io_seproxyhal_touch_message_signature_verify_ok(const bagl_element_t *e) {
     return 0; // DO NOT REDRAW THE BUTTON
 }
 
-unsigned int io_seproxyhal_touch_display_cancel(const bagl_element_t *e) {
+unsigned int io_seproxyhal_touch_display_cancel(const bagl_element_t *e)
+{
     // user denied the transaction, tell the USB side
     btchip_bagl_user_action_display(0);
     // redraw ui
@@ -1716,7 +1803,8 @@ unsigned int io_seproxyhal_touch_display_cancel(const bagl_element_t *e) {
     return 0; // DO NOT REDRAW THE BUTTON
 }
 
-unsigned int io_seproxyhal_touch_display_ok(const bagl_element_t *e) {
+unsigned int io_seproxyhal_touch_display_ok(const bagl_element_t *e)
+{
     // user accepted the transaction, tell the USB side
     btchip_bagl_user_action_display(1);
     // redraw ui
@@ -1726,8 +1814,10 @@ unsigned int io_seproxyhal_touch_display_ok(const bagl_element_t *e) {
 
 #if defined(TARGET_NANOS)
 unsigned int ui_verify_nanos_button(unsigned int button_mask,
-                                    unsigned int button_mask_counter) {
-    switch (button_mask) {
+                                    unsigned int button_mask_counter)
+{
+    switch (button_mask)
+    {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT:
         io_seproxyhal_touch_verify_cancel(NULL);
         break;
@@ -1740,8 +1830,10 @@ unsigned int ui_verify_nanos_button(unsigned int button_mask,
 }
 
 unsigned int ui_verify_output_nanos_button(unsigned int button_mask,
-                                           unsigned int button_mask_counter) {
-    switch (button_mask) {
+                                           unsigned int button_mask_counter)
+{
+    switch (button_mask)
+    {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT:
         io_seproxyhal_touch_verify_cancel(NULL);
         break;
@@ -1754,8 +1846,10 @@ unsigned int ui_verify_output_nanos_button(unsigned int button_mask,
 }
 
 unsigned int ui_finalize_nanos_button(unsigned int button_mask,
-                                      unsigned int button_mask_counter) {
-    switch (button_mask) {
+                                      unsigned int button_mask_counter)
+{
+    switch (button_mask)
+    {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT:
         io_seproxyhal_touch_verify_cancel(NULL);
         break;
@@ -1769,8 +1863,10 @@ unsigned int ui_finalize_nanos_button(unsigned int button_mask,
 
 unsigned int
 ui_verify_message_signature_nanos_button(unsigned int button_mask,
-                                         unsigned int button_mask_counter) {
-    switch (button_mask) {
+                                         unsigned int button_mask_counter)
+{
+    switch (button_mask)
+    {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT:
         io_seproxyhal_touch_message_signature_verify_cancel(NULL);
         break;
@@ -1783,8 +1879,10 @@ ui_verify_message_signature_nanos_button(unsigned int button_mask,
 }
 
 unsigned int ui_display_address_nanos_button(unsigned int button_mask,
-                                             unsigned int button_mask_counter) {
-    switch (button_mask) {
+                                             unsigned int button_mask_counter)
+{
+    switch (button_mask)
+    {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT:
         io_seproxyhal_touch_display_cancel(NULL);
         break;
@@ -1799,11 +1897,13 @@ unsigned int ui_display_address_nanos_button(unsigned int button_mask,
 #endif // #if defined(TARGET_NANOS)
 
 #if defined(TARGET_BLUE)
-void ui_transaction_blue_init(void) {
+void ui_transaction_blue_init(void)
+{
     UX_DISPLAY(ui_transaction_blue, ui_transaction_blue_prepro);
 }
 
-void ui_transaction_full_blue_init(void) {
+void ui_transaction_full_blue_init(void)
+{
     ui_transaction_blue_ok =
         (bagl_element_callback_t)io_seproxyhal_touch_verify_ok;
     ui_transaction_blue_cancel =
@@ -1815,7 +1915,8 @@ void ui_transaction_full_blue_init(void) {
     ui_transaction_blue_init();
 }
 
-void ui_transaction_output_blue_init(void) {
+void ui_transaction_output_blue_init(void)
+{
     ui_transaction_blue_ok =
         (bagl_element_callback_t)io_seproxyhal_touch_verify_ok;
     ui_transaction_blue_cancel =
@@ -1831,7 +1932,8 @@ void ui_transaction_output_blue_init(void) {
     ui_transaction_blue_init();
 }
 
-void ui_transaction_finalize_blue_init(void) {
+void ui_transaction_finalize_blue_init(void)
+{
     ui_transaction_blue_ok =
         (bagl_element_callback_t)io_seproxyhal_touch_verify_ok;
     ui_transaction_blue_cancel =
@@ -1843,7 +1945,8 @@ void ui_transaction_finalize_blue_init(void) {
     ui_transaction_blue_init();
 }
 
-void ui_message_signature_blue_init(void) {
+void ui_message_signature_blue_init(void)
+{
     ui_transaction_blue_ok = (bagl_element_callback_t)
         io_seproxyhal_touch_message_signature_verify_ok;
     ui_transaction_blue_cancel = (bagl_element_callback_t)
@@ -1856,7 +1959,8 @@ void ui_message_signature_blue_init(void) {
     ui_transaction_blue_init();
 }
 
-void ui_transaction_p2sh_blue_init(void) {
+void ui_transaction_p2sh_blue_init(void)
+{
     ui_transaction_blue_ok =
         (bagl_element_callback_t)io_seproxyhal_touch_verify_ok;
     ui_transaction_blue_cancel =
@@ -1870,28 +1974,36 @@ void ui_transaction_p2sh_blue_init(void) {
 #endif // #if defined(TARGET_BLUE)
 
 // override point, but nothing more to do
-void io_seproxyhal_display(const bagl_element_t *element) {
-    if ((element->component.type & (~BAGL_TYPE_FLAGS_MASK)) != BAGL_NONE) {
+void io_seproxyhal_display(const bagl_element_t *element)
+{
+    if ((element->component.type & (~BAGL_TYPE_FLAGS_MASK)) != BAGL_NONE)
+    {
         io_seproxyhal_display_default((bagl_element_t *)element);
     }
 }
 
-unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
-    switch (channel & ~(IO_FLAGS)) {
+unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len)
+{
+    switch (channel & ~(IO_FLAGS))
+    {
     case CHANNEL_KEYBOARD:
         break;
 
     // multiplexed io exchange over a SPI channel and TLV encapsulated protocol
     case CHANNEL_SPI:
-        if (tx_len) {
+        if (tx_len)
+        {
             io_seproxyhal_spi_send(G_io_apdu_buffer, tx_len);
 
-            if (channel & IO_RESET_AFTER_REPLIED) {
+            if (channel & IO_RESET_AFTER_REPLIED)
+            {
                 reset();
             }
             return 0; // nothing received from the master so far (it's a tx
                       // transaction)
-        } else {
+        }
+        else
+        {
             return io_seproxyhal_spi_recv(G_io_apdu_buffer,
                                           sizeof(G_io_apdu_buffer), 0);
         }
@@ -1902,12 +2014,14 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
     return 0;
 }
 
-unsigned char io_event(unsigned char channel) {
+unsigned char io_event(unsigned char channel)
+{
     // nothing done with the event, throw an error on the transport layer if
     // needed
 
     // can't have more than one tag in the reply, not supported yet.
-    switch (G_io_seproxyhal_spi_buffer[0]) {
+    switch (G_io_seproxyhal_spi_buffer[0])
+    {
     case SEPROXYHAL_TAG_FINGER_EVENT:
         UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
         break;
@@ -1919,7 +2033,8 @@ unsigned char io_event(unsigned char channel) {
     case SEPROXYHAL_TAG_STATUS_EVENT:
         if (G_io_apdu_media == IO_APDU_MEDIA_USB_HID &&
             !(U4BE(G_io_seproxyhal_spi_buffer, 3) &
-              SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
+              SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED))
+        {
             THROW(EXCEPTION_IO_RESET);
         }
     // no break is intentional
@@ -1935,7 +2050,8 @@ unsigned char io_event(unsigned char channel) {
         UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {
             // don't redisplay if UX not allowed (pin locked in the common bolos
             // ux ?)
-            if (ux_step_count && UX_ALLOWED) {
+            if (ux_step_count && UX_ALLOWED)
+            {
                 // prepare next screen
                 ux_step = (ux_step + 1) % ux_step_count;
                 // redisplay screen
@@ -1946,7 +2062,8 @@ unsigned char io_event(unsigned char channel) {
     }
 
     // close the event if not done previously (by a display or whatever)
-    if (!io_seproxyhal_spi_is_status_sent()) {
+    if (!io_seproxyhal_spi_is_status_sent())
+    {
         io_seproxyhal_general_status();
     }
 
@@ -1954,16 +2071,21 @@ unsigned char io_event(unsigned char channel) {
     return 1;
 }
 
-uint8_t prepare_fees() {
-    if (btchip_context_D.transactionContext.relaxed) {
+uint8_t prepare_fees()
+{
+    if (btchip_context_D.transactionContext.relaxed)
+    {
         os_memmove(vars.tmp.feesAmount, "UNKNOWN", 7);
         vars.tmp.feesAmount[7] = '\0';
-    } else {
+    }
+    else
+    {
         unsigned char fees[8];
         unsigned short textSize;
         if (transaction_amount_sub_be(
                 fees, btchip_context_D.transactionContext.transactionAmount,
-                btchip_context_D.totalOutputAmount)) {
+                btchip_context_D.totalOutputAmount))
+        {
             PRINTF("Error : Fees not consistent");
             goto error;
         }
@@ -1982,7 +2104,8 @@ error:
     return 0;
 }
 
-uint8_t prepare_single_output() {
+uint8_t prepare_single_output()
+{
     // TODO : special display for OP_RETURN
     unsigned char amount[8];
     char tmp[80];
@@ -1990,60 +2113,55 @@ uint8_t prepare_single_output() {
     unsigned char versionSize;
     int addressOffset;
     unsigned char address[22];
-    unsigned short version;
+    unsigned short version; // addr prefix, or net id
     unsigned short textSize;
-    unsigned char nativeSegwit;
+    unsigned char script_version[2]; // Decred thing
 
     vars.tmp.fullAddress[0] = '\0';
     btchip_swap_bytes(amount, btchip_context_D.currentOutput + offset, 8);
     offset += 8;
-    nativeSegwit = btchip_output_script_is_native_witness(
-        btchip_context_D.currentOutput + offset);
+
+    btchip_swap_bytes(script_version, btchip_context_D.currentOutput + offset, 2);
+    offset += 2;
+
     if (btchip_output_script_is_op_return(btchip_context_D.currentOutput +
-                                          offset)) {
+                                          offset))
+    {
         strcpy(vars.tmp.fullAddress, "OP_RETURN");
-    } else if ((G_coin_config->flags & FLAG_QTUM_SUPPORT) &&
-               btchip_output_script_is_op_create(
-                   btchip_context_D.currentOutput + offset)) {
-        strcpy(vars.tmp.fullAddress, "OP_CREATE");
-    } else if ((G_coin_config->flags & FLAG_QTUM_SUPPORT) &&
-               btchip_output_script_is_op_call(btchip_context_D.currentOutput +
-                                               offset)) {
-        strcpy(vars.tmp.fullAddress, "OP_CALL");
-    } else if (nativeSegwit) {
-        addressOffset = offset + OUTPUT_SCRIPT_NATIVE_WITNESS_PROGRAM_OFFSET;
-    } else if (btchip_output_script_is_regular(btchip_context_D.currentOutput +
-                                               offset)) {
+    }
+    else if (btchip_output_script_is_regular(btchip_context_D.currentOutput +
+                                             offset))
+    {
         addressOffset = offset + 4;
         version = btchip_context_D.payToAddressVersion;
-    } else {
+    }
+    else
+    {
         addressOffset = offset + 3;
         version = btchip_context_D.payToScriptHashVersion;
     }
-    if (vars.tmp.fullAddress[0] == 0) {
-        if (!nativeSegwit) {
-            if (version > 255) {
-                versionSize = 2;
-                address[0] = (version >> 8);
-                address[1] = version;
-            } else {
-                versionSize = 1;
-                address[0] = version;
-            }
-            os_memmove(address + versionSize,
-                       btchip_context_D.currentOutput + addressOffset, 20);
+    if (vars.tmp.fullAddress[0] == 0) 
+    {
 
-            // Prepare address
-            textSize = btchip_public_key_to_encoded_base58(
-                address, 20 + versionSize, (unsigned char *)tmp, sizeof(tmp),
-                version, 1);
-            tmp[textSize] = '\0';
-        } else if (G_coin_config->native_segwit_prefix) {
-            textSize = segwit_addr_encode(
-                tmp, PIC(G_coin_config->native_segwit_prefix), 0,
-                btchip_context_D.currentOutput + addressOffset,
-                btchip_context_D.currentOutput[addressOffset - 1]);
+        if (version > 255)
+        {
+            versionSize = 2;
+            address[0] = (version >> 8);
+            address[1] = version;
         }
+        else
+        {
+            versionSize = 1;
+            address[0] = version;
+        } 
+        os_memmove(address + versionSize,
+                   btchip_context_D.currentOutput + addressOffset, 20);
+
+        // Prepare address
+        textSize = btchip_public_key_to_encoded_base58(
+            address, 20 + versionSize, (unsigned char *)tmp, sizeof(tmp),
+            version, 1);
+        tmp[textSize] = '\0';
 
         strcpy(vars.tmp.fullAddress, tmp);
     }
@@ -2063,7 +2181,9 @@ uint8_t prepare_single_output() {
     return 1;
 }
 
-uint8_t prepare_full_output(uint8_t checkOnly) {
+uint8_t prepare_full_output(uint8_t checkOnly)
+{
+    PRINTF("Bijour 15\n");
     unsigned int offset = 0;
     int numberOutputs;
     int i;
@@ -2071,15 +2191,21 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
     unsigned char amount[8], totalOutputAmount[8], fees[8];
     char tmp[80];
     unsigned char outputPos = 0, changeFound = 0;
+    unsigned char script_version[2]; // Decred thing
+
     if (btchip_context_D.transactionContext.relaxed &&
-        !btchip_context_D.transactionContext.consumeP2SH) {
-        if (!checkOnly) {
+        !btchip_context_D.transactionContext.consumeP2SH)
+    {
+        if (!checkOnly)
+        {
             PRINTF("Error : Mixed inputs");
         }
         goto error;
     }
-    if (btchip_context_D.transactionContext.consumeP2SH) {
-        if (checkOnly) {
+    if (btchip_context_D.transactionContext.consumeP2SH)
+    {
+        if (checkOnly)
+        {
             goto error;
         }
         vars.tmp.fullAmount[0] = '\0';
@@ -2090,20 +2216,25 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
     // Parse output, locate the change output location
     os_memset(totalOutputAmount, 0, sizeof(totalOutputAmount));
     numberOutputs = btchip_context_D.currentOutput[offset++];
-    if (numberOutputs > 3) {
-        if (!checkOnly) {
+    if (numberOutputs > 3)
+    {
+        if (!checkOnly)
+        {
             PRINTF("Error : Too many outputs");
         }
         goto error;
     }
-    for (i = 0; i < numberOutputs; i++) {
+    for (i = 0; i < numberOutputs; i++)
+    {
         unsigned char nullAmount = 1;
         unsigned int j;
         unsigned char isOpReturn, isP2sh, isNativeSegwit;
         unsigned char isOpCreate, isOpCall;
 
-        for (j = 0; j < 8; j++) {
-            if (btchip_context_D.currentOutput[offset + j] != 0) {
+        for (j = 0; j < 8; j++)
+        {
+            if (btchip_context_D.currentOutput[offset + j] != 0)
+            {
                 nullAmount = 0;
                 break;
             }
@@ -2111,6 +2242,10 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
         btchip_swap_bytes(amount, btchip_context_D.currentOutput + offset, 8);
         transaction_amount_add_be(totalOutputAmount, totalOutputAmount, amount);
         offset += 8; // skip amount
+
+        btchip_swap_bytes(script_version, btchip_context_D.currentOutput + offset, 2);
+        offset += 2; // skip script_version
+
         isOpReturn = btchip_output_script_is_op_return(
             btchip_context_D.currentOutput + offset);
         isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput +
@@ -2125,15 +2260,20 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
                                              offset) &&
             !isP2sh && !(nullAmount && isOpReturn) &&
             (!(G_coin_config->flags & FLAG_QTUM_SUPPORT) ||
-             (!isOpCreate && !isOpCall))) {
-            if (!checkOnly) {
+             (!isOpCreate && !isOpCall)))
+        {
+            if (!checkOnly)
+            {
                 PRINTF("Error : Unrecognized input script");
             }
             goto error;
-        } else if (!btchip_output_script_is_regular(
-                       btchip_context_D.currentOutput + offset) &&
-                   !isP2sh && !(nullAmount && isOpReturn)) {
-            if (!checkOnly) {
+        }
+        else if (!btchip_output_script_is_regular(
+                     btchip_context_D.currentOutput + offset) &&
+                 !isP2sh && !(nullAmount && isOpReturn))
+        {
+            if (!checkOnly)
+            {
                 PRINTF("Error : Unrecognized input script");
             }
             goto error;
@@ -2142,7 +2282,8 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
              btchip_context_D.tmpCtx.output.changeInitialized && !isOpReturn &&
              !isOpCreate && !isOpCall) ||
             (!(G_coin_config->flags & FLAG_QTUM_SUPPORT) &&
-             btchip_context_D.tmpCtx.output.changeInitialized && !isOpReturn)) {
+             btchip_context_D.tmpCtx.output.changeInitialized && !isOpReturn))
+        {
             unsigned char addressOffset =
                 (isNativeSegwit ? OUTPUT_SCRIPT_NATIVE_WITNESS_PROGRAM_OFFSET
                                 : isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH
@@ -2150,75 +2291,99 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
             if (os_memcmp(btchip_context_D.currentOutput + offset +
                               addressOffset,
                           btchip_context_D.tmpCtx.output.changeAddress + 1,
-                          20) == 0) {
-                if (changeFound) {
-                    if (!checkOnly) {
+                          20) == 0)
+            {
+                if (changeFound)
+                {
+                    if (!checkOnly)
+                    {
                         PRINTF("Error : Multiple change output found");
                     }
                     goto error;
                 }
                 changeFound = 1;
-            } else {
+            }
+            else
+            {
+                // outputPos is the real output pointer (opposed to the change address output)
                 outputPos = currentPos;
             }
         }
         offset += 1 + btchip_context_D.currentOutput[offset];
         currentPos++;
     }
-    if (btchip_context_D.tmpCtx.output.changeInitialized && !changeFound) {
-        if (!checkOnly) {
+    if (btchip_context_D.tmpCtx.output.changeInitialized && !changeFound)
+    {
+        if (!checkOnly)
+        {
             PRINTF("Error : change output not found");
         }
         goto error;
     }
     if (transaction_amount_sub_be(
             fees, btchip_context_D.transactionContext.transactionAmount,
-            totalOutputAmount)) {
-        if (!checkOnly) {
+            totalOutputAmount))
+    {
+        if (!checkOnly)
+        {
             PRINTF("Error : Fees not consistent");
         }
         goto error;
     }
-    if (!checkOnly) {
+    if (!checkOnly)
+    {
         // Format validation message
         currentPos = 0;
         offset = 1;
         btchip_context_D.tmp = (unsigned char *)tmp;
-        for (i = 0; i < numberOutputs; i++) {
+        for (i = 0; i < numberOutputs; i++)
+        {
             if (((G_coin_config->flags & FLAG_QTUM_SUPPORT) &&
                  !btchip_output_script_is_op_return(
-                     btchip_context_D.currentOutput + offset + 8) &&
+                     btchip_context_D.currentOutput + offset + 8 + 2) &&
                  !btchip_output_script_is_op_create(
-                     btchip_context_D.currentOutput + offset + 8) &&
+                     btchip_context_D.currentOutput + offset + 8 + 2) &&
                  !btchip_output_script_is_op_call(
-                     btchip_context_D.currentOutput + offset + 8)) ||
+                     btchip_context_D.currentOutput + offset + 8 + 2)) ||
                 (!(G_coin_config->flags & FLAG_QTUM_SUPPORT) &&
                  !btchip_output_script_is_op_return(
-                     btchip_context_D.currentOutput + offset + 8))) {
+                     btchip_context_D.currentOutput + offset + 8 + 2)))
+            {
                 unsigned char versionSize;
                 int addressOffset;
                 unsigned char address[22];
                 unsigned short version;
                 unsigned char isNativeSegwit;
-                btchip_swap_bytes(amount,
-                                  btchip_context_D.currentOutput + offset, 8);
-                offset += 8;
+
+                btchip_swap_bytes(amount, btchip_context_D.currentOutput + offset, 8);
+                offset += 8; // skip amount
+
+                btchip_swap_bytes(script_version, btchip_context_D.currentOutput + offset, 2);
+                offset += 2; // skip script_version
+
                 isNativeSegwit = btchip_output_script_is_native_witness(
                     btchip_context_D.currentOutput + offset);
-                if (!isNativeSegwit) {
+                if (!isNativeSegwit)
+                {
                     if (btchip_output_script_is_regular(
-                            btchip_context_D.currentOutput + offset)) {
+                            btchip_context_D.currentOutput + offset))
+                    {
                         addressOffset = offset + 4;
                         version = btchip_context_D.payToAddressVersion;
-                    } else {
+                    }
+                    else
+                    {
                         addressOffset = offset + 3;
                         version = btchip_context_D.payToScriptHashVersion;
                     }
-                    if (version > 255) {
+                    if (version > 255)
+                    {
                         versionSize = 2;
                         address[0] = (version >> 8);
                         address[1] = version;
-                    } else {
+                    }
+                    else
+                    {
                         versionSize = 1;
                         address[0] = version;
                     }
@@ -2226,15 +2391,20 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
                                btchip_context_D.currentOutput + addressOffset,
                                20);
                 }
-                if (currentPos == outputPos) {
+                // if we're processing the real output (not the change one)
+                if (currentPos == outputPos)
+                {
                     unsigned short textSize = 0;
-                    if (!isNativeSegwit) {
+                    if (!isNativeSegwit)
+                    {
                         // Prepare address
                         textSize = btchip_public_key_to_encoded_base58(
                             address, 20 + versionSize, (unsigned char *)tmp,
                             sizeof(tmp), version, 1);
                         tmp[textSize] = '\0';
-                    } else if (G_coin_config->native_segwit_prefix) {
+                    }
+                    else if (G_coin_config->native_segwit_prefix)
+                    {
                         textSize = segwit_addr_encode(
                             tmp, PIC(G_coin_config->native_segwit_prefix), 0,
                             btchip_context_D.currentOutput + offset +
@@ -2281,8 +2451,11 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
                         '\0';
                     break;
                 }
-            } else {
-                offset += 8;
+            }
+            else
+            {
+                // amount + version
+                offset += 8 + 2;
             }
             offset += 1 + btchip_context_D.currentOutput[offset];
             currentPos++;
@@ -2294,7 +2467,8 @@ error:
 }
 
 #define HASH_LENGTH 4
-uint8_t prepare_message_signature() {
+uint8_t prepare_message_signature()
+{
     cx_hash(&btchip_context_D.transactionHashAuthorization.header, CX_LAST,
             vars.tmp.fullAmount, 0, vars.tmp.fullAmount);
     snprintf(vars.tmp.fullAddress, sizeof(vars.tmp.fullAddress), "%.*H...%.*H",
@@ -2302,8 +2476,10 @@ uint8_t prepare_message_signature() {
     return 1;
 }
 
-unsigned int btchip_bagl_confirm_full_output() {
-    if (!prepare_full_output(0)) {
+unsigned int btchip_bagl_confirm_full_output()
+{
+    if (!prepare_full_output(0))
+    {
         return 0;
     }
 
@@ -2317,16 +2493,19 @@ unsigned int btchip_bagl_confirm_full_output() {
     return 1;
 }
 
-unsigned int btchip_bagl_confirm_single_output() {
+unsigned int btchip_bagl_confirm_single_output()
+{
 // TODO : remove when supporting multi output
 #if defined(TARGET_BLUE)
-    if (btchip_context_D.transactionContext.consumeP2SH) {
+    if (btchip_context_D.transactionContext.consumeP2SH)
+    {
         ui_transaction_p2sh_blue_init();
         return 1;
     }
 #endif
 
-    if (!prepare_single_output()) {
+    if (!prepare_single_output())
+    {
         return 0;
     }
 
@@ -2344,8 +2523,10 @@ unsigned int btchip_bagl_confirm_single_output() {
     return 1;
 }
 
-unsigned int btchip_bagl_finalize_tx() {
-    if (!prepare_fees()) {
+unsigned int btchip_bagl_finalize_tx()
+{
+    if (!prepare_fees())
+    {
         return 0;
     }
 
@@ -2359,8 +2540,10 @@ unsigned int btchip_bagl_finalize_tx() {
     return 1;
 }
 
-void btchip_bagl_confirm_message_signature() {
-    if (!prepare_message_signature()) {
+void btchip_bagl_confirm_message_signature()
+{
+    if (!prepare_message_signature())
+    {
         return;
     }
 
@@ -2373,7 +2556,8 @@ void btchip_bagl_confirm_message_signature() {
 #endif // #if TARGET_ID
 }
 
-unsigned int btchip_bagl_display_public_key() {
+unsigned int btchip_bagl_display_public_key()
+{
     // setup qrcode of the address in the apdu buffer
     strcat(G_io_apdu_buffer + 200, " ");
 
@@ -2392,7 +2576,8 @@ unsigned int btchip_bagl_display_public_key() {
             &vars.tmpqr.qrcode, sizeof(vars.tmpqr.qrcode), qrcodegen_Ecc_LOW,
             qrcodegen_VERSION_MIN,
             3, // buffer is not designed to handle more than version 3
-            qrcodegen_Mask_AUTO, 0)) {
+            qrcodegen_Mask_AUTO, 0))
+    {
         vars.tmpqr.icon_details.width = vars.tmpqr.qrcode[0];
         vars.tmpqr.icon_details.height = vars.tmpqr.qrcode[0];
         vars.tmpqr.icon_details.bpp = 1;
@@ -2419,12 +2604,16 @@ unsigned int btchip_bagl_display_public_key() {
     return 1;
 }
 
-void app_exit(void) {
-    BEGIN_TRY_L(exit) {
-        TRY_L(exit) {
+void app_exit(void)
+{
+    BEGIN_TRY_L(exit)
+    {
+        TRY_L(exit)
+        {
             os_sched_exit(-1);
         }
-        FINALLY_L(exit) {
+        FINALLY_L(exit)
+        {
         }
     }
     END_TRY_L(exit);
@@ -2456,7 +2645,8 @@ btchip_altcoin_config_t const C_coin_config = {
     .kind = COIN_KIND,
 };
 
-__attribute__((section(".boot"))) int main(int arg0) {
+__attribute__((section(".boot"))) int main(int arg0)
+{
 #ifdef USE_LIB_BITCOIN
     // in RAM allocation (on stack), to allow simple simple traversal into the
     // bitcoin app (separate NVRAM zone)
@@ -2479,8 +2669,10 @@ __attribute__((section(".boot"))) int main(int arg0) {
 #ifdef COIN_NATIVE_SEGWIT_PREFIX
     coin_config.native_segwit_prefix = native_segwit_prefix;
 #endif // #ifdef COIN_NATIVE_SEGWIT_PREFIX
-    BEGIN_TRY {
-        TRY {
+    BEGIN_TRY
+    {
+        TRY
+        {
             // ensure syscall will accept us
             check_api_level(CX_COMPAT_APILEVEL);
             // delegate to bitcoin app/lib
@@ -2489,7 +2681,8 @@ __attribute__((section(".boot"))) int main(int arg0) {
             libcall_params[2] = &coin_config;
             os_lib_call(&libcall_params);
         }
-        FINALLY {
+        FINALLY
+        {
             app_exit();
         }
     }
@@ -2499,24 +2692,31 @@ __attribute__((section(".boot"))) int main(int arg0) {
     // exit critical section
     __asm volatile("cpsie i");
 
-    if (arg0) {
+    if (arg0)
+    {
         // is ID 1 ?
-        if (((unsigned int *)arg0)[0] != 0x100) {
+        if (((unsigned int *)arg0)[0] != 0x100)
+        {
             os_lib_throw(INVALID_PARAMETER);
         }
         // grab the coin config structure from the first parameter
         G_coin_config = (btchip_altcoin_config_t *)((unsigned int *)arg0)[1];
-    } else {
+    }
+    else
+    {
         G_coin_config = (btchip_altcoin_config_t *)PIC(&C_coin_config);
     }
 
     // ensure exception will work as planned
     os_boot();
 
-    for (;;) {
+    for (;;)
+    {
         UX_INIT();
-        BEGIN_TRY {
-            TRY {
+        BEGIN_TRY
+        {
+            TRY
+            {
                 io_seproxyhal_init();
 
                 btchip_context_init();
@@ -2539,14 +2739,17 @@ __attribute__((section(".boot"))) int main(int arg0) {
 
                 app_main();
             }
-            CATCH(EXCEPTION_IO_RESET) {
+            CATCH(EXCEPTION_IO_RESET)
+            {
                 // reset IO and UX
                 continue;
             }
-            CATCH_ALL {
+            CATCH_ALL
+            {
                 break;
             }
-            FINALLY {
+            FINALLY
+            {
             }
         }
         END_TRY;

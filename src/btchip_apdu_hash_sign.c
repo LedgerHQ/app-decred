@@ -22,14 +22,13 @@
 
 unsigned short btchip_apdu_hash_sign() {
     unsigned long int lockTime;
+    unsigned long int expiry;
     uint32_t sighashType;
     unsigned char dataBuffer[8];
     unsigned char hash1[32];
     unsigned char hash2[32];
     unsigned char authorizationLength;
     unsigned char *parameters = G_io_apdu_buffer + ISO_OFFSET_CDATA;
-    btchip_transaction_summary_t
-        transactionSummary; // could be removed with a refactor
     unsigned char *authorization;
     unsigned short sw;
     unsigned char keyPath[MAX_BIP32_PATH_LENGTH];
@@ -82,6 +81,8 @@ unsigned short btchip_apdu_hash_sign() {
             parameters += authorizationLength;
             lockTime = btchip_read_u32(parameters, 1, 0);
             parameters += 4;
+            expiry = btchip_read_u32(parameters, 1, 0);
+            parameters += 4;
             sighashType = *(parameters++);
 
             if (((N_btchip.bkp.config.options &
@@ -104,10 +105,6 @@ unsigned short btchip_apdu_hash_sign() {
             }
 
             // Read transaction parameters
-            // TODO : remove copy
-            os_memmove(&transactionSummary,
-                       &btchip_context_D.transactionSummary,
-                       sizeof(transactionSummary));
 
             // Fetch the private key
 
@@ -119,18 +116,34 @@ unsigned short btchip_apdu_hash_sign() {
             // Finalize the hash
 
             btchip_write_u32_le(dataBuffer, lockTime);
-            btchip_write_u32_le(dataBuffer + 4, sighashType);
+            btchip_write_u32_le(dataBuffer + 4, expiry);
             L_DEBUG_BUF(
                 ("Finalize hash with\n", dataBuffer, sizeof(dataBuffer)));
 
-            cx_hash(&btchip_context_D.transactionHashFull.header, CX_LAST,
-                    dataBuffer, sizeof(dataBuffer), hash1);
+
+            blake256_Update(&btchip_context_D.transactionHashFull, dataBuffer,  sizeof(dataBuffer));
+            blake256_Final(&btchip_context_D.transactionHashFull, hash1);
             L_DEBUG_BUF(("Hash1\n", hash1, sizeof(hash1)));
 
-            // Rehash
+            blake256_Final(&btchip_context_D.transactionHashAuthorization, hash2);
+
+            blake256_Init(&btchip_context_D.transactionHashFull);
+
+            btchip_write_u32_le(dataBuffer, sighashType);
+            // include sighash type
+            blake256_Update(&btchip_context_D.transactionHashFull, dataBuffer,  4);
+            // include prefix_hash
+            blake256_Update(&btchip_context_D.transactionHashFull, hash1,  sizeof(hash1));
+            // include witness_hash
+            blake256_Update(&btchip_context_D.transactionHashFull, hash2,  sizeof(hash2));
+
+            // final signature hash
+            blake256_Final(&btchip_context_D.transactionHashAuthorization, hash2);
+
+            /*DELETED// Rehash
             cx_sha256_init(&localHash);
             cx_hash(&localHash.header, CX_LAST, hash1, sizeof(hash1), hash2);
-            L_DEBUG_BUF(("Hash2\n", hash2, sizeof(hash2)));
+            L_DEBUG_BUF(("Hash2\n", hash2, sizeof(hash2)));*/
 
             // Sign
             btchip_signverify_finalhash(

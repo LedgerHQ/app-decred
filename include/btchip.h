@@ -27,7 +27,8 @@
 
 #define L_DEBUG_APP(x)
 #define L_DEBUG_NOPREFIX(x)
-#define L_DEBUG_BUF(x)
+#define L_DEBUG_BUF2(string, buffer, len) PRINTF(string "%.*H\n", len, buffer)
+#define L_DEBUG_BUF(x) L_DEBUG_BUF2 x
 
 #define SW_TECHNICAL_DETAILS(x) BTCHIP_SW_TECHNICAL_PROBLEM
 
