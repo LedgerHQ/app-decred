@@ -93,10 +93,8 @@ unsigned short btchip_apdu_get_trusted_input()
         G_io_apdu_buffer[1] = 0x00;
 
         blake256_Final(&btchip_context_D.transactionHashFull, G_io_apdu_buffer + 4);
-
-        //cx_sha256_init(&hash);
-        //cx_hash(&hash.header, CX_LAST, targetHash, 32, G_io_apdu_buffer + 4);
-
+        //cx_hash(&btchip_context_D.transactionHashFull, CX_LAST, (unsigned char WIDE *)NULL, 0, G_io_apdu_buffer + 4);zzzzzzzzz
+        
         btchip_write_u32_le(G_io_apdu_buffer + 4 + 32,
                             btchip_context_D.transactionTargetInput);
         os_memmove(G_io_apdu_buffer + 4 + 32 + 4,

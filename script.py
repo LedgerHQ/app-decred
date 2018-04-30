@@ -31,11 +31,11 @@ dongle = getDongle(True)
 ################# GET PUBKEY #########################
 
 packets = [
-"058000002c8000002a800000000000000100000001"
+"058000002c80000001800000000000000000000001"
 ]
 
 
-packets[0] = "e0400000" + hexlify(bytes([int(len(packets[0])/2)])).decode("utf-8") + packets[0] 
+packets[0] = "e0400100" + hexlify(bytes([int(len(packets[0])/2)])).decode("utf-8") + packets[0] 
 result = dongle.exchange(bytearray.fromhex(packets[0]))
 
 

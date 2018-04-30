@@ -171,14 +171,17 @@ void btchip_retrieve_keypair_discard(unsigned char WIDE *privateComponent,
 void btchip_public_key_hash160(unsigned char WIDE *in, unsigned short inlen,
                                unsigned char *out) {
     union {
-        BLAKE256_CTX shasha;
+        //cx_blake2b_t blake;
+        BLAKE256_CTX blake;
         cx_ripemd160_t riprip;
     } u;
     unsigned char buffer[32];
 
-    blake256_Init(&u.shasha);
-    blake256_Update(&u.shasha, in, inlen);
-    blake256_Final(&u.shasha, buffer);
+    /*cx_blake2b_init(&u.blake, 256);
+    cx_hash(&u.blake.header, CX_LAST, in, inlen, buffer);*/
+    blake256_Init(&u.blake);
+    blake256_Update(&u.blake, in, inlen);
+    blake256_Final(&u.blake, buffer);
     cx_ripemd160_init(&u.riprip);
     cx_hash(&u.riprip.header, CX_LAST, buffer, 32, out);
 }
@@ -189,7 +192,8 @@ unsigned short btchip_public_key_to_encoded_base58(
     unsigned char alreadyHashed) {
     unsigned char tmpBuffer[26];
     unsigned char checksumBuffer[32];
-    cx_sha256_t hash;
+    //cx_blake2b_t hash;
+    BLAKE256_CTX hash;
     unsigned char versionSize = (version > 255 ? 2 : 1);
 
     if (!alreadyHashed) {
@@ -212,6 +216,10 @@ unsigned short btchip_public_key_to_encoded_base58(
     blake256_Init(&hash);
     blake256_Update(&hash, checksumBuffer, 32);
     blake256_Final(&hash, checksumBuffer);
+    /*cx_blake2b_init(&hash, 256);
+    cx_hash(&hash.header, CX_LAST, tmpBuffer, 20 + versionSize, checksumBuffer);
+    cx_blake2b_init(&hash, 256);
+    cx_hash(&hash.header, CX_LAST, checksumBuffer, 32, checksumBuffer);*/
 
     L_DEBUG_BUF(("Checksum\n", checksumBuffer, 4));
     os_memmove(tmpBuffer + 20 + versionSize, checksumBuffer, 4);

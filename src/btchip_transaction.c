@@ -89,13 +89,15 @@ void transaction_offset(unsigned char value)
     {
         L_DEBUG_BUF(("Add to hash full\n",
                      btchip_context_D.transactionBufferPointer, value));
-        //cx_hash(&btchip_context_D.transactionHashFull.header, 0,
-        //        btchip_context_D.transactionBufferPointer, value, NULL);
+        /*cx_hash(&btchip_context_D.transactionHashFull.header, 0,
+                btchip_context_D.transactionBufferPointer, value, NULL);*/
         blake256_Update(&btchip_context_D.transactionHashFull, btchip_context_D.transactionBufferPointer, value);
     }
     if ((btchip_context_D.transactionHashOption &
          /*TRANSACTION_HASH_AUTHORIZATION*/ 0x04) != 0)
     {
+        /*cx_hash(&btchip_context_D.transactionHashAuthorization.header, 0,
+                btchip_context_D.transactionBufferPointer, value, NULL);*/
         blake256_Update(&btchip_context_D.transactionHashAuthorization, btchip_context_D.transactionBufferPointer, value);
     }
     PRINTF(("hashing %d on %d\n"), value, btchip_context_D.transactionHashOption);
@@ -178,6 +180,8 @@ void transaction_parse(unsigned char parseMode)
                     // Reset hashes
                     blake256_Init(&btchip_context_D.transactionHashFull);
                     blake256_Init(&btchip_context_D.transactionHashAuthorization);
+                    /*cx_blake2b_init(&btchip_context_D.transactionHashFull, 256);
+                    cx_blake2b_init(&btchip_context_D.transactionHashAuthorization, 256);*/
 
 
                     // Parse the beginning of the transaction
