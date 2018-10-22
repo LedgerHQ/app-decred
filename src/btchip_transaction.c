@@ -87,20 +87,22 @@ void transaction_offset(unsigned char value)
 {
     if ((btchip_context_D.transactionHashOption & TRANSACTION_HASH_FULL) != 0)
     {
-        L_DEBUG_BUF(("Add to hash full\n",
+        L_DEBUG_BUF(("Add to prefix hash: ",
                      btchip_context_D.transactionBufferPointer, value));
-        /*cx_hash(&btchip_context_D.transactionHashFull.header, 0,
+        /*cx_hash(&btchip_context_D.transactionHashPrefix.header, 0,
                 btchip_context_D.transactionBufferPointer, value, NULL);*/
-        blake256_Update(&btchip_context_D.transactionHashFull, btchip_context_D.transactionBufferPointer, value);
-    }
-    if ((btchip_context_D.transactionHashOption &
-         /*TRANSACTION_HASH_AUTHORIZATION*/ 0x04) != 0)
-    {
-        /*cx_hash(&btchip_context_D.transactionHashAuthorization.header, 0,
-                btchip_context_D.transactionBufferPointer, value, NULL);*/
+        blake256_Update(&btchip_context_D.transactionHashPrefix, btchip_context_D.transactionBufferPointer, value);
         blake256_Update(&btchip_context_D.transactionHashAuthorization, btchip_context_D.transactionBufferPointer, value);
     }
-    PRINTF(("hashing %d on %d\n"), value, btchip_context_D.transactionHashOption);
+    if ((btchip_context_D.transactionHashOption &
+         /*TRANSACTION_HASH_AUTHORIZATION*/ TRANSACTION_HASH_WITNESS) != 0)
+    {
+        L_DEBUG_BUF(("Add to witness hash: ",
+                     btchip_context_D.transactionBufferPointer, value));
+        /*cx_hash(&btchip_context_D.transactionHashWitness.header, 0,
+                btchip_context_D.transactionBufferPointer, value, NULL);*/
+        blake256_Update(&btchip_context_D.transactionHashWitness, btchip_context_D.transactionBufferPointer, value);
+    }
 }
 
 void transaction_offset_increase(unsigned char value)
@@ -162,11 +164,12 @@ void transaction_parse(unsigned char parseMode)
         {
             for (;;)
             {
+                PRINTF("TX parse, state=%d\n", btchip_context_D.transactionContext.transactionState);
                 switch (btchip_context_D.transactionContext.transactionState)
                 {
                 case BTCHIP_TRANSACTION_NONE:
                 {
-                    PRINTF(("Init transaction parser\n"));
+                    PRINTF(("\nInit transaction parser\n"));
                     // Reset transaction state
                     btchip_context_D.transactionContext
                         .transactionRemainingInputsOutputs = 0;
@@ -178,10 +181,11 @@ void transaction_parse(unsigned char parseMode)
                         0, sizeof(btchip_context_D.transactionContext.transactionAmount));
                     // TODO : transactionControlFid
                     // Reset hashes
-                    blake256_Init(&btchip_context_D.transactionHashFull);
+                    blake256_Init(&btchip_context_D.transactionHashPrefix);
+                    blake256_Init(&btchip_context_D.transactionHashWitness);
                     blake256_Init(&btchip_context_D.transactionHashAuthorization);
-                    /*cx_blake2b_init(&btchip_context_D.transactionHashFull, 256);
-                    cx_blake2b_init(&btchip_context_D.transactionHashAuthorization, 256);*/
+                    //cx_blake2b_init(&btchip_context_D.transactionHashPrefix, 256);
+                    //cx_blake2b_init(&btchip_context_D.transactionHashWitness, 256);
 
 
                     // Parse the beginning of the transaction
@@ -191,8 +195,16 @@ void transaction_parse(unsigned char parseMode)
                                btchip_context_D.transactionBufferPointer, 4);
                     // decred "no witness" serialization type ORing
                     btchip_context_D.transactionBufferPointer[2] |= 1;
-                    btchip_context_D.transactionHashOption = 0x05; // prefix + witness
+                    btchip_context_D.transactionHashOption = TRANSACTION_HASH_FULL; // prefix only
                     transaction_offset_increase(4);
+
+                    btchip_context_D.transactionBufferPointer -= 4;
+                    btchip_context_D.transactionDataRemaining += 4;
+                    btchip_context_D.transactionBufferPointer[2] |= 3;
+                    btchip_context_D.transactionHashOption = TRANSACTION_HASH_WITNESS; // witness only
+                    transaction_offset_increase(4);
+
+                    btchip_context_D.transactionHashOption = 0x05; // both prefix and witness hash
 
 
                     // Number of inputs
@@ -225,6 +237,7 @@ void transaction_parse(unsigned char parseMode)
                     if (btchip_context_D.transactionDataRemaining < 1)
                     {
                         // No more data to read, ok
+                        PRINTF("Waiting for more data...\n");
                         goto ok;
                     }
                     // Proceed with the next input
@@ -359,7 +372,7 @@ void transaction_parse(unsigned char parseMode)
                             btchip_context_D.transactionBufferPointer =
                                 trustedInput + 4;
                             L_DEBUG_BUF((
-                                "Trusted input hash & input index\n",
+                                "Trusted input txid & input index\n",
                                 btchip_context_D.transactionBufferPointer, 36));
                             transaction_offset(36);
 
@@ -403,8 +416,8 @@ void transaction_parse(unsigned char parseMode)
                         }
 
                     }
-                    // include script len and script in witness hash
-                    btchip_context_D.transactionHashOption = 0x04;
+                    // DIRTY: include utxo script len and script in witness hash
+                    btchip_context_D.transactionHashOption = TRANSACTION_HASH_WITNESS;
 
                     // Read the script length
                     btchip_context_D.transactionContext.scriptRemaining =
@@ -502,11 +515,8 @@ void transaction_parse(unsigned char parseMode)
                     }
                     // Save the last script byte for the P2SH check
                     dataAvailable =
-                        (btchip_context_D.transactionDataRemaining >
-                                 btchip_context_D.transactionContext
-                                         .scriptRemaining - 1
-                             ? btchip_context_D.transactionContext
-                                       .scriptRemaining - 1
+                        (btchip_context_D.transactionDataRemaining > btchip_context_D.transactionContext.scriptRemaining - 1
+                             ? btchip_context_D.transactionContext.scriptRemaining - 1
                              : btchip_context_D.transactionDataRemaining);
                     if (dataAvailable == 0)
                     {

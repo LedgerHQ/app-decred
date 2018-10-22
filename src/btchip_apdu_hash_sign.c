@@ -21,6 +21,9 @@
 #define SIGHASH_ALL 0x01
 
 unsigned short btchip_apdu_hash_sign() {
+
+    PRINTF("\n### HASH_SIGN:\n");
+
     unsigned long int lockTime;
     unsigned long int expiry;
     uint32_t sighashType;
@@ -76,14 +79,15 @@ unsigned short btchip_apdu_hash_sign() {
             os_memmove(keyPath, G_io_apdu_buffer + ISO_OFFSET_CDATA,
                        MAX_BIP32_PATH_LENGTH);
             parameters += (4 * G_io_apdu_buffer[ISO_OFFSET_CDATA]) + 1;
-            authorizationLength = *(parameters++);
+            /*authorizationLength = *(parameters++);
             authorization = parameters;
-            parameters += authorizationLength;
+            parameters += authorizationLength;*/
             lockTime = btchip_read_u32(parameters, 1, 0);
             parameters += 4;
             expiry = btchip_read_u32(parameters, 1, 0);
             parameters += 4;
             sighashType = *(parameters++);
+            PRINTF("SighashType: %d\n", sighashType);
 
             if (((N_btchip.bkp.config.options &
                   BTCHIP_OPTION_FREE_SIGHASHTYPE) == 0)) {
@@ -108,7 +112,7 @@ unsigned short btchip_apdu_hash_sign() {
 
             // Fetch the private key
 
-            btchip_private_derive_keypair(keyPath, 0, NULL);
+            btchip_private_derive_keypair(keyPath, 1, NULL);
 
             // TODO optional : check the public key against the associated non
             // blank input to sign
@@ -117,28 +121,31 @@ unsigned short btchip_apdu_hash_sign() {
 
             btchip_write_u32_le(dataBuffer, lockTime);
             btchip_write_u32_le(dataBuffer + 4, expiry);
-            L_DEBUG_BUF(
-                ("Finalize hash with\n", dataBuffer, sizeof(dataBuffer)));
+            L_DEBUG_BUF(("Finalize hash with\n", dataBuffer, sizeof(dataBuffer))); 
 
 
-            blake256_Update(&btchip_context_D.transactionHashFull, dataBuffer,  sizeof(dataBuffer));
-            blake256_Final(&btchip_context_D.transactionHashFull, hash1);
+            blake256_Update(&btchip_context_D.transactionHashPrefix, dataBuffer,  sizeof(dataBuffer));
+            blake256_Final(&btchip_context_D.transactionHashPrefix, hash1);
             L_DEBUG_BUF(("Hash1\n", hash1, sizeof(hash1)));
 
-            blake256_Final(&btchip_context_D.transactionHashAuthorization, hash2);
+            blake256_Final(&btchip_context_D.transactionHashWitness, hash2);
 
-            blake256_Init(&btchip_context_D.transactionHashFull);
+            blake256_Init(&btchip_context_D.transactionHashPrefix);
 
             btchip_write_u32_le(dataBuffer, sighashType);
             // include sighash type
-            blake256_Update(&btchip_context_D.transactionHashFull, dataBuffer,  4);
+            L_DEBUG_BUF(("Sighash type: ", dataBuffer, 4));
+            blake256_Update(&btchip_context_D.transactionHashPrefix, dataBuffer,  4);
             // include prefix_hash
-            blake256_Update(&btchip_context_D.transactionHashFull, hash1,  sizeof(hash1));
+            L_DEBUG_BUF(("Prefix hash: ", hash1, sizeof(hash1)));
+            blake256_Update(&btchip_context_D.transactionHashPrefix, hash1,  sizeof(hash1));
             // include witness_hash
-            blake256_Update(&btchip_context_D.transactionHashFull, hash2,  sizeof(hash2));
+            L_DEBUG_BUF(("Witness hash: ", hash2, sizeof(hash2)));
+            blake256_Update(&btchip_context_D.transactionHashPrefix, hash2,  sizeof(hash2));
 
             // final signature hash
-            blake256_Final(&btchip_context_D.transactionHashAuthorization, hash2);
+            blake256_Final(&btchip_context_D.transactionHashPrefix, hash2);
+            L_DEBUG_BUF(("Hash to sign: ", hash2, sizeof(hash2)));
 
             /*DELETED// Rehash
             cx_sha256_init(&localHash);
@@ -146,6 +153,7 @@ unsigned short btchip_apdu_hash_sign() {
             L_DEBUG_BUF(("Hash2\n", hash2, sizeof(hash2)));*/
 
             // Sign
+            L_DEBUG_BUF(("Pub key: ", btchip_public_key_D.W, sizeof(btchip_public_key_D.W)));
             btchip_signverify_finalhash(
                 &btchip_private_key_D, 1, hash2, sizeof(hash2),
                 G_io_apdu_buffer, sizeof(G_io_apdu_buffer),

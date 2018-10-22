@@ -2073,6 +2073,7 @@ unsigned char io_event(unsigned char channel)
 
 uint8_t prepare_fees()
 {
+    PRINTF("Prepare Fees:\n");
     if (btchip_context_D.transactionContext.relaxed)
     {
         os_memmove(vars.tmp.feesAmount, "UNKNOWN", 7);
@@ -2086,6 +2087,9 @@ uint8_t prepare_fees()
                 fees, btchip_context_D.transactionContext.transactionAmount,
                 btchip_context_D.totalOutputAmount))
         {
+            PRINTF("Fees: %.*H\n", 8, fees);
+            PRINTF("txAmount:: %.*H\n", 8, btchip_context_D.transactionContext.transactionAmount);
+            PRINTF("totalOutAmount: %.*H\n", 8, btchip_context_D.totalOutputAmount);
             PRINTF("Error : Fees not consistent");
             goto error;
         }
@@ -2123,6 +2127,8 @@ uint8_t prepare_single_output()
 
     btchip_swap_bytes(script_version, btchip_context_D.currentOutput + offset, 2);
     offset += 2;
+
+    PRINTF("amount: %.*H\n", 8, amount);
 
     if (btchip_output_script_is_op_return(btchip_context_D.currentOutput +
                                           offset))
@@ -2183,7 +2189,7 @@ uint8_t prepare_single_output()
 
 uint8_t prepare_full_output(uint8_t checkOnly)
 {
-    PRINTF("Bijour 15\n");
+    PRINTF("prepare full output (check= %d):\n", checkOnly);
     unsigned int offset = 0;
     int numberOutputs;
     int i;
@@ -2216,6 +2222,7 @@ uint8_t prepare_full_output(uint8_t checkOnly)
     // Parse output, locate the change output location
     os_memset(totalOutputAmount, 0, sizeof(totalOutputAmount));
     numberOutputs = btchip_context_D.currentOutput[offset++];
+    PRINTF("%d outputs\n", numberOutputs);
     if (numberOutputs > 3)
     {
         if (!checkOnly)
@@ -2256,6 +2263,7 @@ uint8_t prepare_full_output(uint8_t checkOnly)
             btchip_context_D.currentOutput + offset);
         isOpCall = btchip_output_script_is_op_call(
             btchip_context_D.currentOutput + offset);
+        PRINTF("REGULAR SCRIPT: %d\n", btchip_output_script_is_regular(btchip_context_D.currentOutput + offset));
         if (!btchip_output_script_is_regular(btchip_context_D.currentOutput +
                                              offset) &&
             !isP2sh && !(nullAmount && isOpReturn) &&
@@ -2324,6 +2332,8 @@ uint8_t prepare_full_output(uint8_t checkOnly)
             fees, btchip_context_D.transactionContext.transactionAmount,
             totalOutputAmount))
     {
+        L_DEBUG_BUF(("tx_amount: ", btchip_context_D.transactionContext.transactionAmount, 8));
+        L_DEBUG_BUF(("total_amount: ", totalOutputAmount, 8));
         if (!checkOnly)
         {
             PRINTF("Error : Fees not consistent");
@@ -2418,6 +2428,7 @@ uint8_t prepare_full_output(uint8_t checkOnly)
                     strcpy(vars.tmp.fullAddress, tmp);
 
                     // Prepare amount
+                    PRINTF("prepare amount\n");
 
                     os_memmove(vars.tmp.fullAmount,
                                btchip_context_D.shortCoinId,
@@ -2435,6 +2446,7 @@ uint8_t prepare_full_output(uint8_t checkOnly)
                         '\0';
 
                     // prepare fee display
+                    PRINTF("prepare fee display\n");
                     os_memmove(vars.tmp.feesAmount,
                                btchip_context_D.shortCoinId,
                                btchip_context_D.shortCoinIdLength);
@@ -2469,7 +2481,7 @@ error:
 #define HASH_LENGTH 4
 uint8_t prepare_message_signature()
 {
-    cx_hash(&btchip_context_D.transactionHashAuthorization.header, CX_LAST,
+    cx_hash(&btchip_context_D.transactionHashWitness.header, CX_LAST,
             vars.tmp.fullAmount, 0, vars.tmp.fullAmount);
     snprintf(vars.tmp.fullAddress, sizeof(vars.tmp.fullAddress), "%.*H...%.*H",
              8, vars.tmp.fullAmount, 8, vars.tmp.fullAmount + 32 - 8);
@@ -2480,8 +2492,10 @@ unsigned int btchip_bagl_confirm_full_output()
 {
     if (!prepare_full_output(0))
     {
+        //PRINTF("FAIL\n");
         return 0;
     }
+    //PRINTF("WIN\n");
 
 #if defined(TARGET_BLUE)
     ui_transaction_full_blue_init();
@@ -2737,6 +2751,7 @@ __attribute__((section(".boot"))) int main(int arg0)
 
                 ui_idle();
 
+ 
                 app_main();
             }
             CATCH(EXCEPTION_IO_RESET)

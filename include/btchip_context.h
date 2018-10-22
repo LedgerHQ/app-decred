@@ -168,20 +168,21 @@ struct btchip_context_s {
 
     /** Non protected transaction context */
 
-    /** Full transaction hash context */
-    //cx_sha256_t transactionHashFull;
-    BLAKE256_CTX transactionHashFull;
-    /** Authorization transaction hash context */
-    BLAKE256_CTX transactionHashAuthorization; // used as witness hash in decred
+    /** Transaction Prefix hash context */
+    BLAKE256_CTX transactionHashPrefix;
+    /** Transaction Witness hash context */
+    BLAKE256_CTX transactionHashWitness; 
+    /** Authorization hash context */
+    BLAKE256_CTX transactionHashAuthorization;
     /** Current hash to perform (TRANSACTION_HASH_) */
     unsigned char transactionHashOption;
 
     /* Segregated Witness changes */
 
-    union {
+    /*union {
         struct segwit_hash_s hash;
         struct segwit_cache_s cache;
-    } segwit;
+    } segwit;*/
     unsigned char transactionVersion[4];
     unsigned char inputValue[8];
     unsigned char usingSegwit;
@@ -267,6 +268,8 @@ typedef enum btchip_coin_kind_e {
     COIN_KIND_DIGIBYTE,
     COIN_KIND_QTUM,
     COIN_KIND_HCASH,
+    COIN_KIND_DECRED,
+    COIN_KIND_DECRED_TESTNET,
 } btchip_coin_kind_t;
 
 typedef struct btchip_altcoin_config_s {

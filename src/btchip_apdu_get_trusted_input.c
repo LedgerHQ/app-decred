@@ -84,7 +84,7 @@ unsigned short btchip_apdu_get_trusted_input()
             return BTCHIP_SW_INCORRECT_DATA;
         }
 
-        //cx_hash(&btchip_context_D.transactionHashFull.header, CX_LAST,
+        //cx_hash(&btchip_context_D.transactionHashPrefix.header, CX_LAST,
         //       (unsigned char WIDE *)NULL, 0, targetHash);
 
         // Otherwise prepare
@@ -92,8 +92,8 @@ unsigned short btchip_apdu_get_trusted_input()
         G_io_apdu_buffer[0] = MAGIC_TRUSTED_INPUT;
         G_io_apdu_buffer[1] = 0x00;
 
-        blake256_Final(&btchip_context_D.transactionHashFull, G_io_apdu_buffer + 4);
-        //cx_hash(&btchip_context_D.transactionHashFull, CX_LAST, (unsigned char WIDE *)NULL, 0, G_io_apdu_buffer + 4);zzzzzzzzz
+        blake256_Final(&btchip_context_D.transactionHashPrefix, G_io_apdu_buffer + 4);
+        //cx_hash(&btchip_context_D.transactionHashPrefix, CX_LAST, (unsigned char WIDE *)NULL, 0, G_io_apdu_buffer + 4);zzzzzzzzz
         
         btchip_write_u32_le(G_io_apdu_buffer + 4 + 32,
                             btchip_context_D.transactionTargetInput);
