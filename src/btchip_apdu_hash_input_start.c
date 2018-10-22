@@ -31,7 +31,6 @@ unsigned short btchip_apdu_hash_input_start()
     apduLength = G_io_apdu_buffer[ISO_OFFSET_LC];
 
     PRINTF("\n### HASH_INPUT_START:\n");
-    PRINTF("%.*H\n", 100, G_io_apdu_buffer);
 
     SB_CHECK(N_btchip.bkp.config.operationMode);
     switch (SB_GET(N_btchip.bkp.config.operationMode))

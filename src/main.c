@@ -2088,8 +2088,8 @@ uint8_t prepare_fees()
                 btchip_context_D.totalOutputAmount))
         {
             PRINTF("Fees: %.*H\n", 8, fees);
-            PRINTF("txAmount:: %.*H\n", 8, btchip_context_D.transactionContext.transactionAmount);
-            PRINTF("totalOutAmount: %.*H\n", 8, btchip_context_D.totalOutputAmount);
+            PRINTF("transactionAmount:: %.*H\n", 8, btchip_context_D.transactionContext.transactionAmount);
+            PRINTF("totalOutputAmount: %.*H\n", 8, btchip_context_D.totalOutputAmount);
             PRINTF("Error : Fees not consistent");
             goto error;
         }
@@ -2332,8 +2332,8 @@ uint8_t prepare_full_output(uint8_t checkOnly)
             fees, btchip_context_D.transactionContext.transactionAmount,
             totalOutputAmount))
     {
-        L_DEBUG_BUF(("tx_amount: ", btchip_context_D.transactionContext.transactionAmount, 8));
-        L_DEBUG_BUF(("total_amount: ", totalOutputAmount, 8));
+        PRINTF("tx_amount: ", 8, btchip_context_D.transactionContext.transactionAmount);
+        PRINTF("total_amount: ", 8, totalOutputAmount);
         if (!checkOnly)
         {
             PRINTF("Error : Fees not consistent");

@@ -30,7 +30,7 @@ unsigned char btchip_decode_base58(unsigned char WIDE *in, unsigned char length,
         THROW(INVALID_PARAMETER);
     }
     os_memmove(tmp, in, length);
-    L_DEBUG_BUF(("To decode\n", tmp, length));
+    PRINTF("To decode %.*H\n", length, tmp);
     for (i = 0; i < length; i++) {
         if (in[i] > 128) {
             THROW(EXCEPTION);
@@ -68,7 +68,7 @@ unsigned char btchip_decode_base58(unsigned char WIDE *in, unsigned char length,
         THROW(EXCEPTION_OVERFLOW);
     }
     os_memmove(out, buffer + j - zeroCount, length);
-    L_DEBUG_BUF(("Decoded\n", out, length));
+    PRINTF("Decoded %.*H\n", length, out);
     return length;
 }
 
@@ -85,7 +85,7 @@ unsigned char btchip_encode_base58(unsigned char WIDE *in, unsigned char length,
     }
     os_memmove(tmp, in, length);
     L_DEBUG_APP(("Length to encode %d\n", length));
-    L_DEBUG_BUF(("To encode\n", tmp, length));
+    PRINTF("To encode %.*H\n", length, tmp);
     while ((zeroCount < length) && (tmp[zeroCount] == 0)) {
         ++zeroCount;
     }
@@ -118,6 +118,6 @@ unsigned char btchip_encode_base58(unsigned char WIDE *in, unsigned char length,
     }
     os_memmove(out, (buffer + j), length);
     L_DEBUG_APP(("Length encoded %d\n", length));
-    L_DEBUG_BUF(("Encoded\n", out, length));
+    PRINTF("Encoded %.*H\n", length, out);
     return length;
 }

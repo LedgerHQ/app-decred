@@ -41,7 +41,7 @@ unsigned char btchip_output_script_is_regular(unsigned char *buffer) {
             return 1;
         }
     }
-    //L_DEBUG_BUF(("SCRIPT: ", buffer, 26));
+
     if ((os_memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_PRE,
                    sizeof(TRANSACTION_OUTPUT_SCRIPT_PRE)) == 0) &&
         (os_memcmp(buffer + sizeof(TRANSACTION_OUTPUT_SCRIPT_PRE) + 20,
@@ -49,7 +49,7 @@ unsigned char btchip_output_script_is_regular(unsigned char *buffer) {
                    sizeof(TRANSACTION_OUTPUT_SCRIPT_POST)) == 0)) {
         return 1;
     }
-    PRINTF("irregular script: %.*H\n", 10, buffer);
+    PRINTF("Irregular script: %.*H\n", 10, buffer);
     return 0;
 }
 
@@ -157,8 +157,6 @@ void btchip_retrieve_keypair_discard(unsigned char WIDE *privateComponent,
             cx_ecdsa_init_private_key(BTCHIP_CURVE, privateComponent, 32,
                                       &btchip_private_key_D);
 
-            L_DEBUG_BUF(("Using private component\n", privateComponent, 32));
-
             if (derivePublic) {
                 cx_ecfp_generate_pair(BTCHIP_CURVE, &btchip_public_key_D,
                                       &btchip_private_key_D, 1);
@@ -199,9 +197,7 @@ unsigned short btchip_public_key_to_encoded_base58(
     unsigned char versionSize = (version > 255 ? 2 : 1);
 
     if (!alreadyHashed) {
-        L_DEBUG_BUF(("Comp. PubKey\n", in, inlen));
         btchip_public_key_hash160(in, inlen, tmpBuffer + versionSize);
-        L_DEBUG_BUF(("After Hash160\n", (tmpBuffer + versionSize), 20));
         if (version > 255) {
             tmpBuffer[0] = (version >> 8);
             tmpBuffer[1] = version;
@@ -223,7 +219,6 @@ unsigned short btchip_public_key_to_encoded_base58(
     cx_blake2b_init(&hash, 256);
     cx_hash(&hash.header, CX_LAST, checksumBuffer, 32, checksumBuffer);*/
 
-    L_DEBUG_BUF(("Checksum\n", checksumBuffer, 4));
     os_memmove(tmpBuffer + 20 + versionSize, checksumBuffer, 4);
     return btchip_encode_base58(tmpBuffer, 24 + versionSize, out, outlen);
 }
@@ -251,8 +246,7 @@ unsigned short btchip_decode_base58_address(unsigned char WIDE *in,
     cx_hash(&hash.header, CX_LAST, hashBuffer, 32, hashBuffer);
 
     if (os_memcmp(out + outlen - 4, hashBuffer, 4)) {
-        L_DEBUG_BUF(
-            ("Hash checksum mismatch\n", hashBuffer, sizeof(hashBuffer)));
+        PRINTF("Hash checksum mismatch:\n", sizeof(hashBuffer), hashBuffer);
         THROW(INVALID_CHECKSUM);
     }
 

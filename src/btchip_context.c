@@ -24,7 +24,7 @@ void btchip_autosetup(void);
  */
 void btchip_context_init() {
     L_DEBUG_APP(("Context init\n"));
-    L_DEBUG_APP(("Backup size %d\n", sizeof(N_btchip.bkp)));
+    L_DEBUG_APP((N_btchip.bkp));
     os_memset(&btchip_context_D, 0, sizeof(btchip_context_D));
     SB_SET(btchip_context_D.halted, 0);
     btchip_context_D.currentOutputOffset = 0;
