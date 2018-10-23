@@ -25,8 +25,6 @@
 
 #include "btchip_bagl_extensions.h"
 
-#include "segwit_addr.h"
-
 #include "glyphs.h"
 
 #define __NAME3(a, b, c) a##b##c
@@ -2235,7 +2233,7 @@ uint8_t prepare_full_output(uint8_t checkOnly)
     {
         unsigned char nullAmount = 1;
         unsigned int j;
-        unsigned char isOpReturn, isP2sh, isNativeSegwit;
+        unsigned char isOpReturn, isP2sh;
         unsigned char isOpCreate, isOpCall;
 
         for (j = 0; j < 8; j++)
@@ -2257,8 +2255,6 @@ uint8_t prepare_full_output(uint8_t checkOnly)
             btchip_context_D.currentOutput + offset);
         isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput +
                                               offset);
-        isNativeSegwit = btchip_output_script_is_native_witness(
-            btchip_context_D.currentOutput + offset);
         isOpCreate = btchip_output_script_is_op_create(
             btchip_context_D.currentOutput + offset);
         isOpCall = btchip_output_script_is_op_call(
@@ -2293,8 +2289,7 @@ uint8_t prepare_full_output(uint8_t checkOnly)
              btchip_context_D.tmpCtx.output.changeInitialized && !isOpReturn))
         {
             unsigned char addressOffset =
-                (isNativeSegwit ? OUTPUT_SCRIPT_NATIVE_WITNESS_PROGRAM_OFFSET
-                                : isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH
+                (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH
                                          : OUTPUT_SCRIPT_REGULAR_PRE_LENGTH);
             if (os_memcmp(btchip_context_D.currentOutput + offset +
                               addressOffset,
@@ -2363,7 +2358,6 @@ uint8_t prepare_full_output(uint8_t checkOnly)
                 int addressOffset;
                 unsigned char address[22];
                 unsigned short version;
-                unsigned char isNativeSegwit;
 
                 btchip_swap_bytes(amount, btchip_context_D.currentOutput + offset, 8);
                 offset += 8; // skip amount
@@ -2371,60 +2365,43 @@ uint8_t prepare_full_output(uint8_t checkOnly)
                 btchip_swap_bytes(script_version, btchip_context_D.currentOutput + offset, 2);
                 offset += 2; // skip script_version
 
-                isNativeSegwit = btchip_output_script_is_native_witness(
-                    btchip_context_D.currentOutput + offset);
-                if (!isNativeSegwit)
+                if (btchip_output_script_is_regular(
+                        btchip_context_D.currentOutput + offset))
                 {
-                    if (btchip_output_script_is_regular(
-                            btchip_context_D.currentOutput + offset))
-                    {
-                        addressOffset = offset + 4;
-                        version = btchip_context_D.payToAddressVersion;
-                    }
-                    else
-                    {
-                        addressOffset = offset + 3;
-                        version = btchip_context_D.payToScriptHashVersion;
-                    }
-                    if (version > 255)
-                    {
-                        versionSize = 2;
-                        address[0] = (version >> 8);
-                        address[1] = version;
-                    }
-                    else
-                    {
-                        versionSize = 1;
-                        address[0] = version;
-                    }
-                    os_memmove(address + versionSize,
-                               btchip_context_D.currentOutput + addressOffset,
-                               20);
+                    addressOffset = offset + 4;
+                    version = btchip_context_D.payToAddressVersion;
                 }
+                else
+                {
+                    addressOffset = offset + 3;
+                    version = btchip_context_D.payToScriptHashVersion;
+                }
+                if (version > 255)
+                {
+                    versionSize = 2;
+                    address[0] = (version >> 8);
+                    address[1] = version;
+                }
+                else
+                {
+                    versionSize = 1;
+                    address[0] = version;
+                }
+                os_memmove(address + versionSize,
+                            btchip_context_D.currentOutput + addressOffset,
+                            20);
+                
                 // if we're processing the real output (not the change one)
                 if (currentPos == outputPos)
                 {
                     unsigned short textSize = 0;
-                    if (!isNativeSegwit)
-                    {
-                        // Prepare address
-                        textSize = btchip_public_key_to_encoded_base58(
-                            address, 20 + versionSize, (unsigned char *)tmp,
-                            sizeof(tmp), version, 1);
-                        tmp[textSize] = '\0';
-                    }
-                    else if (G_coin_config->native_segwit_prefix)
-                    {
-                        textSize = segwit_addr_encode(
-                            tmp, PIC(G_coin_config->native_segwit_prefix), 0,
-                            btchip_context_D.currentOutput + offset +
-                                OUTPUT_SCRIPT_NATIVE_WITNESS_PROGRAM_OFFSET,
-                            btchip_context_D.currentOutput
-                                [offset +
-                                 OUTPUT_SCRIPT_NATIVE_WITNESS_PROGRAM_OFFSET -
-                                 1]);
-                    }
-
+                    
+                    // Prepare address
+                    textSize = btchip_public_key_to_encoded_base58(
+                        address, 20 + versionSize, (unsigned char *)tmp,
+                        sizeof(tmp), version, 1);
+                    tmp[textSize] = '\0';
+                    
                     strcpy(vars.tmp.fullAddress, tmp);
 
                     // Prepare amount
@@ -2647,9 +2624,7 @@ btchip_altcoin_config_t const C_coin_config = {
     .coinid = COIN_COINID,
     .name = COIN_COINID_NAME,
     .name_short = COIN_COINID_SHORT,
-#ifdef COIN_NATIVE_SEGWIT_PREFIX
-    .native_segwit_prefix = COIN_NATIVE_SEGWIT_PREFIX,
-#endif // COIN_NATIVE_SEGWIT_PREFIX
+
 #ifdef COIN_FORKID
     .forkid = COIN_FORKID,
 #endif // COIN_FORKID
@@ -2671,18 +2646,13 @@ __attribute__((section(".boot"))) int main(int arg0)
     strcpy(name, COIN_COINID_NAME);
     unsigned char name_short[sizeof(COIN_COINID_SHORT)];
     strcpy(name_short, COIN_COINID_SHORT);
-#ifdef COIN_NATIVE_SEGWIT_PREFIX
-    unsigned char native_segwit_prefix[sizeof(COIN_NATIVE_SEGWIT_PREFIX)];
-    strcpy(native_segwit_prefix, COIN_NATIVE_SEGWIT_PREFIX);
-#endif
+
     btchip_altcoin_config_t coin_config;
     os_memmove(&coin_config, &C_coin_config, sizeof(coin_config));
     coin_config.coinid = coinid;
     coin_config.name = name;
     coin_config.name_short = name_short;
-#ifdef COIN_NATIVE_SEGWIT_PREFIX
-    coin_config.native_segwit_prefix = native_segwit_prefix;
-#endif // #ifdef COIN_NATIVE_SEGWIT_PREFIX
+
     BEGIN_TRY
     {
         TRY

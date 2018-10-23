@@ -90,15 +90,6 @@ enum btchip_output_parsing_state_e {
 };
 typedef enum btchip_output_parsing_state_e btchip_output_parsing_state_t;
 
-struct segwit_hash_s {
-    cx_sha256_t hashPrevouts;
-    cx_sha256_t hashSequence;
-};
-struct segwit_cache_s {
-    unsigned char hashedPrevouts[32];
-    unsigned char hashedSequence[32];
-    unsigned char hashedOutputs[32];
-};
 
 /**
  * Structure defining an operation on a transaction
@@ -177,18 +168,9 @@ struct btchip_context_s {
     /** Current hash to perform (TRANSACTION_HASH_) */
     unsigned char transactionHashOption;
 
-    /* Segregated Witness changes */
-
-    /*union {
-        struct segwit_hash_s hash;
-        struct segwit_cache_s cache;
-    } segwit;*/
     unsigned char transactionVersion[4];
     unsigned char inputValue[8];
-    unsigned char usingSegwit;
-    unsigned char segwitParsedOnce;
 
-    /* /Segregated Witness changes */
 
     /** Size currently available to the transaction parser */
     unsigned char transactionDataRemaining;
@@ -242,7 +224,6 @@ typedef struct btchip_context_s btchip_context_t;
 typedef enum btchip_coin_flags_e {
     FLAG_PEERCOIN_UNITS=1,
     FLAG_PEERCOIN_SUPPORT=2,
-    FLAG_SEGWIT_CHANGE_SUPPORT=4,
     FLAG_QTUM_SUPPORT=8,
 } btchip_coin_flags_t;
 
@@ -283,7 +264,6 @@ typedef struct btchip_altcoin_config_s {
     const char* coinid; // used coind id for message signature prefix
     const char* name; // for ux displays
     const char* name_short; // for unit in ux displays
-    const char* native_segwit_prefix; // null if no segwit prefix
     unsigned int forkid;
     btchip_coin_kind_t kind;
     unsigned int flags;

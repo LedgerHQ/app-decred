@@ -54,7 +54,6 @@ unsigned short btchip_apdu_get_trusted_input()
         btchip_set_check_internal_structure_integrity(1);
         dataOffset = 4;
         btchip_context_D.transactionHashOption = TRANSACTION_HASH_FULL;
-        btchip_context_D.usingSegwit = 0;
     }
     else if (G_io_apdu_buffer[ISO_OFFSET_P1] != GET_TRUSTED_INPUT_P1_NEXT)
     {

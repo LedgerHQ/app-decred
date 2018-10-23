@@ -33,14 +33,6 @@ const unsigned char TRANSACTION_OUTPUT_SCRIPT_P2WPKH_PRE[] = {0x16, 0x00, 0x14};
 const unsigned char TRANSACTION_OUTPUT_SCRIPT_P2WSH_PRE[] = {0x22, 0x00, 0x20};
 
 unsigned char btchip_output_script_is_regular(unsigned char *buffer) {
-    if (G_coin_config->native_segwit_prefix) {
-        if ((os_memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_P2WPKH_PRE,
-                       sizeof(TRANSACTION_OUTPUT_SCRIPT_P2WPKH_PRE)) == 0) ||
-            (os_memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_P2WSH_PRE,
-                       sizeof(TRANSACTION_OUTPUT_SCRIPT_P2WSH_PRE)) == 0)) {
-            return 1;
-        }
-    }
 
     if ((os_memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_PRE,
                    sizeof(TRANSACTION_OUTPUT_SCRIPT_PRE)) == 0) &&
@@ -60,18 +52,6 @@ unsigned char btchip_output_script_is_p2sh(unsigned char *buffer) {
                    TRANSACTION_OUTPUT_SCRIPT_P2SH_POST,
                    sizeof(TRANSACTION_OUTPUT_SCRIPT_P2SH_POST)) == 0)) {
         return 1;
-    }
-    return 0;
-}
-
-unsigned char btchip_output_script_is_native_witness(unsigned char *buffer) {
-    if (G_coin_config->native_segwit_prefix) {
-        if ((os_memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_P2WPKH_PRE,
-                       sizeof(TRANSACTION_OUTPUT_SCRIPT_P2WPKH_PRE)) == 0) ||
-            (os_memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_P2WSH_PRE,
-                       sizeof(TRANSACTION_OUTPUT_SCRIPT_P2WSH_PRE)) == 0)) {
-            return 1;
-        }
     }
     return 0;
 }

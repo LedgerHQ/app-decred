@@ -45,8 +45,7 @@ static bool check_output_displayable()
 {
     PRINTF("Check if output is displayable\n");
     bool displayable = true;
-    unsigned char amount[8], isOpReturn, isP2sh, isNativeSegwit, j,
-        nullAmount = 1;
+    unsigned char amount[8], isOpReturn, isP2sh, j,nullAmount = 1;
     unsigned char isOpCreate, isOpCall;
 
     for (j = 0; j < 8; j++)
@@ -66,8 +65,6 @@ static bool check_output_displayable()
     isOpReturn =
         btchip_output_script_is_op_return(btchip_context_D.currentOutput + 8 + 2); // +2 for script version, decred particularity
     isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput + 8 + 2);
-    isNativeSegwit = btchip_output_script_is_native_witness(
-        btchip_context_D.currentOutput + 8 + 2);
     isOpCreate =
         btchip_output_script_is_op_create(btchip_context_D.currentOutput + 8 + 2);
     isOpCall =
@@ -83,8 +80,7 @@ static bool check_output_displayable()
     {
         bool changeFound = false;
         unsigned char addressOffset =
-            (isNativeSegwit ? OUTPUT_SCRIPT_NATIVE_WITNESS_PROGRAM_OFFSET
-                            : isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH
+            (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH
                                      : OUTPUT_SCRIPT_REGULAR_PRE_LENGTH);
         if (!isP2sh &&
             os_memcmp(btchip_context_D.currentOutput + 8 + 2 + addressOffset,
@@ -335,13 +331,11 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
 
             // Always update the transaction & authorization hashes with the
             // given data
-            // For SegWit, this has been reset to hold hashOutputs
-            if (!btchip_context_D.segwitParsedOnce)
-            {
-                PRINTF("Adding to prefix hash:\n%.*H\n", apduLength - hashOffset, G_io_apdu_buffer + ISO_OFFSET_CDATA + hashOffset);
-                blake256_Update(&btchip_context_D.transactionHashPrefix, G_io_apdu_buffer + ISO_OFFSET_CDATA + hashOffset, apduLength - hashOffset);
-                blake256_Update(&btchip_context_D.transactionHashAuthorization, G_io_apdu_buffer + ISO_OFFSET_CDATA + hashOffset, apduLength - hashOffset);
-            }
+
+            PRINTF("Adding to prefix hash:\n%.*H\n", apduLength - hashOffset, G_io_apdu_buffer + ISO_OFFSET_CDATA + hashOffset);
+            blake256_Update(&btchip_context_D.transactionHashPrefix, G_io_apdu_buffer + ISO_OFFSET_CDATA + hashOffset, apduLength - hashOffset);
+            blake256_Update(&btchip_context_D.transactionHashAuthorization, G_io_apdu_buffer + ISO_OFFSET_CDATA + hashOffset, apduLength - hashOffset);
+        
 
             if (btchip_context_D.transactionContext.firstSigned)
             {
@@ -396,10 +390,8 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
 
             /* Computes an intermediary hash of the txId that will be checked for each 
             successive inputs to sign to check that they belong to the same tx*/
-            if (!btchip_context_D.usingSegwit)
-            {
-                blake256_Final(&btchip_context_D.transactionHashAuthorization, authorizationHash);
-            }
+  
+            blake256_Final(&btchip_context_D.transactionHashAuthorization, authorizationHash);
 
 
             if(btchip_context_D.transactionContext.firstSigned)

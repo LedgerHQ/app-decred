@@ -390,13 +390,6 @@ void transaction_parse(unsigned char parseMode)
                             PRINTF("New amount\n", 8, btchip_context_D.transactionContext.transactionAmount);
                         }
 
-                        if (!btchip_context_D.usingSegwit)
-                        {
-                            /*// Do not include the input script length + value in
-                            // the authentication hash
-                            btchip_context_D.transactionHashOption =
-                                TRANSACTION_HASH_FULL;*/
-                        }
 
                     }
                     // DIRTY: include utxo script len and script in witness hash
@@ -409,7 +402,7 @@ void transaction_parse(unsigned char parseMode)
                          btchip_context_D.transactionContext.scriptRemaining);
 
                     if ((parseMode == PARSE_MODE_SIGNATURE) &&
-                        !trustedInputFlag && !btchip_context_D.usingSegwit)
+                        !trustedInputFlag)
                     {
                         // Only proceeds if this is not to be signed - so length
                         // should be null
@@ -476,13 +469,7 @@ void transaction_parse(unsigned char parseMode)
 
                         if (parseMode == PARSE_MODE_SIGNATURE)
                         {
-                            if (!btchip_context_D.usingSegwit)
-                            {
-                                // Restore dual hash for signature +
-                                // authentication
-                                btchip_context_D.transactionHashOption =
-                                    TRANSACTION_HASH_BOTH;
-                            }
+                            btchip_context_D.transactionHashOption = TRANSACTION_HASH_BOTH; 
                         }
                         // Sequence
                         check_transaction_available(4);
