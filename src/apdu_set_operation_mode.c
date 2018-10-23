@@ -17,56 +17,56 @@
 
 // TODO BAGL : validate operation mode change
 
-#include "btchip_internal.h"
-#include "btchip_apdu_constants.h"
+#include "internal.h"
+#include "apdu_constants.h"
 
 #define P1_DISABLE_KEYCARD 0x00
 #define P1_ENABLE_KEYCARD 0x01
 #define P1_ENABLE_KEYCARD_PERMANENTLY 0x02
 
-unsigned short btchip_apdu_set_operation_mode() {
+unsigned short apdu_set_operation_mode() {
     unsigned char operationMode;
 
     if (G_io_apdu_buffer[ISO_OFFSET_LC] != 0x01) {
-        return BTCHIP_SW_INCORRECT_LENGTH;
+        return SW_INCORRECT_LENGTH;
     }
 
     SB_CHECK(N_btchip.bkp.config.operationMode);
     if ((SB_GET(N_btchip.bkp.config.operationMode) ==
-         BTCHIP_MODE_SETUP_NEEDED) ||
-        (SB_GET(N_btchip.bkp.config.operationMode) == BTCHIP_MODE_ISSUER)) {
-        return BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
+         MODE_SETUP_NEEDED) ||
+        (SB_GET(N_btchip.bkp.config.operationMode) == MODE_ISSUER)) {
+        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
     }
 
     if (!os_global_pin_is_validated()) {
-        return BTCHIP_SW_SECURITY_STATUS_NOT_SATISFIED;
+        return SW_SECURITY_STATUS_NOT_SATISFIED;
     }
     operationMode = G_io_apdu_buffer[ISO_OFFSET_CDATA];
 
-    if (operationMode == BTCHIP_MODE_WALLET) {
+    if (operationMode == MODE_WALLET) {
     }
 
     if (operationMode == SB_GET(N_btchip.bkp.config.operationMode)) {
-        return BTCHIP_SW_OK;
+        return SW_OK;
     }
 
     switch (operationMode) {
-    case BTCHIP_MODE_WALLET:
-    case BTCHIP_MODE_RELAXED_WALLET:
-    case BTCHIP_MODE_SERVER:
-    case BTCHIP_MODE_DEVELOPER:
+    case MODE_WALLET:
+    case MODE_RELAXED_WALLET:
+    case MODE_SERVER:
+    case MODE_DEVELOPER:
         break;
     default:
-        return BTCHIP_SW_INCORRECT_DATA;
+        return SW_INCORRECT_DATA;
     }
 
     SB_CHECK(N_btchip.bkp.config.supportedModes);
     if ((SB_GET(N_btchip.bkp.config.supportedModes) & operationMode) == 0) {
-        return BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
+        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
     }
 
     // commit new operation
-    btchip_set_operation_mode(operationMode);
+    set_operation_mode(operationMode);
 
-    return BTCHIP_SW_OK;
+    return SW_OK;
 }

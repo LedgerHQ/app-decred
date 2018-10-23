@@ -15,8 +15,8 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
+#include "internal.h"
 
-void btchip_compress_public_key_value(unsigned char *value) {
+void compress_public_key_value(unsigned char *value) {
     value[0] = ((value[64] & 1) ? 0x03 : 0x02);
 }

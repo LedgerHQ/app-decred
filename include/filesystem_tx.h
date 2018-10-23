@@ -15,16 +15,16 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BTCHIP_FS_TX_H
+#ifndef FS_TX_H
 
-#define BTCHIP_FS_TX_H
+#define FS_TX_H
 
 #include "os.h"
 
 #define MAX_BIP32_PATH 10
 #define MAX_BIP32_PATH_LENGTH (4 * MAX_BIP32_PATH) + 1
 
-struct btchip_transaction_summary_data_s {
+struct transaction_summary_data_s {
     unsigned char
         transactionNonce[8]; // used to bind to the current set of inputs
     unsigned char pin[4];    // transaction PIN
@@ -38,17 +38,17 @@ struct btchip_transaction_summary_data_s {
     unsigned char changeAddress[21]; // only in wallet mode
     unsigned char keyPath[MAX_BIP32_PATH_LENGTH];
 };
-typedef struct btchip_transaction_summary_data_s
-    btchip_transaction_summary_data_t;
+typedef struct transaction_summary_data_s
+    transaction_summary_data_t;
 
-struct btchip_transaction_summary_s {
+struct transaction_summary_s {
     unsigned char active;
     unsigned char payToAddressVersion;
     unsigned char payToScriptHashVersion;
     unsigned char authorizationHash[32];
-    btchip_transaction_summary_data_t summarydata;
+    transaction_summary_data_t summarydata;
     unsigned short messageLength;
 };
-typedef struct btchip_transaction_summary_s btchip_transaction_summary_t;
+typedef struct transaction_summary_s transaction_summary_t;
 
 #endif

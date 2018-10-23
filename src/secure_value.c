@@ -15,7 +15,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
+#include "internal.h"
 
 void sbSet(secu8 *target, unsigned char source) {
     *target = (((unsigned char)~source) << 8) + source;

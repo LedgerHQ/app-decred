@@ -15,18 +15,18 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
-#include "btchip_apdu_constants.h"
+#include "internal.h"
+#include "apdu_constants.h"
 
 #define P1_GET_OPERATION_MODE 0x00
 #define P1_GET_SECOND_FACTOR_MODE 0x01
 
-unsigned short btchip_apdu_get_operation_mode() {
+unsigned short apdu_get_operation_mode() {
     SB_CHECK(N_btchip.bkp.config.operationMode);
     if ((SB_GET(N_btchip.bkp.config.operationMode) ==
-         BTCHIP_MODE_SETUP_NEEDED) ||
-        (SB_GET(N_btchip.bkp.config.operationMode) == BTCHIP_MODE_ISSUER)) {
-        return BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
+         MODE_SETUP_NEEDED) ||
+        (SB_GET(N_btchip.bkp.config.operationMode) == MODE_ISSUER)) {
+        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
     }
 
     switch (G_io_apdu_buffer[ISO_OFFSET_P1]) {
@@ -35,10 +35,10 @@ unsigned short btchip_apdu_get_operation_mode() {
         break;
 
     default:
-        return BTCHIP_SW_INCORRECT_P1_P2;
+        return SW_INCORRECT_P1_P2;
     }
 
-    btchip_context_D.outLength = 1;
+    context_D.outLength = 1;
 
-    return BTCHIP_SW_OK;
+    return SW_OK;
 }

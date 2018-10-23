@@ -15,8 +15,8 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
-#include "btchip_apdu_constants.h"
+#include "internal.h"
+#include "apdu_constants.h"
 
 #define FEATURES_COMPRESSED_KEYS 0x01
 #define FEATURES_SELF_SCREEN_BUTTONS 0x02
@@ -41,9 +41,9 @@ void get_firmware_version(unsigned char *buffer) {
     buffer[5] = TCS_LOADER_PATCH_VERSION;
 }
 
-unsigned short btchip_apdu_get_firmware_version() {
+unsigned short apdu_get_firmware_version() {
     G_io_apdu_buffer[0] =
-        (((N_btchip.bkp.config.options & BTCHIP_OPTION_UNCOMPRESSED_KEYS) != 0)
+        (((N_btchip.bkp.config.options & OPTION_UNCOMPRESSED_KEYS) != 0)
              ? 0x00
              : 0x01);
 
@@ -58,7 +58,7 @@ unsigned short btchip_apdu_get_firmware_version() {
     G_io_apdu_buffer[7] |= MODE_SETUP;
     G_io_apdu_buffer[7] |= MODE_OPERATION;
 
-    btchip_context_D.outLength = 0x08;
+    context_D.outLength = 0x08;
 
-    return BTCHIP_SW_OK;
+    return SW_OK;
 }

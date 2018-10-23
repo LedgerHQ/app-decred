@@ -15,14 +15,14 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BTCHIP_ECC_H
+#ifndef ECC_H
 
-#define BTCHIP_ECC_H
+#define ECC_H
 
 #include "os.h"
 
-#define BTCHIP_CURVE CX_CURVE_256K1
+#define CURVE CX_CURVE_256K1
 
-void btchip_compress_public_key_value(unsigned char *value);
+void compress_public_key_value(unsigned char *value);
 
 #endif

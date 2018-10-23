@@ -15,15 +15,15 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BTCHIP_PUBLIC_RAM_VARIABLES_H
+#ifndef PUBLIC_RAM_VARIABLES_H
 
-#define BTCHIP_PUBLIC_RAM_VARIABLES_H
+#define PUBLIC_RAM_VARIABLES_H
 
-#include "btchip_config.h"
+#include "config.h"
 
-#include "btchip_secure_value.h"
-#include "btchip_context.h"
+#include "secure_value.h"
+#include "context.h"
 
-extern btchip_context_t btchip_context_D;
+extern context_t context_D;
 
 #endif

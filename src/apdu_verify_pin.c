@@ -15,9 +15,9 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
-#include "btchip_apdu_constants.h"
+#include "internal.h"
+#include "apdu_constants.h"
 
-unsigned short btchip_apdu_verify_pin() {
-    return BTCHIP_SW_INS_NOT_SUPPORTED;
+unsigned short apdu_verify_pin() {
+    return SW_INS_NOT_SUPPORTED;
 }

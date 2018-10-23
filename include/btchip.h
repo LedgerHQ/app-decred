@@ -15,11 +15,11 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BTCHIP_H
+#ifndef H
 
-#define BTCHIP_H
+#define H
 
-#include "btchip_config.h"
+#include "config.h"
 #include "os.h"
 
 #include "stdlib.h"
@@ -28,8 +28,8 @@
 #define L_DEBUG_APP(x)
 #define L_DEBUG_NOPREFIX(x)
 
-#define SW_TECHNICAL_DETAILS(x) BTCHIP_SW_TECHNICAL_PROBLEM
+#define SW_TECHNICAL_DETAILS(x) SW_TECHNICAL_PROBLEM
 
-#include "btchip_secure_value.h"
+#include "secure_value.h"
 
 #endif

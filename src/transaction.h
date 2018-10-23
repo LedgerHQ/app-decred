@@ -15,11 +15,11 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_secure_value.h"
+#include "secure_value.h"
 
-#ifndef BTCHIP_TRANSACTION_H
+#ifndef TRANSACTION_H
 
-#define BTCHIP_TRANSACTION_H
+#define TRANSACTION_H
 
 #define TRANSACTION_HASH_NONE 0x00
 #define TRANSACTION_HASH_FULL 0x01

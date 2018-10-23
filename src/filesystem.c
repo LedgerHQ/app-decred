@@ -15,11 +15,11 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
+#include "internal.h"
 
-#include "btchip_public_ram_variables.h"
+#include "public_ram_variables.h"
 
-void btchip_set_operation_mode(unsigned char operationMode) {
+void set_operation_mode(unsigned char operationMode) {
     secu8 opMode;
     SB_SET(opMode, operationMode);
 

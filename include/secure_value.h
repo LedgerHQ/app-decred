@@ -15,9 +15,9 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BTCHIP_SECURE_VALUE_H
+#ifndef SECURE_VALUE_H
 
-#define BTCHIP_SECURE_VALUE_H
+#define SECURE_VALUE_H
 
 #include "os.h"
 

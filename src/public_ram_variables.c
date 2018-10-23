@@ -15,8 +15,8 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_public_ram_variables.h"
+#include "public_ram_variables.h"
 
-btchip_context_t btchip_context_D;
+context_t context_D;
 
-btchip_altcoin_config_t *G_coin_config;
+altcoin_config_t *G_coin_config;

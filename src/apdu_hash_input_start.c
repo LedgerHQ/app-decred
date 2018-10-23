@@ -15,8 +15,8 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
-#include "btchip_apdu_constants.h"
+#include "internal.h"
+#include "apdu_constants.h"
 
 #define P1_FIRST 0x00
 #define P1_NEXT 0x80
@@ -24,7 +24,7 @@
 #define P2_CONTINUE 0x80
 
 
-unsigned short btchip_apdu_hash_input_start()
+unsigned short apdu_hash_input_start()
 {
     unsigned char apduLength;
     apduLength = G_io_apdu_buffer[ISO_OFFSET_LC];
@@ -34,31 +34,31 @@ unsigned short btchip_apdu_hash_input_start()
     SB_CHECK(N_btchip.bkp.config.operationMode);
     switch (SB_GET(N_btchip.bkp.config.operationMode))
     {
-    case BTCHIP_MODE_WALLET:
-    case BTCHIP_MODE_RELAXED_WALLET:
-    case BTCHIP_MODE_SERVER:
+    case MODE_WALLET:
+    case MODE_RELAXED_WALLET:
+    case MODE_SERVER:
         break;
     default:
-        return BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
+        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
     }
 
     if (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_FIRST)
     {
         // Initialize
-        btchip_context_D.transactionContext.transactionState =
-            BTCHIP_TRANSACTION_NONE;
-        btchip_set_check_internal_structure_integrity(1);
-        btchip_context_D.transactionHashOption = TRANSACTION_HASH_BOTH;
+        context_D.transactionContext.transactionState =
+            TRANSACTION_NONE;
+        set_check_internal_structure_integrity(1);
+        context_D.transactionHashOption = TRANSACTION_HASH_BOTH;
     }
     else if (G_io_apdu_buffer[ISO_OFFSET_P1] != P1_NEXT)
     {
-        return BTCHIP_SW_INCORRECT_P1_P2;
+        return SW_INCORRECT_P1_P2;
     }
 
     if (G_io_apdu_buffer[ISO_OFFSET_P2] == P2_NEW)
     {
-        // btchip_context_D.transactionContext.consumeP2SH =
-        // ((N_btchip.bkp.config.options & BTCHIP_OPTION_SKIP_2FA_P2SH) != 0);
+        // context_D.transactionContext.consumeP2SH =
+        // ((N_btchip.bkp.config.options & OPTION_SKIP_2FA_P2SH) != 0);
         if (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_FIRST)
         {
             // Request PIN validation
@@ -67,32 +67,32 @@ unsigned short btchip_apdu_hash_input_start()
             // Thus allowing for numerous output to be processed in the
             // background without
             // requiring to disable autolock/autopoweroff
-            if (!btchip_context_D.transactionContext.firstSigned &&
+            if (!context_D.transactionContext.firstSigned &&
                 !os_global_pin_is_validated())
             {
-                return BTCHIP_SW_SECURITY_STATUS_NOT_SATISFIED;
+                return SW_SECURITY_STATUS_NOT_SATISFIED;
             }
             // Master transaction reset
-            btchip_context_D.transactionContext.firstSigned = 1;
-            btchip_context_D.transactionContext.consumeP2SH = 0;
-            btchip_context_D.transactionContext.relaxed = 0;
-            btchip_set_check_internal_structure_integrity(1);
+            context_D.transactionContext.firstSigned = 1;
+            context_D.transactionContext.consumeP2SH = 0;
+            context_D.transactionContext.relaxed = 0;
+            set_check_internal_structure_integrity(1);
             // Initialize for screen pairing
-            os_memset(&btchip_context_D.tmpCtx.output, 0,
-                      sizeof(btchip_context_D.tmpCtx.output));
-            btchip_context_D.tmpCtx.output.changeAccepted = 1;
+            os_memset(&context_D.tmpCtx.output, 0,
+                      sizeof(context_D.tmpCtx.output));
+            context_D.tmpCtx.output.changeAccepted = 1;
         }
     }
     else if (G_io_apdu_buffer[ISO_OFFSET_P2] != P2_CONTINUE)
     {
-        return BTCHIP_SW_INCORRECT_P1_P2;
+        return SW_INCORRECT_P1_P2;
     }
 
-    btchip_context_D.transactionBufferPointer =
+    context_D.transactionBufferPointer =
         G_io_apdu_buffer + ISO_OFFSET_CDATA;
-    btchip_context_D.transactionDataRemaining = apduLength;
+    context_D.transactionDataRemaining = apduLength;
 
     transaction_parse(PARSE_MODE_SIGNATURE);
 
-    return BTCHIP_SW_OK;
+    return SW_OK;
 }

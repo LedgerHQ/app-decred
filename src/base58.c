@@ -15,9 +15,9 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
+#include "internal.h"
 
-unsigned char btchip_decode_base58(unsigned char WIDE *in, unsigned char length,
+unsigned char decode_base58(unsigned char WIDE *in, unsigned char length,
                                    unsigned char *out,
                                    unsigned char maxoutlen) {
     unsigned char tmp[164];
@@ -72,7 +72,7 @@ unsigned char btchip_decode_base58(unsigned char WIDE *in, unsigned char length,
     return length;
 }
 
-unsigned char btchip_encode_base58(unsigned char WIDE *in, unsigned char length,
+unsigned char encode_base58(unsigned char WIDE *in, unsigned char length,
                                    unsigned char *out,
                                    unsigned char maxoutlen) {
     unsigned char tmp[164];

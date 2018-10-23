@@ -15,12 +15,12 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
-#include "btchip_apdu_constants.h"
+#include "internal.h"
+#include "apdu_constants.h"
 
 #define SIGHASH_ALL 0x01
 
-unsigned short btchip_apdu_hash_sign() {
+unsigned short apdu_hash_sign() {
 
     PRINTF("\n### HASH_SIGN:\n");
 
@@ -39,38 +39,38 @@ unsigned short btchip_apdu_hash_sign() {
 
     SB_CHECK(N_btchip.bkp.config.operationMode);
     switch (SB_GET(N_btchip.bkp.config.operationMode)) {
-    case BTCHIP_MODE_WALLET:
-    case BTCHIP_MODE_RELAXED_WALLET:
-    case BTCHIP_MODE_SERVER:
+    case MODE_WALLET:
+    case MODE_RELAXED_WALLET:
+    case MODE_SERVER:
         break;
     default:
-        return BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
+        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
     }
 
     if ((G_io_apdu_buffer[ISO_OFFSET_P1] != 0) &&
         (G_io_apdu_buffer[ISO_OFFSET_P2] != 0)) {
-        return BTCHIP_SW_INCORRECT_P1_P2;
+        return SW_INCORRECT_P1_P2;
     }
 
     if (G_io_apdu_buffer[ISO_OFFSET_LC] < (1 + 1 + 4 + 1)) {
-        return BTCHIP_SW_INCORRECT_LENGTH;
+        return SW_INCORRECT_LENGTH;
     }
 
     // Check state
     BEGIN_TRY {
         TRY {
-            btchip_set_check_internal_structure_integrity(0);
-            if (btchip_context_D.transactionContext.transactionState !=
-                BTCHIP_TRANSACTION_SIGN_READY) {
+            set_check_internal_structure_integrity(0);
+            if (context_D.transactionContext.transactionState !=
+                TRANSACTION_SIGN_READY) {
                 L_DEBUG_APP(("Invalid transaction state %d\n",
-                     btchip_context_D.transactionContext.transactionState));
-                sw = BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
+                     context_D.transactionContext.transactionState));
+                sw = SW_CONDITIONS_OF_USE_NOT_SATISFIED;
                 goto discardTransaction;
             }
 
             // Read parameters
             if (G_io_apdu_buffer[ISO_OFFSET_CDATA] > MAX_BIP32_PATH) {
-                sw = BTCHIP_SW_INCORRECT_DATA;
+                sw = SW_INCORRECT_DATA;
             discardTransaction:
                 CLOSE_TRY;
                 goto catch_discardTransaction;
@@ -79,27 +79,27 @@ unsigned short btchip_apdu_hash_sign() {
                        MAX_BIP32_PATH_LENGTH);
             parameters += (4 * G_io_apdu_buffer[ISO_OFFSET_CDATA]) + 1;
 
-            lockTime = btchip_read_u32(parameters, 1, 0);
+            lockTime = read_u32(parameters, 1, 0);
             parameters += 4;
-            expiry = btchip_read_u32(parameters, 1, 0);
+            expiry = read_u32(parameters, 1, 0);
             parameters += 4;
             sighashType = *(parameters++);
             PRINTF("SighashType: %d\n", sighashType);
 
             if (((N_btchip.bkp.config.options &
-                  BTCHIP_OPTION_FREE_SIGHASHTYPE) == 0)) {
+                  OPTION_FREE_SIGHASHTYPE) == 0)) {
                 // if bitcoin cash OR forkid is set, then use the fork id
                 if (G_coin_config->kind == COIN_KIND_BITCOIN_CASH ||
                     G_coin_config->forkid) {
 #define SIGHASH_FORKID 0x40
                     if (sighashType != (SIGHASH_ALL | SIGHASH_FORKID)) {
-                        sw = BTCHIP_SW_INCORRECT_DATA;
+                        sw = SW_INCORRECT_DATA;
                         goto discardTransaction;
                     }
                     sighashType |= (G_coin_config->forkid << 8);
                 } else {
                     if (sighashType != SIGHASH_ALL) {
-                        sw = BTCHIP_SW_INCORRECT_DATA;
+                        sw = SW_INCORRECT_DATA;
                         goto discardTransaction;
                     }
                 }
@@ -109,39 +109,39 @@ unsigned short btchip_apdu_hash_sign() {
 
             // Fetch the private key
 
-            btchip_private_derive_keypair(keyPath, 1, NULL);
+            private_derive_keypair(keyPath, 1, NULL);
 
             // TODO optional : check the public key against the associated non
             // blank input to sign
 
             // Finalize the hash
 
-            btchip_write_u32_le(dataBuffer, lockTime);
-            btchip_write_u32_le(dataBuffer + 4, expiry);
+            write_u32_le(dataBuffer, lockTime);
+            write_u32_le(dataBuffer + 4, expiry);
             PRINTF("Finalize hash with %.*H\n", sizeof(dataBuffer), dataBuffer); 
 
 
-            blake256_Update(&btchip_context_D.transactionHashPrefix, dataBuffer,  sizeof(dataBuffer));
-            blake256_Final(&btchip_context_D.transactionHashPrefix, hash1);
+            blake256_Update(&context_D.transactionHashPrefix, dataBuffer,  sizeof(dataBuffer));
+            blake256_Final(&context_D.transactionHashPrefix, hash1);
             PRINTF("Hash1 %.*H\n", sizeof(hash1), hash1);
 
-            blake256_Final(&btchip_context_D.transactionHashWitness, hash2);
+            blake256_Final(&context_D.transactionHashWitness, hash2);
 
-            blake256_Init(&btchip_context_D.transactionHashPrefix);
+            blake256_Init(&context_D.transactionHashPrefix);
 
-            btchip_write_u32_le(dataBuffer, sighashType);
+            write_u32_le(dataBuffer, sighashType);
             // include sighash type
             PRINTF("Sighash type: %.*H\n", 4, dataBuffer);
-            blake256_Update(&btchip_context_D.transactionHashPrefix, dataBuffer,  4);
+            blake256_Update(&context_D.transactionHashPrefix, dataBuffer,  4);
             // include prefix_hash
             PRINTF("Prefix hash: %.*H\n", sizeof(hash1), hash1);
-            blake256_Update(&btchip_context_D.transactionHashPrefix, hash1,  sizeof(hash1));
+            blake256_Update(&context_D.transactionHashPrefix, hash1,  sizeof(hash1));
             // include witness_hash
             PRINTF("Witness hash: %.*H\n", sizeof(hash2), hash2);
-            blake256_Update(&btchip_context_D.transactionHashPrefix, hash2,  sizeof(hash2));
+            blake256_Update(&context_D.transactionHashPrefix, hash2,  sizeof(hash2));
 
             // final signature hash
-            blake256_Final(&btchip_context_D.transactionHashPrefix, hash2);
+            blake256_Final(&context_D.transactionHashPrefix, hash2);
             PRINTF("Hash to sign: %.*H\n", sizeof(hash2), hash2);
 
             /*DELETED// Rehash
@@ -150,28 +150,28 @@ unsigned short btchip_apdu_hash_sign() {
             PRINTF("Hash2\n", hash2, sizeof(hash2));*/
 
             // Sign
-            PRINTF("Pub key: %.*H\n", sizeof(btchip_public_key_D.W), btchip_public_key_D.W);
-            btchip_signverify_finalhash(
-                &btchip_private_key_D, 1, hash2, sizeof(hash2),
+            PRINTF("Pub key: %.*H\n", sizeof(public_key_D.W), public_key_D.W);
+            signverify_finalhash(
+                &private_key_D, 1, hash2, sizeof(hash2),
                 G_io_apdu_buffer, sizeof(G_io_apdu_buffer),
                 ((N_btchip.bkp.config.options &
-                  BTCHIP_OPTION_DETERMINISTIC_SIGNATURE) != 0));
+                  OPTION_DETERMINISTIC_SIGNATURE) != 0));
 
-            btchip_context_D.outLength = G_io_apdu_buffer[1] + 2;
-            G_io_apdu_buffer[btchip_context_D.outLength++] = sighashType;
+            context_D.outLength = G_io_apdu_buffer[1] + 2;
+            G_io_apdu_buffer[context_D.outLength++] = sighashType;
 
-            sw = BTCHIP_SW_OK;
+            sw = SW_OK;
 
             // Then discard the transaction and reply
         }
         CATCH_ALL {
             sw = SW_TECHNICAL_DETAILS(0xF);
         catch_discardTransaction:
-            btchip_context_D.transactionContext.transactionState =
-                BTCHIP_TRANSACTION_NONE;
+            context_D.transactionContext.transactionState =
+                TRANSACTION_NONE;
         }
         FINALLY {
-            btchip_set_check_internal_structure_integrity(1);
+            set_check_internal_structure_integrity(1);
             return sw;
         }
     }

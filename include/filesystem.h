@@ -15,29 +15,29 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BTCHIP_FS_H
+#ifndef FS_H
 
-#define BTCHIP_FS_H
+#define FS_H
 
 #include "os.h"
-#include "btchip_config.h"
-#include "btchip_context.h"
-#include "btchip_filesystem_tx.h"
+#include "config.h"
+#include "context.h"
+#include "filesystem_tx.h"
 
-enum btchip_supported_modes_e {
-    BTCHIP_SUPPORTED_MODE_WALLET = 0x01,
-    BTCHIP_SUPPORTED_MODE_RELAXED_WALLET = 0x02,
-    BTCHIP_SUPPORTED_MODE_SERVER = 0x04,
-    BTCHIP_SUPPORTED_MODE_DEVELOPER = 0x08
+enum supported_modes_e {
+    SUPPORTED_MODE_WALLET = 0x01,
+    SUPPORTED_MODE_RELAXED_WALLET = 0x02,
+    SUPPORTED_MODE_SERVER = 0x04,
+    SUPPORTED_MODE_DEVELOPER = 0x08
 };
 
-enum btchip_family_e {
-    BTCHIP_FAMILY_BITCOIN = 0x01,
-    BTCHIP_FAMILY_PEERCOIN = 0x02,
-    BTCHIP_FAMILY_QTUM = 0x03,
+enum family_e {
+    FAMILY_BITCOIN = 0x01,
+    FAMILY_PEERCOIN = 0x02,
+    FAMILY_QTUM = 0x03,
 };
 
-struct btchip_config_s {
+struct config_s {
     secu8 supportedModes;
     secu8 operationMode;
     unsigned char options;
@@ -53,28 +53,28 @@ struct btchip_config_s {
     // /** Current short Coin ID length */
     // unsigned char shortCoinIdLength;
 };
-typedef struct btchip_config_s btchip_config_t;
+typedef struct config_s config_t;
 
-typedef struct btchip_backup_area_s {
-    btchip_config_t config;
+typedef struct backup_area_s {
+    config_t config;
     uint8_t trustedinput_key[32];
-} btchip_backup_area_t;
+} backup_area_t;
 
-typedef struct btchip_storage_s {
+typedef struct storage_s {
     unsigned char storageInitialized;
 
     unsigned char config_valid;
-    btchip_backup_area_t bkp;
+    backup_area_t bkp;
 
     unsigned char fidoTransport;
 
-} btchip_storage_t;
+} storage_t;
 
 // the global nvram memory variable
-extern WIDE btchip_storage_t N_btchip_real;
+extern WIDE storage_t N_real;
 
-#define N_btchip (*(WIDE btchip_storage_t *)PIC(&N_btchip_real))
+#define N_btchip (*(WIDE storage_t *)PIC(&N_real))
 
-void btchip_set_operation_mode(unsigned char operationMode);
+void set_operation_mode(unsigned char operationMode);
 
 #endif

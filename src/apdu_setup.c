@@ -15,24 +15,24 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
-#include "btchip_apdu_constants.h"
+#include "internal.h"
+#include "apdu_constants.h"
 
-unsigned short btchip_apdu_setup() {
-    return BTCHIP_SW_INS_NOT_SUPPORTED;
+unsigned short apdu_setup() {
+    return SW_INS_NOT_SUPPORTED;
 }
 
 // Setup with WALLET mode only, deterministic signatures only
-void btchip_autosetup() {
-    btchip_config_t config;
+void autosetup() {
+    config_t config;
     unsigned char i;
     unsigned char tmp[32];
-    os_memset(&config, 0, sizeof(btchip_config_t));
-    config.options |= BTCHIP_OPTION_DETERMINISTIC_SIGNATURE;
-    config.options |= BTCHIP_OPTION_SKIP_2FA_P2SH; // TODO : remove when
+    os_memset(&config, 0, sizeof(config_t));
+    config.options |= OPTION_DETERMINISTIC_SIGNATURE;
+    config.options |= OPTION_SKIP_2FA_P2SH; // TODO : remove when
                                                    // supporting multi output
-    SB_SET(config.supportedModes, BTCHIP_MODE_WALLET);
-    SB_SET(config.operationMode, BTCHIP_MODE_WALLET);
+    SB_SET(config.supportedModes, MODE_WALLET);
+    SB_SET(config.operationMode, MODE_WALLET);
     // config.payToAddressVersion = G_coin_config->p2pkh_version;
     // config.payToScriptHashVersion = G_coin_config->p2sh_version;
     // config.coinFamily = G_coin_config->family;

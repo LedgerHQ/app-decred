@@ -15,24 +15,24 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
-#include "btchip_apdu_constants.h"
+#include "internal.h"
+#include "apdu_constants.h"
 
 #define MAX_LENGTH 248
 
-unsigned short btchip_apdu_get_random() {
+unsigned short apdu_get_random() {
     unsigned char length = G_io_apdu_buffer[ISO_OFFSET_LC];
     if (length == 0) {
         length = MAX_LENGTH;
     }
 
     if (length > MAX_LENGTH) {
-        return BTCHIP_SW_INCORRECT_LENGTH;
+        return SW_INCORRECT_LENGTH;
     }
 
     cx_rng(G_io_apdu_buffer, length);
 
-    btchip_context_D.outLength = length;
+    context_D.outLength = length;
 
-    return BTCHIP_SW_OK;
+    return SW_OK;
 }

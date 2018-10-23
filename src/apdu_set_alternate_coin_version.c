@@ -15,81 +15,81 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
-#include "btchip_apdu_constants.h"
+#include "internal.h"
+#include "apdu_constants.h"
 
 #define P1_VERSION_ONLY 0x00
 #define P1_VERSION_COINID 0x01
 
-unsigned short btchip_apdu_set_alternate_coin_version() {
+unsigned short apdu_set_alternate_coin_version() {
     uint8_t offset = ISO_OFFSET_CDATA;
     unsigned char p1 = G_io_apdu_buffer[ISO_OFFSET_P1];
     if ((p1 != P1_VERSION_ONLY) && (p1 != P1_VERSION_COINID)) {
-        return BTCHIP_SW_INCORRECT_P1_P2;
+        return SW_INCORRECT_P1_P2;
     }
 
     if (p1 == P1_VERSION_ONLY) {
         if (G_io_apdu_buffer[ISO_OFFSET_LC] != 0x05) {
-            return BTCHIP_SW_INCORRECT_LENGTH;
+            return SW_INCORRECT_LENGTH;
         }
     } else {
         if (G_io_apdu_buffer[ISO_OFFSET_LC] >
             7 + MAX_COIN_ID + MAX_SHORT_COIN_ID) {
-            return BTCHIP_SW_INCORRECT_LENGTH;
+            return SW_INCORRECT_LENGTH;
         }
     }
 
     SB_CHECK(N_btchip.bkp.config.operationMode);
     if ((SB_GET(N_btchip.bkp.config.operationMode) ==
-         BTCHIP_MODE_SETUP_NEEDED) ||
-        (SB_GET(N_btchip.bkp.config.operationMode) == BTCHIP_MODE_ISSUER)) {
-        return BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
+         MODE_SETUP_NEEDED) ||
+        (SB_GET(N_btchip.bkp.config.operationMode) == MODE_ISSUER)) {
+        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
     }
 
     if (!os_global_pin_is_validated()) {
-        return BTCHIP_SW_SECURITY_STATUS_NOT_SATISFIED;
+        return SW_SECURITY_STATUS_NOT_SATISFIED;
     }
 
     switch (G_io_apdu_buffer[offset + 4]) {
-    case BTCHIP_FAMILY_BITCOIN:
+    case FAMILY_BITCOIN:
         break;
-    case BTCHIP_FAMILY_PEERCOIN:
+    case FAMILY_PEERCOIN:
         if (!(G_coin_config->flags & FLAG_PEERCOIN_SUPPORT)) {
             goto incorrect_family;
         }
         break;
-    case BTCHIP_FAMILY_QTUM:
+    case FAMILY_QTUM:
         if (!(G_coin_config->flags & FLAG_QTUM_SUPPORT)) {
             goto incorrect_family;
         }
         break;
     default:
     incorrect_family:
-        return BTCHIP_SW_INCORRECT_DATA;
+        return SW_INCORRECT_DATA;
     }
 
-    btchip_context_D.payToAddressVersion =
+    context_D.payToAddressVersion =
         (G_io_apdu_buffer[offset] << 8) | (G_io_apdu_buffer[offset + 1]);
     offset += 2;
-    btchip_context_D.payToScriptHashVersion =
+    context_D.payToScriptHashVersion =
         (G_io_apdu_buffer[offset] << 8) | (G_io_apdu_buffer[offset + 1]);
     offset += 2;
-    btchip_context_D.coinFamily = G_io_apdu_buffer[offset++];
+    context_D.coinFamily = G_io_apdu_buffer[offset++];
     if (p1 == P1_VERSION_COINID) {
         uint8_t coinIdLength = G_io_apdu_buffer[offset];
         uint8_t shortCoinIdLength = G_io_apdu_buffer[offset + 1 + coinIdLength];
         if ((coinIdLength > MAX_COIN_ID) ||
             (shortCoinIdLength > MAX_SHORT_COIN_ID)) {
-            return BTCHIP_SW_INCORRECT_DATA;
+            return SW_INCORRECT_DATA;
         }
-        os_memmove(btchip_context_D.coinId, G_io_apdu_buffer + offset + 1,
+        os_memmove(context_D.coinId, G_io_apdu_buffer + offset + 1,
                    coinIdLength);
-        btchip_context_D.coinIdLength = coinIdLength;
+        context_D.coinIdLength = coinIdLength;
         offset += 1 + coinIdLength;
-        os_memmove(btchip_context_D.shortCoinId, G_io_apdu_buffer + offset + 1,
+        os_memmove(context_D.shortCoinId, G_io_apdu_buffer + offset + 1,
                    shortCoinIdLength);
-        btchip_context_D.shortCoinIdLength = shortCoinIdLength;
+        context_D.shortCoinIdLength = shortCoinIdLength;
     }
 
-    return BTCHIP_SW_OK;
+    return SW_OK;
 }

@@ -15,18 +15,18 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BTCHIP_INTERNAL_H
-#define BTCHIP_INTERNAL_H
+#ifndef INTERNAL_H
+#define INTERNAL_H
 
 #include "btchip.h"
-#include "btchip_public_ram_variables.h"
-#include "btchip_public_ram_key_variables.h"
-#include "btchip_rom_variables.h"
-#include "btchip_filesystem.h"
-#include "btchip_base58.h"
-#include "btchip_bcd.h"
-#include "btchip_ecc.h"
-#include "btchip_helpers.h"
-#include "btchip_transaction.h"
+#include "public_ram_variables.h"
+#include "public_ram_key_variables.h"
+#include "rom_variables.h"
+#include "filesystem.h"
+#include "base58.h"
+#include "bcd.h"
+#include "ecc.h"
+#include "helpers.h"
+#include "transaction.h"
 
 #endif

@@ -15,7 +15,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
+#include "internal.h"
 
 #define SIGNMAGIC_LENGTH 17
 

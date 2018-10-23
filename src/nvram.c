@@ -15,8 +15,8 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "btchip_internal.h"
+#include "internal.h"
 
-#include "btchip_public_ram_variables.h"
+#include "public_ram_variables.h"
 
-WIDE btchip_storage_t N_btchip_real;
+WIDE storage_t N_real;
