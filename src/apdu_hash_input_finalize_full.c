@@ -351,8 +351,7 @@ unsigned short apdu_hash_input_finalize_full_internal(
                 context_D.currentOutputOffset += apduLength;
 
                 // Check if the legacy UI can be applied
-                if (!(G_coin_config->flags & FLAG_QTUM_SUPPORT) &&
-                    (G_io_apdu_buffer[ISO_OFFSET_P1] == FINALIZE_P1_LAST) &&
+                if ((G_io_apdu_buffer[ISO_OFFSET_P1] == FINALIZE_P1_LAST) &&
                     !context_D.tmpCtx.output.multipleOutput &&
                     prepare_full_output(1))
                 {

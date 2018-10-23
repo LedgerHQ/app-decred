@@ -2263,8 +2263,7 @@ uint8_t prepare_full_output(uint8_t checkOnly)
         if (!output_script_is_regular(context_D.currentOutput +
                                              offset) &&
             !isP2sh && !(nullAmount && isOpReturn) &&
-            (!(G_coin_config->flags & FLAG_QTUM_SUPPORT) ||
-             (!isOpCreate && !isOpCall)))
+             (!isOpCreate && !isOpCall))
         {
             if (!checkOnly)
             {
@@ -2282,11 +2281,7 @@ uint8_t prepare_full_output(uint8_t checkOnly)
             }
             goto error;
         }
-        if (((G_coin_config->flags & FLAG_QTUM_SUPPORT) &&
-             context_D.tmpCtx.output.changeInitialized && !isOpReturn &&
-             !isOpCreate && !isOpCall) ||
-            (!(G_coin_config->flags & FLAG_QTUM_SUPPORT) &&
-             context_D.tmpCtx.output.changeInitialized && !isOpReturn))
+        if (context_D.tmpCtx.output.changeInitialized && !isOpReturn)
         {
             unsigned char addressOffset =
                 (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH
@@ -2343,16 +2338,7 @@ uint8_t prepare_full_output(uint8_t checkOnly)
         context_D.tmp = (unsigned char *)tmp;
         for (i = 0; i < numberOutputs; i++)
         {
-            if (((G_coin_config->flags & FLAG_QTUM_SUPPORT) &&
-                 !output_script_is_op_return(
-                     context_D.currentOutput + offset + 8 + 2) &&
-                 !output_script_is_op_create(
-                     context_D.currentOutput + offset + 8 + 2) &&
-                 !output_script_is_op_call(
-                     context_D.currentOutput + offset + 8 + 2)) ||
-                (!(G_coin_config->flags & FLAG_QTUM_SUPPORT) &&
-                 !output_script_is_op_return(
-                     context_D.currentOutput + offset + 8 + 2)))
+            if (!output_script_is_op_return(context_D.currentOutput + offset + 8 + 2))
             {
                 unsigned char versionSize;
                 int addressOffset;

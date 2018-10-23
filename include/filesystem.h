@@ -32,9 +32,7 @@ enum supported_modes_e {
 };
 
 enum family_e {
-    FAMILY_BITCOIN = 0x01,
-    FAMILY_PEERCOIN = 0x02,
-    FAMILY_QTUM = 0x03,
+    FAMILY_DECRED = 0x01
 };
 
 struct config_s {

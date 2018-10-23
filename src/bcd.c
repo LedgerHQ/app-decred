@@ -23,13 +23,10 @@ unsigned char
 convert_hex_amount_to_displayable(unsigned char WIDE *amount) {
     unsigned char LOOP1;
     unsigned char LOOP2;
-    if (!(G_coin_config->flags & FLAG_PEERCOIN_UNITS)) {
-        LOOP1 = 13;
-        LOOP2 = 8;
-    } else {
-        LOOP1 = 15;
-        LOOP2 = 6;
-    }
+
+    LOOP1 = 13;
+    LOOP2 = 8;
+    
     unsigned short scratch[SCRATCH_SIZE];
     unsigned char offset = 0;
     unsigned char nonZero = 0;

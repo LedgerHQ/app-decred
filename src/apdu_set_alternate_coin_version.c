@@ -51,17 +51,7 @@ unsigned short apdu_set_alternate_coin_version() {
     }
 
     switch (G_io_apdu_buffer[offset + 4]) {
-    case FAMILY_BITCOIN:
-        break;
-    case FAMILY_PEERCOIN:
-        if (!(G_coin_config->flags & FLAG_PEERCOIN_SUPPORT)) {
-            goto incorrect_family;
-        }
-        break;
-    case FAMILY_QTUM:
-        if (!(G_coin_config->flags & FLAG_QTUM_SUPPORT)) {
-            goto incorrect_family;
-        }
+    case FAMILY_DECRED:
         break;
     default:
     incorrect_family:
