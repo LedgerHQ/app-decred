@@ -143,10 +143,6 @@ unsigned short apdu_hash_sign() {
             blake256_Final(&context_D.transactionHashPrefix, hash2);
             PRINTF("Hash to sign: %.*H\n", sizeof(hash2), hash2);
 
-            /*DELETED// Rehash
-            cx_sha256_init(&localHash);
-            cx_hash(&localHash.header, CX_LAST, hash1, sizeof(hash1), hash2);
-            PRINTF("Hash2\n", hash2, sizeof(hash2));*/
 
             // Sign
             PRINTF("Pub key: %.*H\n", sizeof(public_key_D.W), public_key_D.W);

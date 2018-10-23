@@ -39,8 +39,8 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 #define MAX_CHAR_PER_LINE 25
 
 #define COLOR_BG_1 0xF9F9F9
-#define COLOR_APP COLOR_HDR      // bitcoin 0xFCB653
-#define COLOR_APP_LIGHT COLOR_DB // bitcoin 0xFEDBA9
+#define COLOR_APP COIN_COLOR_HDR      // bitcoin 0xFCB653
+#define COLOR_APP_LIGHT COIN_COLOR_DB // bitcoin 0xFEDBA9
 
 #if defined(TARGET_BLUE)
 #include "qrcodegen.h"
@@ -66,6 +66,23 @@ union {
     unsigned int dummy; // ensure the whole vars is aligned for the CM0 to
                         // operate correctly
 } vars;
+
+unsigned int map_color(unsigned int color) {
+    switch (color) {
+    case COLOR_APP:
+        return G_coin_config->color_header;
+     case COLOR_APP_LIGHT:
+        return G_coin_config->color_dashboard;
+    }
+    return color;
+}
+void copy_element_and_map_coin_colors(const bagl_element_t *element) {
+    os_memmove(&tmp_element, element, sizeof(bagl_element_t));
+    tmp_element.component.fgcolor = map_color(tmp_element.component.fgcolor);
+    tmp_element.component.bgcolor = map_color(tmp_element.component.bgcolor);
+    tmp_element.overfgcolor = map_color(tmp_element.overfgcolor);
+    tmp_element.overbgcolor = map_color(tmp_element.overbgcolor);
+}
 
 #else
 
@@ -119,7 +136,14 @@ const bagl_element_t *ui_menu_item_out_over(const bagl_element_t *e)
 
 #if defined(TARGET_BLUE)
 
-unsigned int io_seproxyhal_touch_settings(const bagl_element_t *e);
+const bagl_element_t *ui_idle_blue_prepro(const bagl_element_t *element) {
+    copy_element_and_map_coin_colors(element);
+    if (element->component.userid == 0x01) {
+        tmp_element.text = G_coin_config->header_text;
+    }
+    return &tmp_element;
+}
+
 const bagl_element_t ui_idle_blue[] = {
     // type                               userid    x    y   w    h  str rad
     // fill      fg        bg      fid iid  txt   touchparams...       ]
@@ -145,9 +169,9 @@ const bagl_element_t ui_idle_blue[] = {
      NULL},
 
     /// TOP STATUS BAR
-    {{BAGL_LABELINE, 0x00, 0, 45, 320, 30, 0, 0, BAGL_FILL, 0xFFFFFF, COLOR_APP,
+    {{BAGL_LABELINE, 0x01, 0, 45, 320, 30, 0, 0, BAGL_FILL, 0xFFFFFF, COLOR_APP,
       BAGL_FONT_OPEN_SANS_SEMIBOLD_10_13PX | BAGL_FONT_ALIGNMENT_CENTER, 0},
-     COINID_UPCASE,
+     COIN_COINID_HEADER,
      0,
      0,
      0,
@@ -168,19 +192,19 @@ const bagl_element_t ui_idle_blue[] = {
      NULL},
 
     // BADGE_<COINID>.GIF
-    {{BAGL_ICON, 0x00, 135, 178, 50, 50, 0, 0, BAGL_FILL, 0, COLOR_BG_1, 0, 0},
+    /*{{BAGL_ICON, 0x00, 135, 178, 50, 50, 0, 0, BAGL_FILL, 0, COLOR_BG_1, 0, 0},
      &NAME3(C_blue_badge_, COINID, ),
      0,
      0,
      0,
      NULL,
      NULL,
-     NULL},
+     NULL},*/
 
     {{BAGL_LABELINE, 0x00, 0, 270, 320, 30, 0, 0, BAGL_FILL, 0x000000,
       COLOR_BG_1,
       BAGL_FONT_OPEN_SANS_LIGHT_16_22PX | BAGL_FONT_ALIGNMENT_CENTER, 0},
-     "Open " COINID_NAME " wallet",
+     "Open your wallet",
      0,
      0,
      0,
@@ -249,12 +273,6 @@ const ux_menu_entry_t menu_main[] = {
 // reuse vars.tmp.addressSummary for each line content
 typedef void (*callback_t)(void);
 callback_t ui_details_back_callback;
-
-// don't perform any draw/color change upon finger event over settings
-const bagl_element_t *ui_settings_out_over(const bagl_element_t *e)
-{
-    return NULL;
-}
 
 const char *ui_details_title;
 const char *ui_details_content;
@@ -432,9 +450,9 @@ const bagl_element_t ui_details_blue[] = {
 
 const bagl_element_t *ui_details_blue_prepro(const bagl_element_t *element)
 {
+    copy_element_and_map_coin_colors(element);
     if (element->component.userid == 1)
     {
-        os_memmove(&tmp_element, element, sizeof(bagl_element_t));
         tmp_element.text = ui_details_title;
         return &tmp_element;
     }
@@ -456,7 +474,7 @@ const bagl_element_t *ui_details_blue_prepro(const bagl_element_t *element)
         // nothing to draw for this line
         return 0;
     }
-    return 1;
+    return &tmp_element;
 }
 
 unsigned int ui_details_blue_button(unsigned int button_mask,
@@ -840,9 +858,10 @@ const bagl_element_t ui_transaction_blue[] = {
 const bagl_element_t *
 ui_transaction_blue_prepro(const bagl_element_t *element)
 {
+    copy_element_and_map_coin_colors(element);
     if (element->component.userid == 0)
     {
-        return 1;
+        return &tmp_element;
     }
     // none elements are skipped
     if ((element->component.type & (~BAGL_FLAG_TOUCHABLE)) == BAGL_NONE)
@@ -855,12 +874,11 @@ ui_transaction_blue_prepro(const bagl_element_t *element)
         {
         // icon
         case 0x40:
-            return 1;
+            return &tmp_element;
             break;
 
         // TITLE
         case 0x60:
-            os_memmove(&tmp_element, element, sizeof(bagl_element_t));
             tmp_element.text =
                 ui_transaction_blue_details_name[G_ui_transaction_blue_state]
                                                 [3];
@@ -869,7 +887,6 @@ ui_transaction_blue_prepro(const bagl_element_t *element)
 
         // SUBLINE
         case 0x50:
-            os_memmove(&tmp_element, element, sizeof(bagl_element_t));
             tmp_element.text =
                 ui_transaction_blue_details_name[G_ui_transaction_blue_state]
                                                 [4];
@@ -884,7 +901,6 @@ ui_transaction_blue_prepro(const bagl_element_t *element)
             {
                 return NULL;
             }
-            os_memmove(&tmp_element, element, sizeof(bagl_element_t));
             tmp_element.text =
                 ui_transaction_blue_details_name[G_ui_transaction_blue_state]
                                                 [element->component.userid &
@@ -901,7 +917,6 @@ ui_transaction_blue_prepro(const bagl_element_t *element)
                 return NULL;
             }
             // always display the value
-            os_memmove(&tmp_element, element, sizeof(bagl_element_t));
             tmp_element.text =
                 ui_transaction_blue_values[(element->component.userid & 0xF)];
 
@@ -937,11 +952,11 @@ ui_transaction_blue_prepro(const bagl_element_t *element)
             return ui_transaction_blue_details_name[G_ui_transaction_blue_state]
                                                    [element->component.userid &
                                                     0xF] != NULL
-                       ? element
+                       ? &tmp_element
                        : NULL;
         }
     }
-    return element;
+    return &tmp_element;
 }
 unsigned int ui_transaction_blue_button(unsigned int button_mask,
                                         unsigned int button_mask_counter)
@@ -1058,6 +1073,7 @@ unsigned int ui_display_address_blue_prepro(const bagl_element_t *element)
 {
     bagl_icon_details_t *icon_details = &vars.tmpqr.icon_details;
     bagl_element_t *icon_component = element;
+    copy_element_and_map_coin_colors(element);
     if (element->component.userid > 0)
     {
         unsigned int length = strlen(G_io_apdu_buffer + 200);
@@ -1130,14 +1146,14 @@ unsigned int ui_display_address_blue_prepro(const bagl_element_t *element)
                                    (element->component.userid & 0xF) *
                                        MAX_CHAR_PER_LINE,
                                MAX_CHAR_PER_LINE));
-                return 1;
+                return &tmp_element;
             }
             break;
         }
         // nothing to draw for this line
         return 0;
     }
-    return 1;
+    return &tmp_element;
 }
 unsigned int ui_display_address_blue_button(unsigned int button_mask,
                                             unsigned int button_mask_counter)
@@ -1729,18 +1745,13 @@ void ui_idle(void)
     ux_step_count = 0;
 
 #if defined(TARGET_BLUE)
-    UX_DISPLAY(ui_idle_blue, NULL);
+    UX_DISPLAY(ui_idle_blue, ui_idle_blue_prepro);
 #elif defined(TARGET_NANOS)
     UX_MENU_DISPLAY(0, menu_main, NULL);
 #endif // #if TARGET_ID
 }
 
 #ifdef TARGET_BLUE
-unsigned int io_seproxyhal_touch_settings(const bagl_element_t *e)
-{
-    UX_DISPLAY(ui_settings_blue, ui_settings_blue_prepro);
-    return 0; // do not redraw button, screen has switched
-}
 
 unsigned int io_seproxyhal_touch_exit(const bagl_element_t *e)
 {
@@ -2633,8 +2644,20 @@ __attribute__((section(".boot"))) int main(int arg0)
     unsigned char name_short[sizeof(COIN_COINID_SHORT)];
     strcpy(name_short, COIN_COINID_SHORT);
 
+    #ifdef TARGET_BLUE
+        unsigned char header[sizeof(COIN_COINID_HEADER)];
+        strcpy(header, COIN_COINID_HEADER);
+    #endif // TARGET_BLUE
+
     altcoin_config_t coin_config;
     os_memmove(&coin_config, &C_coin_config, sizeof(coin_config));
+
+    #ifdef TARGET_BLUE
+        coin_config.header_text = header;
+        coin_config.color_header = COIN_COLOR_HDR;
+        coin_config.color_dashboard = COIN_COLOR_DB;
+    #endif // TARGET_BLUE
+
     coin_config.coinid = coinid;
     coin_config.name = name;
     coin_config.name_short = name_short;
@@ -2702,7 +2725,7 @@ __attribute__((section(".boot"))) int main(int arg0)
 #if defined(TARGET_BLUE)
                 // setup the status bar colors (remembered after wards, even
                 // more if another app does not resetup after app switch)
-                UX_SET_STATUS_BAR_COLOR(0xFFFFFF, COLOR_APP);
+                UX_SET_STATUS_BAR_COLOR(0xFFFFFF, G_coin_config->color_header);
 #endif // TARGET_ID
 
                 ui_idle();
