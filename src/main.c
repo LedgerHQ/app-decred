@@ -2633,7 +2633,7 @@ altcoin_config_t const C_coin_config = {
 
 __attribute__((section(".boot"))) int main(int arg0)
 {
-#ifdef USE_LIB_BITCOIN
+#ifdef USE_LIB_DECRED
     // in RAM allocation (on stack), to allow simple simple traversal into the
     // bitcoin app (separate NVRAM zone)
     unsigned int libcall_params[3];
@@ -2749,6 +2749,6 @@ __attribute__((section(".boot"))) int main(int arg0)
         END_TRY;
     }
     app_exit();
-#endif // USE_LIB_BITCOIN
+#endif // USE_LIB_DECRED
     return 0;
 }
