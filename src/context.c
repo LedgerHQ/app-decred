@@ -17,7 +17,23 @@
 
 #include "internal.h"
 
-void autosetup(void);
+void autosetup(void){
+    config_t config;
+    unsigned char i;
+    unsigned char tmp[32];
+    os_memset(&config, 0, sizeof(config_t));
+    config.options |= OPTION_DETERMINISTIC_SIGNATURE;
+    config.options |= OPTION_SKIP_2FA_P2SH; // TODO : remove when
+                                                   // supporting multi output
+    SB_SET(config.supportedModes, MODE_WALLET);
+    SB_SET(config.operationMode, MODE_WALLET);
+
+    nvm_write((void *)&N_btchip.bkp.config, &config, sizeof(config));
+    cx_rng(tmp, sizeof(tmp));
+    nvm_write((void *)&N_btchip.bkp.trustedinput_key, tmp, sizeof(tmp));
+    i = 1;
+    nvm_write((void *)&N_btchip.config_valid, &i, 1);
+}
 
 /**
  * Initialize the application context on boot
@@ -43,21 +59,8 @@ void context_init() {
         defaultMode = MODE_SETUP_NEEDED;
 
         set_operation_mode(defaultMode);
-    } else {
-        /*
-        context_D.payToAddressVersion =
-        N_btchip.bkp.config.payToAddressVersion;
-        context_D.payToScriptHashVersion =
-        N_btchip.bkp.config.payToScriptHashVersion;
-            context_D.coinFamily = N_btchip.bkp.config.coinFamily;
-        context_D.coinIdLength = N_btchip.bkp.config.coinIdLength;
-        os_memmove(context_D.coinId, N_btchip.bkp.config.coinId,
-        N_btchip.bkp.config.coinIdLength);
-        context_D.shortCoinIdLength =
-        N_btchip.bkp.config.shortCoinIdLength;
-        os_memmove(context_D.shortCoinId,
-        N_btchip.bkp.config.shortCoinId, N_btchip.bkp.config.shortCoinIdLength);
-        */
+    } 
+    else {
         context_D.payToAddressVersion = G_coin_config->p2pkh_version;
         context_D.payToScriptHashVersion = G_coin_config->p2sh_version;
         context_D.coinFamily = G_coin_config->family;

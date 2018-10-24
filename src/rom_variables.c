@@ -47,69 +47,45 @@ unsigned char const TWOPOWER[] = {0x01, 0x02, 0x04, 0x08,
                                   0x10, 0x20, 0x40, 0x80};
 
 unsigned char const DISPATCHER_CLA[] = {
-    CLA, // apdu_setup,
-    CLA, // apdu_verify_pin,
-    CLA, // apdu_get_operation_mode,
-    CLA, // apdu_set_operation_mode,
     CLA, // apdu_get_wallet_public_key,
     CLA, // apdu_get_trusted_input,
     CLA, // apdu_hash_input_start,
     CLA, // apdu_hash_sign,
     CLA, // apdu_hash_input_finalize_full,
     CLA, // apdu_sign_message,
-    CLA, // apdu_get_random,
     CLA, // apdu_get_firmware_version,
-    CLA, // apdu_set_alternate_coin_version
     CLA, // apdu_get_coin_version
 };
 
 unsigned char const DISPATCHER_INS[] = {
-    INS_SETUP,                    // apdu_setup,
-    INS_VERIFY_PIN,               // apdu_verify_pin,
-    INS_GET_OPERATION_MODE,       // apdu_get_operation_mode,
-    INS_SET_OPERATION_MODE,       // apdu_set_operation_mode,
     INS_GET_WALLET_PUBLIC_KEY,    // apdu_get_wallet_public_key,
     INS_GET_TRUSTED_INPUT,        // apdu_get_trusted_input,
     INS_HASH_INPUT_START,         // apdu_hash_input_start,
     INS_HASH_SIGN,                // apdu_hash_sign,
     INS_HASH_INPUT_FINALIZE_FULL, // apdu_hash_input_finalize_full,
     INS_SIGN_MESSAGE,             // apdu_sign_message,
-    INS_GET_RANDOM,               // apdu_get_random,
     INS_GET_FIRMWARE_VERSION,     // apdu_get_firmware_version,
-    INS_SET_ALTERNATE_COIN_VER, // apdu_set_alternate_coin_version
     INS_GET_COIN_VER,           // apdu_get_coin_version
 };
 
 unsigned char const DISPATCHER_DATA_IN[] = {
-    1, // apdu_setup,
-    1, // apdu_verify_pin,
-    0, // apdu_get_operation_mode,
-    1, // apdu_set_operation_mode,
     1, // apdu_get_wallet_public_key,
     1, // apdu_get_trusted_input,
     1, // apdu_hash_input_start,
     1, // apdu_hash_sign,
     1, // apdu_hash_input_finalize_full,
     1, // apdu_sign_message,
-    0, // apdu_get_random,
     0, // apdu_get_firmware_version,
-    1, // apdu_set_alternate_coin_version
     0, // apdu_get_coin_version
 };
 
 apduProcessingFunction const DISPATCHER_FUNCTIONS[] = {
-    apdu_setup,
-    apdu_verify_pin,
-    apdu_get_operation_mode,
-    apdu_set_operation_mode,
     apdu_get_wallet_public_key,
     apdu_get_trusted_input,
     apdu_hash_input_start,
     apdu_hash_sign,
     apdu_hash_input_finalize_full,
     apdu_sign_message,
-    apdu_get_random,
     apdu_get_firmware_version,
-    apdu_set_alternate_coin_version,
     apdu_get_coin_version,
 };
