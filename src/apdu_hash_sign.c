@@ -37,13 +37,6 @@ unsigned short apdu_hash_sign() {
     unsigned char keyPath[MAX_BIP32_PATH_LENGTH];
     cx_sha256_t localHash;
 
-    SB_CHECK(N_btchip.bkp.config.operationMode);
-    switch (SB_GET(N_btchip.bkp.config.operationMode)) {
-    case MODE_WALLET:
-        break;
-    default:
-        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
-    }
 
     if ((G_io_apdu_buffer[ISO_OFFSET_P1] != 0) &&
         (G_io_apdu_buffer[ISO_OFFSET_P2] != 0)) {

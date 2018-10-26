@@ -25,8 +25,6 @@ void autosetup(void){
     config.options |= OPTION_DETERMINISTIC_SIGNATURE;
     config.options |= OPTION_SKIP_2FA_P2SH; // TODO : remove when
                                                    // supporting multi output
-    SB_SET(config.supportedModes, MODE_WALLET);
-    SB_SET(config.operationMode, MODE_WALLET);
 
     nvm_write((void *)&N_btchip.bkp.config, &config, sizeof(config));
     cx_rng(tmp, sizeof(tmp));
@@ -59,7 +57,6 @@ void context_init() {
         L_DEBUG_APP(("No configuration found\n"));
         defaultMode = MODE_WALLET;
 
-        set_operation_mode(defaultMode);
     } 
     else {
         context_D.payToAddressVersion = G_coin_config->p2pkh_version;
@@ -73,7 +70,6 @@ void context_init() {
         os_memmove(context_D.shortCoinId, PIC(G_coin_config->name_short),
                    context_D.shortCoinIdLength);
 
-        SB_CHECK(N_btchip.bkp.config.operationMode);
     }
     if (!N_btchip.storageInitialized) {
         unsigned char initialized = 1, denied=0;

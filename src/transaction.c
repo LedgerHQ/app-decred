@@ -273,22 +273,13 @@ void transaction_parse(unsigned char parseMode)
 
                         if (!trustedInputFlag)
                         {
-                            // Only authorized in relaxed wallet and server
-                            // modes
-                            SB_CHECK(N_btchip.bkp.config.operationMode);
-                            switch (SB_GET(N_btchip.bkp.config.operationMode))
+
+                            if (!optionP2SHSkip2FA)
                             {
-                            case MODE_WALLET:
-                                if (!optionP2SHSkip2FA)
-                                {
-                                    PRINTF("Untrusted input not authorized\n");
-                                    goto fail;
-                                }
-                                break;
-                            default:
                                 PRINTF("Untrusted input not authorized\n");
                                 goto fail;
                             }
+
                             context_D.transactionBufferPointer++;
                             context_D.transactionDataRemaining--;
                             check_transaction_available(

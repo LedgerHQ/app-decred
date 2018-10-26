@@ -36,20 +36,7 @@ enum family_e {
 };
 
 struct config_s {
-    secu8 supportedModes;
-    secu8 operationMode;
     unsigned char options;
-    // unsigned short payToAddressVersion;
-    // unsigned short payToScriptHashVersion;
-    // unsigned char coinFamily;
-    // /** Current Coin ID */
-    // unsigned char coinId[MAX_COIN_ID];
-    // /** Current short Coin ID */
-    // unsigned char shortCoinId[MAX_SHORT_COIN_ID];
-    // /** Current Coin ID length */
-    // unsigned char coinIdLength;
-    // /** Current short Coin ID length */
-    // unsigned char shortCoinIdLength;
 };
 typedef struct config_s config_t;
 
@@ -74,7 +61,5 @@ typedef struct storage_s {
 extern WIDE storage_t N_real;
 
 #define N_btchip (*(WIDE storage_t *)PIC(&N_real))
-
-void set_operation_mode(unsigned char operationMode);
 
 #endif

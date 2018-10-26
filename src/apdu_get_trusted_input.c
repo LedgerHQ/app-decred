@@ -31,14 +31,6 @@ unsigned short apdu_get_trusted_input()
     cx_sha256_t hash;
     apduLength = G_io_apdu_buffer[ISO_OFFSET_LC];
 
-    SB_CHECK(N_btchip.bkp.config.operationMode);
-    switch (SB_GET(N_btchip.bkp.config.operationMode))
-    {
-    case MODE_WALLET:
-        break;
-    default:
-        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
-    }
 
     if (G_io_apdu_buffer[ISO_OFFSET_P1] == GET_TRUSTED_INPUT_P1_FIRST)
     {

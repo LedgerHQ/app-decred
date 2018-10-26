@@ -31,14 +31,6 @@ unsigned short apdu_hash_input_start()
 
     PRINTF("\n### HASH_INPUT_START:\n");
 
-    SB_CHECK(N_btchip.bkp.config.operationMode);
-    switch (SB_GET(N_btchip.bkp.config.operationMode))
-    {
-    case MODE_WALLET:
-        break;
-    default:
-        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
-    }
 
     if (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_FIRST)
     {

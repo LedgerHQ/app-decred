@@ -65,14 +65,7 @@ unsigned short apdu_get_wallet_public_key() {
         //os_memcpy(&request_token, G_io_apdu_buffer + request_token_offset, 4);
         request_token = read_u32(G_io_apdu_buffer + request_token_offset, true, true);
     }
-    /*
-    SB_CHECK(N_btchip.bkp.config.operationMode);
-    switch (SB_GET(N_btchip.bkp.config.operationMode)) {
-    case MODE_WALLET:
-        break;
-    default:
-        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
-    }*/
+
 
     if (!os_global_pin_is_validated()) {
         return SW_SECURITY_STATUS_NOT_SATISFIED;
