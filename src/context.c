@@ -49,6 +49,7 @@ void context_init() {
               sizeof(context_D.totalOutputAmount));
     context_D.changeOutputFound = 0;
 
+
     if (N_btchip.config_valid != 0x01) {
         autosetup();
     }
@@ -56,7 +57,7 @@ void context_init() {
     if (!N_btchip.config_valid) {
         unsigned char defaultMode;
         L_DEBUG_APP(("No configuration found\n"));
-        defaultMode = MODE_SETUP_NEEDED;
+        defaultMode = MODE_WALLET;
 
         set_operation_mode(defaultMode);
     } 
@@ -75,8 +76,9 @@ void context_init() {
         SB_CHECK(N_btchip.bkp.config.operationMode);
     }
     if (!N_btchip.storageInitialized) {
-        unsigned char initialized = 1;
+        unsigned char initialized = 1, denied=0;
 
+        nvm_write((void *)&N_btchip.pubKeyRequestRestriction, &denied, 1);
         nvm_write((void *)&N_btchip.storageInitialized, &initialized, 1);
     }
 }

@@ -22,6 +22,7 @@
 
 #define P1_NO_DISPLAY 0x00
 #define P1_DISPLAY 0x01
+#define P1_REQUEST_TOKEN 0x02
 
 #define P2_LEGACY 0x00
 
@@ -30,12 +31,17 @@ unsigned short apdu_get_wallet_public_key() {
     unsigned char uncompressedPublicKeys =
         ((N_btchip.bkp.config.options & OPTION_UNCOMPRESSED_KEYS) != 0);
     unsigned char keyPath[MAX_BIP32_PATH_LENGTH];
+    uint32_t request_token;
     unsigned char chainCode[32];
     bool display = (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_DISPLAY);
+    bool display_request_token = N_btchip.pubKeyRequestRestriction && (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_REQUEST_TOKEN);
+    bool require_user_approval = N_btchip.pubKeyRequestRestriction && !(display_request_token || display);
+
 
     switch (G_io_apdu_buffer[ISO_OFFSET_P1]) {
     case P1_NO_DISPLAY:
     case P1_DISPLAY:
+    case P1_REQUEST_TOKEN:
         break;
     default:
         return SW_INCORRECT_P1_P2;
@@ -53,16 +59,20 @@ unsigned short apdu_get_wallet_public_key() {
     }
     os_memmove(keyPath, G_io_apdu_buffer + ISO_OFFSET_CDATA,
                MAX_BIP32_PATH_LENGTH);
-
+            
+    if(display_request_token){
+        uint8_t request_token_offset = ISO_OFFSET_CDATA + G_io_apdu_buffer[ISO_OFFSET_CDATA]*4 + 1;
+        //os_memcpy(&request_token, G_io_apdu_buffer + request_token_offset, 4);
+        request_token = read_u32(G_io_apdu_buffer + request_token_offset, true, true);
+    }
+    /*
     SB_CHECK(N_btchip.bkp.config.operationMode);
     switch (SB_GET(N_btchip.bkp.config.operationMode)) {
     case MODE_WALLET:
-    case MODE_RELAXED_WALLET:
-    case MODE_SERVER:
         break;
     default:
         return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
-    }
+    }*/
 
     if (!os_global_pin_is_validated()) {
         return SW_SECURITY_STATUS_NOT_SATISFIED;
@@ -109,6 +119,27 @@ unsigned short apdu_get_wallet_public_key() {
         G_io_apdu_buffer[200 + keyLength] = '\0';
         context_D.io_flags |= IO_ASYNCH_REPLY;
         if (!bagl_display_public_key()) {
+            context_D.io_flags &= ~IO_ASYNCH_REPLY;
+            context_D.outLength = 0;
+            return SW_INCORRECT_DATA;
+        }
+    }
+    else if(request_token)
+    {
+        // Hax, avoid wasting space
+        snprintf(G_io_apdu_buffer + 200, 9, "%02x", request_token);
+        G_io_apdu_buffer[200 + 8] = '\0';
+        context_D.io_flags |= IO_ASYNCH_REPLY;
+        if (!bagl_display_token()) {
+            context_D.io_flags &= ~IO_ASYNCH_REPLY;
+            context_D.outLength = 0;
+            return SW_INCORRECT_DATA;
+        }
+    }
+    else if(require_user_approval)
+    {
+        context_D.io_flags |= IO_ASYNCH_REPLY;
+        if (!bagl_request_pubkey_approval()) {
             context_D.io_flags &= ~IO_ASYNCH_REPLY;
             context_D.outLength = 0;
             return SW_INCORRECT_DATA;

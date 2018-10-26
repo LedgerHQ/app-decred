@@ -32,12 +32,7 @@
 #define MAGIC_DEV_KEY 0x01
 
 enum modes_e {
-    MODE_ISSUER = 0x00,
-    MODE_SETUP_NEEDED = 0xff,
     MODE_WALLET = 0x01,
-    MODE_RELAXED_WALLET = 0x02,
-    MODE_SERVER = 0x04,
-    MODE_DEVELOPER = 0x08,
 };
 
 enum options_e {

@@ -24,13 +24,6 @@
 unsigned short apdu_get_coin_version() {
     uint8_t offset = 0;
 
-    SB_CHECK(N_btchip.bkp.config.operationMode);
-    if ((SB_GET(N_btchip.bkp.config.operationMode) ==
-         MODE_SETUP_NEEDED) ||
-        (SB_GET(N_btchip.bkp.config.operationMode) == MODE_ISSUER)) {
-        return SW_CONDITIONS_OF_USE_NOT_SATISFIED;
-    }
-
     G_io_apdu_buffer[offset++] = context_D.payToAddressVersion >> 8;
     G_io_apdu_buffer[offset++] = context_D.payToAddressVersion;
     G_io_apdu_buffer[offset++] = context_D.payToScriptHashVersion >> 8;

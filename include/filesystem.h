@@ -66,6 +66,8 @@ typedef struct storage_s {
 
     unsigned char fidoTransport;
 
+    uint8_t pubKeyRequestRestriction;
+
 } storage_t;
 
 // the global nvram memory variable

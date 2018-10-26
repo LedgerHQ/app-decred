@@ -40,8 +40,6 @@ unsigned short apdu_hash_sign() {
     SB_CHECK(N_btchip.bkp.config.operationMode);
     switch (SB_GET(N_btchip.bkp.config.operationMode)) {
     case MODE_WALLET:
-    case MODE_RELAXED_WALLET:
-    case MODE_SERVER:
         break;
     default:
         return SW_CONDITIONS_OF_USE_NOT_SATISFIED;

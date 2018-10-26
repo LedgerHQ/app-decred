@@ -285,9 +285,6 @@ void transaction_parse(unsigned char parseMode)
                                     goto fail;
                                 }
                                 break;
-                            case MODE_RELAXED_WALLET:
-                            case MODE_SERVER:
-                                break;
                             default:
                                 PRINTF("Untrusted input not authorized\n");
                                 goto fail;
