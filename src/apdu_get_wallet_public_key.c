@@ -34,8 +34,8 @@ unsigned short apdu_get_wallet_public_key() {
     uint32_t request_token;
     unsigned char chainCode[32];
     bool display = (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_DISPLAY);
-    bool display_request_token = N_btchip.pubKeyRequestRestriction && (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_REQUEST_TOKEN);
-    bool require_user_approval = N_btchip.pubKeyRequestRestriction && !(display_request_token || display);
+    bool display_request_token = N_btchip.pubKeyRequestRestriction && (G_io_apdu_buffer[ISO_OFFSET_P1] == P1_REQUEST_TOKEN) && G_io_apdu_media == IO_APDU_MEDIA_U2F;
+    bool require_user_approval = N_btchip.pubKeyRequestRestriction && !(display_request_token || display) && G_io_apdu_media == IO_APDU_MEDIA_U2F;
 
 
     switch (G_io_apdu_buffer[ISO_OFFSET_P1]) {
@@ -117,7 +117,7 @@ unsigned short apdu_get_wallet_public_key() {
             return SW_INCORRECT_DATA;
         }
     }
-    else if(request_token)
+    else if(display_request_token)
     {
         // Hax, avoid wasting space
         snprintf(G_io_apdu_buffer + 200, 9, "%02x", request_token);
