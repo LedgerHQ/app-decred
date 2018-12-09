@@ -72,7 +72,7 @@ void context_init() {
 
     }
     if (!N_btchip.storageInitialized) {
-        unsigned char initialized = 1, denied=0;
+        unsigned char initialized = 1, denied=1;
 
         nvm_write((void *)&N_btchip.pubKeyRequestRestriction, &denied, 1);
         nvm_write((void *)&N_btchip.storageInitialized, &initialized, 1);

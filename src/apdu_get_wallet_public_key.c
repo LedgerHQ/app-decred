@@ -62,8 +62,7 @@ unsigned short apdu_get_wallet_public_key() {
             
     if(display_request_token){
         uint8_t request_token_offset = ISO_OFFSET_CDATA + G_io_apdu_buffer[ISO_OFFSET_CDATA]*4 + 1;
-        //os_memcpy(&request_token, G_io_apdu_buffer + request_token_offset, 4);
-        request_token = read_u32(G_io_apdu_buffer + request_token_offset, true, true);
+        request_token = read_u32(G_io_apdu_buffer + request_token_offset, true, false);
     }
 
 
@@ -111,32 +110,25 @@ unsigned short apdu_get_wallet_public_key() {
         os_memmove(G_io_apdu_buffer + 200, G_io_apdu_buffer + 67, keyLength);
         G_io_apdu_buffer[200 + keyLength] = '\0';
         context_D.io_flags |= IO_ASYNCH_REPLY;
-        if (!bagl_display_public_key()) {
-            context_D.io_flags &= ~IO_ASYNCH_REPLY;
-            context_D.outLength = 0;
-            return SW_INCORRECT_DATA;
+        bagl_display_public_key();
         }
-    }
-    else if(display_request_token)
+    // If the token requested has already been approved in a previous call, the source is trusted so don't ask for approval again
+    else if(display_request_token && 
+           (!context_D.has_valid_token || os_memcmp(&request_token, context_D.last_token, 4)))
     {
+        // disable the has_valid_token flag and store the new token
+        context_D.has_valid_token = false;
+        os_memcpy(context_D.last_token, &request_token, 4);
         // Hax, avoid wasting space
-        snprintf(G_io_apdu_buffer + 200, 9, "%02x", request_token);
+        snprintf(G_io_apdu_buffer + 200, 9, "%08X", request_token);
         G_io_apdu_buffer[200 + 8] = '\0';
         context_D.io_flags |= IO_ASYNCH_REPLY;
-        if (!bagl_display_token()) {
-            context_D.io_flags &= ~IO_ASYNCH_REPLY;
-            context_D.outLength = 0;
-            return SW_INCORRECT_DATA;
-        }
+        bagl_display_token();
     }
     else if(require_user_approval)
     {
         context_D.io_flags |= IO_ASYNCH_REPLY;
-        if (!bagl_request_pubkey_approval()) {
-            context_D.io_flags &= ~IO_ASYNCH_REPLY;
-            context_D.outLength = 0;
-            return SW_INCORRECT_DATA;
-        }
+        bagl_request_pubkey_approval();
     }
 
     return SW_OK;

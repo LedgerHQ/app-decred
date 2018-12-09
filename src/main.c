@@ -118,6 +118,8 @@ unsigned int
 io_seproxyhal_touch_message_signature_verify_ok(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_display_cancel(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_display_ok(const bagl_element_t *e);
+unsigned int io_seproxyhal_touch_display_token_cancel(const bagl_element_t *e);
+unsigned int io_seproxyhal_touch_display_token_ok(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_settings(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_exit(const bagl_element_t *e);
 void ui_idle(void);
@@ -292,8 +294,8 @@ const bagl_element_t ui_settings_blue[] = {
   //{{BAGL_RECTANGLE | BAGL_FLAG_TOUCHABLE, 0x00, 264,  19,  56,  44, 0, 0, BAGL_FILL, COLOR_APP, COLOR_APP_LIGHT, BAGL_FONT_SYMBOLS_0|BAGL_FONT_ALIGNMENT_CENTER|BAGL_FONT_ALIGNMENT_MIDDLE, 0 }, BAGL_FONT_SYMBOLS_0_DASHBOARD, 0, COLOR_APP, 0xFFFFFF, io_seproxyhal_touch_exit, NULL, NULL},
 
 
-  {{BAGL_LABELINE, 0x00,  30, 105, 160,  30, 0, 0, BAGL_FILL, 0x000000, COLOR_BG_1, BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, 0   }, "Privacy restriction", 0, 0, 0, NULL, NULL, NULL},
-  {{BAGL_LABELINE, 0x00,  30, 126, 260,  30, 0, 0, BAGL_FILL, 0x999999, COLOR_BG_1, BAGL_FONT_OPEN_SANS_REGULAR_8_11PX, 0   }, "Export public keys only after user approval", 0, 0, 0, NULL, NULL, NULL},
+  {{BAGL_LABELINE, 0x00,  30, 105, 160,  30, 0, 0, BAGL_FILL, 0x000000, COLOR_BG_1, BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, 0   }, "Public key export", 0, 0, 0, NULL, NULL, NULL},
+  {{BAGL_LABELINE, 0x00,  30, 126, 260,  30, 0, 0, BAGL_FILL, 0x999999, COLOR_BG_1, BAGL_FONT_OPEN_SANS_REGULAR_8_11PX, 0   }, "Enable to approve export requests manually", 0, 0, 0, NULL, NULL, NULL},
   {{BAGL_NONE   | BAGL_FLAG_TOUCHABLE, 0x00,   0,  78, 320,  68, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0 , 0   }, NULL, 0, 0xEEEEEE, 0x000000, ui_settings_blue_toggle_pubKeyRequestRestriction, ui_settings_out_over, ui_settings_out_over },
 
   {{BAGL_ICON, 0x01, 258,  98,  32,  18, 0, 0, BAGL_FILL, 0x000000, COLOR_BG_1, 0, 0   }, NULL, 0, 0, 0, NULL, NULL, NULL}
@@ -343,13 +345,13 @@ void menu_settings_pubKeyRequestRestriction_change(unsigned int enabled) {
 
 
 const ux_menu_entry_t menu_settings_pubKeyRequestRestriction[] = {
-  {NULL, menu_settings_pubKeyRequestRestriction_change, 0, NULL, "Unrestricted", NULL, 0, 0},
-  {NULL, menu_settings_pubKeyRequestRestriction_change, 1, NULL, "Restricted", NULL, 0, 0},
+  {NULL, menu_settings_pubKeyRequestRestriction_change, 1, NULL, "Manual approval", NULL, 0, 0},
+  {NULL, menu_settings_pubKeyRequestRestriction_change, 0, NULL, "Auto approval", NULL, 0, 0},
   UX_MENU_END
 };
 
 const ux_menu_entry_t menu_settings[] = {
-    {menu_settings_pubKeyRequestRestriction, NULL, 0, NULL, "Public keys", "requests", 0, 0},
+    {menu_settings_pubKeyRequestRestriction, NULL, 0, NULL, "Public key", "export approval", 0, 0},
     {menu_main, NULL, 1, &C_nanos_icon_back, "Back", NULL, 61, 40},
     UX_MENU_END};
 
@@ -1196,7 +1198,7 @@ const bagl_element_t ui_display_token_blue[] = {
     /// TOP STATUS BAR
     {{BAGL_LABELINE, 0x00, 0, 45, 320, 30, 0, 0, BAGL_FILL, 0xFFFFFF, COLOR_APP,
       BAGL_FONT_OPEN_SANS_SEMIBOLD_10_13PX | BAGL_FONT_ALIGNMENT_CENTER, 0},
-     "CHECK IF TOKENS ARE IDENTICAL",
+     "PUBLIC KEY EXPORT",
      0,
      0,
      0,
@@ -1212,7 +1214,7 @@ const bagl_element_t ui_display_token_blue[] = {
 
     {{BAGL_LABELINE, 0x00, 30, 185, 260, 30, 0, 0, BAGL_FILL, 0x000000,
       COLOR_BG_1, BAGL_FONT_OPEN_SANS_SEMIBOLD_11_16PX | BAGL_FONT_ALIGNMENT_CENTER, 0},
-     "Token:",
+     "Check if the following token is",
      0,
      0,
      0,
@@ -1220,8 +1222,18 @@ const bagl_element_t ui_display_token_blue[] = {
      NULL,
      NULL},
 
-    {{BAGL_LABELINE, 0x10, 30, 220, 260, 30, 0, 0, BAGL_FILL, 0x000000,
-      COLOR_BG_1, BAGL_FONT_OPEN_SANS_REGULAR_22_30PX | BAGL_FONT_ALIGNMENT_CENTER, 0},
+    {{BAGL_LABELINE, 0x00, 30, 201, 260, 30, 0, 0, BAGL_FILL, 0x000000,
+      COLOR_BG_1, BAGL_FONT_OPEN_SANS_SEMIBOLD_11_16PX | BAGL_FONT_ALIGNMENT_CENTER, 0},
+     "identical on both devices:",
+     0,
+     0,
+     0,
+     NULL,
+     NULL,
+     NULL},
+
+    {{BAGL_LABELINE, 0x10, 30, 240, 260, 30, 0, 0, BAGL_FILL, 0x000000,
+      COLOR_BG_1, BAGL_FONT_OPEN_SANS_LIGHT_16_22PX | BAGL_FONT_ALIGNMENT_CENTER, 0},
      vars.tmpqr.addressSummary,
      0,
      0,
@@ -1241,7 +1253,7 @@ const bagl_element_t ui_display_token_blue[] = {
      0,
      0xB7B7B7,
      COLOR_BG_1,
-     io_seproxyhal_touch_display_cancel,
+     io_seproxyhal_touch_display_token_cancel,
      NULL,
      NULL},
     {{BAGL_RECTANGLE | BAGL_FLAG_TOUCHABLE, 0x00, 165, 414, 115, 36, 0, 18,
@@ -1249,11 +1261,11 @@ const bagl_element_t ui_display_token_blue[] = {
       BAGL_FONT_OPEN_SANS_REGULAR_11_14PX | BAGL_FONT_ALIGNMENT_CENTER |
           BAGL_FONT_ALIGNMENT_MIDDLE,
       0},
-     "APPROVE",
+     "CONFIRM",
      0,
      0x3ab7a2,
      COLOR_BG_1,
-     io_seproxyhal_touch_display_ok,
+     io_seproxyhal_touch_display_token_ok,
      NULL,
      NULL},
 };
@@ -1299,24 +1311,13 @@ const bagl_element_t ui_request_pubkey_approval_blue[] = {
 
     {{BAGL_LABELINE, 0x00, 0, 160, 320, 30, 0, 0, BAGL_FILL, 0x000000,
       COLOR_BG_1, BAGL_FONT_OPEN_SANS_SEMIBOLD_11_16PX | BAGL_FONT_ALIGNMENT_CENTER, 0},
-     "A remote app is requesting access ",
+     "Approve to export your public keys",
      0,
      0,
      0,
      NULL,
      NULL,
      NULL},
-
-    {{BAGL_LABELINE, 0x00, 0, 180, 320, 30, 0, 0, BAGL_FILL, 0x000000,
-      COLOR_BG_1, BAGL_FONT_OPEN_SANS_SEMIBOLD_11_16PX | BAGL_FONT_ALIGNMENT_CENTER, 0},
-     "to your public keys",
-     0,
-     0,
-     0,
-     NULL,
-     NULL,
-     NULL},
-
 
 
     {{BAGL_RECTANGLE | BAGL_FLAG_TOUCHABLE, 0x00, 40, 414, 115, 36, 0, 18,
@@ -2230,6 +2231,25 @@ unsigned int io_seproxyhal_touch_display_ok(const bagl_element_t *e)
     return 0; // DO NOT REDRAW THE BUTTON
 }
 
+unsigned int io_seproxyhal_touch_display_token_cancel(const bagl_element_t *e) {
+    // revoke previous valid token if there was one 
+    context_D.has_valid_token = false;
+    // user denied the token, tell the USB side
+    bagl_user_action_display(0);
+    // redraw ui
+    ui_idle();
+    return 0; // DO NOT REDRAW THE BUTTON
+}
+ unsigned int io_seproxyhal_touch_display_token_ok(const bagl_element_t *e) {
+    // Set the valid token flag
+    context_D.has_valid_token = true;
+    // user approved the token, tell the USB side
+    bagl_user_action_display(1);
+    // redraw ui
+    ui_idle();
+    return 0; // DO NOT REDRAW THE BUTTON
+}
+
 #if defined(TARGET_NANOS)
 unsigned int ui_verify_nanos_button(unsigned int button_mask,
                                     unsigned int button_mask_counter)
@@ -2318,11 +2338,11 @@ unsigned int ui_display_token_nanos_button(unsigned int button_mask,
     switch (button_mask)
     {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT:
-        io_seproxyhal_touch_display_cancel(NULL);
+        io_seproxyhal_touch_display_token_cancel(NULL);
         break;
 
     case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
-        io_seproxyhal_touch_display_ok(NULL);
+        io_seproxyhal_touch_display_token_ok(NULL);
         break;
     }
     return 0;

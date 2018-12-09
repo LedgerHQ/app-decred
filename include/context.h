@@ -154,6 +154,10 @@ struct context_s {
 
     /** Non protected transaction context */
 
+    /** Last U2F Token streamed by host to attempt pubkey request */
+    unsigned char last_token[4];
+    unsigned char has_valid_token;
+
     /** Transaction Prefix hash context */
     BLAKE256_CTX transactionHashPrefix;
     /** Transaction Witness hash context */
