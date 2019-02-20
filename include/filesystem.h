@@ -58,8 +58,15 @@ typedef struct storage_s {
 } storage_t;
 
 // the global nvram memory variable
+#if 0
 extern WIDE storage_t N_real;
 
 #define N_btchip (*(WIDE storage_t *)PIC(&N_real))
+#else
+extern storage_t const N_real;
+#define N_btchip (*(volatile storage_t *)PIC(&N_real))
+#endif
+
+void set_operation_mode(unsigned char operationMode);
 
 #endif

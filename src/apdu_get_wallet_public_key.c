@@ -91,7 +91,7 @@ unsigned short apdu_get_wallet_public_key() {
                                                     context_D.payToAddressVersion, 0);
 
     G_io_apdu_buffer[66] = keyLength;
-
+    L_DEBUG_APP(("Length %d\n", keyLength));
     if (!uncompressedPublicKeys) {
         // Restore for the full key component
         G_io_apdu_buffer[1] = 0x04;
@@ -110,7 +110,7 @@ unsigned short apdu_get_wallet_public_key() {
         os_memmove(G_io_apdu_buffer + 200, G_io_apdu_buffer + 67, keyLength);
         G_io_apdu_buffer[200 + keyLength] = '\0';
         context_D.io_flags |= IO_ASYNCH_REPLY;
-        bagl_display_public_key();
+        bagl_display_public_key(keyPath);
         }
     // If the token requested has already been approved in a previous call, the source is trusted so don't ask for approval again
     else if(display_request_token && 

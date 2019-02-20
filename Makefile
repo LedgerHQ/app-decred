@@ -28,9 +28,9 @@ APP_LOAD_PARAMS= --curve secp256k1 $(COMMON_LOAD_PARAMS)
 
 APPVERSION_M=1
 APPVERSION_N=3
-APPVERSION_P=0
+APPVERSION_P=7
 APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
-APP_LOAD_FLAGS=--appFlags 0x40 --dep Decred:$(APPVERSION)
+APP_LOAD_FLAGS=--appFlags 0x250 --dep Decred:$(APPVERSION)
 
 # simplify for tests
 ifndef COIN
@@ -44,7 +44,7 @@ DEFINES += CX_COMPLIANCE_141
 APPNAME ="Decred"
 APP_LOAD_PARAMS += --path $(APP_PATH)
 DEFINES_LIB =# Decred IS the lib
-APP_LOAD_FLAGS=--appFlags 0x840
+APP_LOAD_FLAGS=--appFlags 0xa50
 else ifeq ($(COIN),decred_testnet)
 # Decred mainnet
 DEFINES   += COIN_P2PKH_VERSION=3873 COIN_P2SH_VERSION=3836 COIN_FAMILY=1 COIN_COINID=\"Decred\" COIN_COINID_HEADER=\"DECRED\" COIN_COLOR_HDR=0x5482ff COIN_COLOR_DB=0xB2E8CB COIN_COINID_NAME=\"Decred\" COIN_COINID_SHORT=\"TDCR\" COIN_KIND=COIN_KIND_DECRED_TESTNET
@@ -64,13 +64,16 @@ DEFINES += $(DEFINES_LIB)
 ifeq ($(TARGET_NAME),TARGET_BLUE)
 ICONNAME=blue_app_$(COIN).gif
 else
+	ifeq ($(TARGET_NAME),TARGET_NANOX)
+ICONNAME=balenos_app_$(COIN).gif
+	else
 ICONNAME=nanos_app_$(COIN).gif
+endif
 endif
 
 ################
 # Default rule #
 ################
-
 all: default
 
 ############
@@ -81,17 +84,31 @@ DEFINES   += OS_IO_SEPROXYHAL IO_SEPROXYHAL_BUFFER_SIZE_B=300
 DEFINES   += HAVE_BAGL HAVE_SPRINTF
 #DEFINES   += HAVE_PRINTF PRINTF=screen_printf
 DEFINES   += PRINTF\(...\)=
+#DEFINES   += HAVE_PRINTF PRINTF=mcu_usb_printf
 DEFINES   += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
 DEFINES   += LEDGER_MAJOR_VERSION=$(APPVERSION_M) LEDGER_MINOR_VERSION=$(APPVERSION_N) LEDGER_PATCH_VERSION=$(APPVERSION_P) TCS_LOADER_PATCH_VERSION=0
 
-DEFINES   += USB_SEGMENT_SIZE=64 
+# U2F
+DEFINES   += HAVE_U2F HAVE_IO_U2F
 DEFINES   += U2F_PROXY_MAGIC=\"BTC\"
-DEFINES   += HAVE_IO_U2F HAVE_U2F 
-#DEFINES   += BLE_SEGMENT_SIZE=20
-#DEFINES   += HAVE_USB_CLASS_CCID
+DEFINES   += USB_SEGMENT_SIZE=64 
+DEFINES   += BLE_SEGMENT_SIZE=32 #max MTU, min 20
 
 DEFINES   += UNUSED\(x\)=\(void\)x
 DEFINES   += APPVERSION=\"$(APPVERSION)\"
+
+
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+DEFINES       += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000
+DEFINES       += HAVE_BLE_APDU # basic ledger apdu transport over BLE
+
+DEFINES       += HAVE_GLO096 HAVE_UX_LEGACY
+DEFINES       += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
+DEFINES       += HAVE_BAGL_ELLIPSIS # long label truncation feature
+DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
+DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
+DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
+endif
 
 ##############
 # Compiler #
@@ -128,6 +145,10 @@ include $(BOLOS_SDK)/Makefile.glyphs
 APP_SOURCE_PATH  += src
 SDK_SOURCE_PATH  += lib_stusb lib_stusb_impl lib_u2f qrcode
 
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
+SDK_SOURCE_PATH  += lib_ux
+endif
 
 load: all
 	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
@@ -140,7 +161,6 @@ include $(BOLOS_SDK)/Makefile.rules
 
 #add dependency on custom makefile filename
 dep/%.d: %.c Makefile
-
 
 listvariants:
 	@echo VARIANTS COIN decred decred_testnet

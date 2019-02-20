@@ -19,4 +19,8 @@
 
 #include "public_ram_variables.h"
 
+#if 0
 WIDE storage_t N_real;
+#else
+WIDE storage_t const N_real;
+#endif

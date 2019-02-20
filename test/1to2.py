@@ -26,12 +26,12 @@ from time import sleep
 dongle = getDongle(True)
 
 
-'''
 
-################# GET PUBKEY #########################
+
+################# GET PUBKEY ######################### (only for testing sake)
 
 packets = [
-"058000002c80000001800000000000000000000001" # BIP32 path len, BIP32 path
+"058000002c8000002a800000000000000000000001" # BIP32 path len, BIP32 path
 ]
 
 
@@ -42,7 +42,7 @@ result = dongle.exchange(bytearray.fromhex(packets[0]))
 # 23 5473636f46366d566741416b664e78776e716f5a553936654e3534355247594c376135 addr base58
 # c191668478d204284390538897117f8c66ef8dafd2f3e67c0d83ce4fe4f09e53  chaincode
 
-'''
+
 
 
 ################# GET TRUSTED INPUT #########################

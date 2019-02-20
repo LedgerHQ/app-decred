@@ -19,9 +19,12 @@
 
 #define BASE58_H
 
-unsigned char decode_base58(unsigned char WIDE *in, unsigned char length,
-                                   unsigned char *out, unsigned char maxoutlen);
-unsigned char encode_base58(unsigned char WIDE *in, unsigned char length,
-                                   unsigned char *out, unsigned char maxoutlen);
+#include <stdlib.h>
+
+int decode_base58(const char WIDE *in, size_t length,
+                         unsigned char *out, size_t *outlen);
+
+int encode_base58(const unsigned char WIDE *in, size_t length,
+                         unsigned char *out, size_t *outlen);
 
 #endif
