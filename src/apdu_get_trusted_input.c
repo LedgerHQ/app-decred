@@ -1,6 +1,6 @@
 /*******************************************************************************
-*   Ledger Blue - Bitcoin Wallet
-*   (c) 2016 Ledger
+*   Ledger App - Bitcoin Wallet
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ unsigned short apdu_get_trusted_input()
 
         blake256_Final(&context_D.transactionHashPrefix, G_io_apdu_buffer + 4);
         //cx_hash(&context_D.transactionHashPrefix, CX_LAST, (unsigned char WIDE *)NULL, 0, G_io_apdu_buffer + 4);zzzzzzzzz
-        
+
         write_u32_le(G_io_apdu_buffer + 4 + 32,
                             context_D.transactionTargetInput);
         os_memmove(G_io_apdu_buffer + 4 + 32 + 4,

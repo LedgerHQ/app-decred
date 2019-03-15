@@ -1,6 +1,6 @@
 /*******************************************************************************
-*   Ledger Blue - Bitcoin Wallet
-*   (c) 2016 Ledger
+*   Ledger App - Bitcoin Wallet
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -205,7 +205,7 @@ void transaction_parse(unsigned char parseMode)
                         .transactionRemainingInputsOutputs =
                         transaction_get_varint();
                     context_D.transactionHashOption = TRANSACTION_HASH_FULL;
-                    
+
                     // Ready to proceed
                     context_D.transactionContext.transactionState =
                         TRANSACTION_DEFINED_WAIT_INPUT;
@@ -257,7 +257,7 @@ void transaction_parse(unsigned char parseMode)
                         case 1:
                             trustedInputFlag = 1;
                             break;
-                            
+
                         default:
                             PRINTF("Invalid trusted input flag\n");
                             goto fail;
@@ -291,7 +291,7 @@ void transaction_parse(unsigned char parseMode)
                             PRINTF("Clearing P2SH consumption\n");
                             context_D.transactionContext.consumeP2SH = 0;
                             */
-                        } 
+                        }
                         else
                         {
                             trustedInputLength = *(
@@ -332,7 +332,7 @@ void transaction_parse(unsigned char parseMode)
                             {
                                 PRINTF("Good Signature\n");
                             }
-                            
+
                             // Update the hash with prevout data
                             savePointer =
                                 context_D.transactionBufferPointer; //trusted input 01
@@ -424,7 +424,7 @@ void transaction_parse(unsigned char parseMode)
                     // Scan for P2SH consumption - huge shortcut, but fine
                     // enough
                     // Also usable in SegWit mode
-                    if (context_D.transactionContext.scriptRemaining ==  
+                    if (context_D.transactionContext.scriptRemaining ==
                         1)
                     {
                         if (*context_D.transactionBufferPointer ==
@@ -446,7 +446,7 @@ void transaction_parse(unsigned char parseMode)
                         }
                         transaction_offset_increase(1);
                         context_D.transactionContext.scriptRemaining--;
-                        
+
                     }
 
                     if (context_D.transactionContext.scriptRemaining ==
@@ -457,7 +457,7 @@ void transaction_parse(unsigned char parseMode)
 
                         if (parseMode == PARSE_MODE_SIGNATURE)
                         {
-                            context_D.transactionHashOption = TRANSACTION_HASH_BOTH; 
+                            context_D.transactionHashOption = TRANSACTION_HASH_BOTH;
                         }
                         // Sequence
                         check_transaction_available(4);
@@ -490,7 +490,7 @@ void transaction_parse(unsigned char parseMode)
                     PRINTF("Input hashing done\n");
                     if (parseMode == PARSE_MODE_SIGNATURE)
                     {
-                        
+
                         context_D.transactionContext
                             .transactionState =
                             TRANSACTION_PRESIGN_READY;

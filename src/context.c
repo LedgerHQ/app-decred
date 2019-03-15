@@ -1,6 +1,6 @@
 /*******************************************************************************
-*   Ledger Blue - Bitcoin Wallet
-*   (c) 2016 Ledger
+*   Ledger App - Bitcoin Wallet
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ void context_init() {
         L_DEBUG_APP(("No configuration found\n"));
         defaultMode = MODE_WALLET;
 
-    } 
+    }
     else {
         context_D.payToAddressVersion = G_coin_config->p2pkh_version;
         context_D.payToScriptHashVersion = G_coin_config->p2sh_version;

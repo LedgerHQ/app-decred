@@ -1,6 +1,6 @@
 /*******************************************************************************
-*   Ledger Blue - Bitcoin Wallet
-*   (c) 2016 Ledger
+*   Ledger App - Bitcoin Wallet
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ static bool check_output_displayable()
         {
             changeFound = true;
         }
-        
+
         if (changeFound)
         {
             if (context_D.changeOutputFound)
@@ -335,7 +335,7 @@ unsigned short apdu_hash_input_finalize_full_internal(
             PRINTF("Adding to prefix hash:\n%.*H\n", apduLength - hashOffset, G_io_apdu_buffer + ISO_OFFSET_CDATA + hashOffset);
             blake256_Update(&context_D.transactionHashPrefix, G_io_apdu_buffer + ISO_OFFSET_CDATA + hashOffset, apduLength - hashOffset);
             blake256_Update(&context_D.transactionHashAuthorization, G_io_apdu_buffer + ISO_OFFSET_CDATA + hashOffset, apduLength - hashOffset);
-        
+
 
             if (context_D.transactionContext.firstSigned)
             {
@@ -387,9 +387,9 @@ unsigned short apdu_hash_input_finalize_full_internal(
                 goto return_OK;
             }
 
-            /* Computes an intermediary hash of the txId that will be checked for each 
+            /* Computes an intermediary hash of the txId that will be checked for each
             successive inputs to sign to check that they belong to the same tx*/
-  
+
             blake256_Final(&context_D.transactionHashAuthorization, authorizationHash);
 
 
@@ -419,7 +419,7 @@ unsigned short apdu_hash_input_finalize_full_internal(
 
             context_D.outLength = (target - G_io_apdu_buffer);
 
-            
+
             // Check that the input being signed is part of the same
             // transaction, otherwise abort
             // (this is done to keep the transaction counter limit per session
@@ -440,7 +440,7 @@ unsigned short apdu_hash_input_finalize_full_internal(
                 {
                     PRINTF("Authorization hash doesn't match the previous one\n");
                     sw = SW_CONDITIONS_OF_USE_NOT_SATISFIED;
-                
+
 discardTransaction:
                     CLOSE_TRY;
                     goto catch_discardTransaction;
@@ -487,7 +487,7 @@ unsigned short apdu_hash_input_finalize_full()
         // immediately
         bool status;
         if (context_D.outputParsingState == OUTPUT_FINALIZE_TX)
-        {   
+        {
             PRINTF("BAGL finalize tx:\n");
             status = bagl_finalize_tx();
         }
@@ -581,7 +581,7 @@ unsigned char bagl_user_action(unsigned char confirming)
                 // Let the UI play
                 return 1;
             }
-        } 
+        }
 
         if ((context_D.outputParsingState ==
              OUTPUT_FINALIZE_TX) ||
@@ -592,7 +592,7 @@ unsigned char bagl_user_action(unsigned char confirming)
 
             context_D.transactionContext.transactionState =
                 TRANSACTION_SIGN_READY;
-            
+
         }
         context_D.outLength -=
             2; // status was already set by the last call

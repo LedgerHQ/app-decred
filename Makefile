@@ -24,7 +24,7 @@ APP_PATH = "44'/42'"
 # All but Decred app use dependency onto the decred app/lib
 DEFINES_LIB = USE_LIB_DECRED
 
-APP_LOAD_PARAMS= --curve secp256k1 $(COMMON_LOAD_PARAMS) 
+APP_LOAD_PARAMS= --curve secp256k1 $(COMMON_LOAD_PARAMS)
 
 APPVERSION_M=1
 APPVERSION_N=3
@@ -54,7 +54,7 @@ APP_LOAD_PARAMS += --path $(APP_PATH)
 
 else
 ifeq ($(filter clean,$(MAKECMDGOALS)),)
-$(error Unsupported COIN - use decred, decred_testnet) 
+$(error Unsupported COIN - use decred, decred_testnet)
 endif
 endif
 
@@ -91,7 +91,7 @@ DEFINES   += LEDGER_MAJOR_VERSION=$(APPVERSION_M) LEDGER_MINOR_VERSION=$(APPVERS
 # U2F
 DEFINES   += HAVE_U2F HAVE_IO_U2F
 DEFINES   += U2F_PROXY_MAGIC=\"BTC\"
-DEFINES   += USB_SEGMENT_SIZE=64 
+DEFINES   += USB_SEGMENT_SIZE=64
 DEFINES   += BLE_SEGMENT_SIZE=32 #max MTU, min 20
 
 DEFINES   += UNUSED\(x\)=\(void\)x
@@ -127,7 +127,7 @@ ifeq ($(GCCPATH),)
 $(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
 endif
 
-CC       := $(CLANGPATH)clang 
+CC       := $(CLANGPATH)clang
 
 #CFLAGS   += -O0
 CFLAGS   += -O3 -Os
@@ -136,7 +136,7 @@ AS     := $(GCCPATH)arm-none-eabi-gcc
 
 LD       := $(GCCPATH)arm-none-eabi-gcc
 LDFLAGS  += -O3 -Os
-LDLIBS   += -lm -lgcc -lc 
+LDLIBS   += -lm -lgcc -lc
 
 # import rules to compile glyphs(/pone)
 include $(BOLOS_SDK)/Makefile.glyphs

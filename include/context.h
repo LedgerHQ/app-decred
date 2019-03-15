@@ -26,7 +26,7 @@
 
 #define MAX_OUTPUT_TO_CHECK 200
 #define MAX_COIN_ID 13
-#define MAX_SHORT_COIN_ID 5 
+#define MAX_SHORT_COIN_ID 5
 
 #define MAGIC_TRUSTED_INPUT 0x32
 #define MAGIC_DEV_KEY 0x01
@@ -148,9 +148,9 @@ struct context_s {
     /** Current short Coin ID */
     unsigned char shortCoinId[MAX_SHORT_COIN_ID];
     /** Current Coin ID length */
-    unsigned char coinIdLength;    
+    unsigned char coinIdLength;
     /** Current short Coin ID length */
-    unsigned char shortCoinIdLength;        
+    unsigned char shortCoinIdLength;
 
     /** Non protected transaction context */
 
@@ -161,7 +161,7 @@ struct context_s {
     /** Transaction Prefix hash context */
     BLAKE256_CTX transactionHashPrefix;
     /** Transaction Witness hash context */
-    BLAKE256_CTX transactionHashWitness; 
+    BLAKE256_CTX transactionHashWitness;
     /** Authorization hash context */
     BLAKE256_CTX transactionHashAuthorization;
     /** Current hash to perform (TRANSACTION_HASH_) */
@@ -211,14 +211,14 @@ struct context_s {
     unsigned int discardSize;
     unsigned char outputParsingState;
     unsigned char totalOutputAmount[8];
-    unsigned char changeOutputFound;    
+    unsigned char changeOutputFound;
 };
 typedef struct context_s context_t;
 
 
 /**
  * Structure to configure the bitcoin application for a given altcoin
- * 
+ *
  */
 typedef enum coin_flags_e {
     DUMMY_FLAG=1
@@ -240,7 +240,7 @@ typedef struct altcoin_config_s {
         unsigned int color_header;
         unsigned int color_dashboard;
     #endif // TARGET_BLUE
-    
+
     const char* coinid; // used coind id for message signature prefix
     const char* name; // for ux displays
     const char* name_short; // for unit in ux displays

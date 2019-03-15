@@ -1,6 +1,6 @@
 /*******************************************************************************
-*   Ledger Blue - Bitcoin Wallet
-*   (c) 2016 Ledger
+*   Ledger App - Bitcoin Wallet
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ union {
 
     struct {
         // A bip44 path contains 5 elements, which max length in ascii is 10 char + optional quote "'" + "/" + \0"
-        char derivation_path [MAX_DERIV_PATH_ASCII_LENGTH];  
+        char derivation_path [MAX_DERIV_PATH_ASCII_LENGTH];
     } tmp_warning;
 
     unsigned int dummy; // ensure the whole vars is aligned for the CM0 to
@@ -158,7 +158,7 @@ union {
     } tmp;
 
     struct {
-        char derivation_path [MAX_DERIV_PATH_ASCII_LENGTH];  
+        char derivation_path [MAX_DERIV_PATH_ASCII_LENGTH];
     } tmp_warning;
 
     /*
@@ -224,7 +224,7 @@ const bagl_element_t ui_idle_blue[] = {
     UI_BLUE_BUTTON_SETTINGS(io_seproxyhal_touch_settings),
     UI_BLUE_BUTTON_EXIT(io_seproxyhal_touch_exit),
     UI_BLUE_TEXT(0, 0, 270, 320, "Open your wallet", BAGL_FONT_OPEN_SANS_LIGHT_16_22PX, BAGL_FONT_ALIGNMENT_CENTER,  COLOR_BLACK, COLOR_BG_1),
-    UI_BLUE_TEXT(0, 0, 308, 320, "Connect your Ledger Blue and open your", BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, BAGL_FONT_ALIGNMENT_CENTER, COLOR_BLACK, COLOR_BG_1),
+    UI_BLUE_TEXT(0, 0, 308, 320, "Connect your Ledger App and open your", BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, BAGL_FONT_ALIGNMENT_CENTER, COLOR_BLACK, COLOR_BG_1),
     UI_BLUE_TEXT(0, 0, 331, 320, "preferred wallet to view your accounts.", BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, BAGL_FONT_ALIGNMENT_CENTER, COLOR_BLACK, COLOR_BG_1),
     UI_BLUE_TEXT(0, 0, 450, 320, "Validation requests will show automatically.", BAGL_FONT_OPEN_SANS_REGULAR_8_11PX, BAGL_FONT_ALIGNMENT_CENTER, COLOR_GRAY, COLOR_BG_1)
 
@@ -256,8 +256,8 @@ unsigned int ui_settings_back_callback(const bagl_element_t* e) {
 const bagl_element_t ui_settings_blue[] = {
     UI_BLUE_BACKGROUND("SETTINGS"),
     UI_BLUE_BUTTON_GO_BACK(ui_settings_back_callback),
-    UI_BLUE_TEXT(0, 30, 105, 160, "Public key export", BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, BAGL_FONT_ALIGNMENT_LEFT, COLOR_BLACK, COLOR_BG_1),     
-    UI_BLUE_TEXT(0, 30, 126, 260, "Enable to approve export requests manually", BAGL_FONT_OPEN_SANS_REGULAR_8_11PX, BAGL_FONT_ALIGNMENT_LEFT, COLOR_GRAY, COLOR_BG_1),     
+    UI_BLUE_TEXT(0, 30, 105, 160, "Public key export", BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, BAGL_FONT_ALIGNMENT_LEFT, COLOR_BLACK, COLOR_BG_1),
+    UI_BLUE_TEXT(0, 30, 126, 260, "Enable to approve export requests manually", BAGL_FONT_OPEN_SANS_REGULAR_8_11PX, BAGL_FONT_ALIGNMENT_LEFT, COLOR_GRAY, COLOR_BG_1),
     UI_BLUE_TOUCHZONE(0, 78, 320, 68, ui_settings_blue_toggle_pubKeyRequestRestriction, ui_settings_out_over, ui_settings_out_over),
     UI_BLUE_TOGGLE(258, 98, COLOR_BG_1)
 };
@@ -285,7 +285,7 @@ const bagl_element_t * ui_settings_blue_prepro(const bagl_element_t * e) {
 }
 
 unsigned int ui_settings_blue_button(unsigned int button_mask, unsigned int button_mask_counter) {
-  return 0;  
+  return 0;
 }
 
 #endif // #if defined(TARGET_BLUE)
@@ -510,7 +510,7 @@ const bagl_element_t ui_transaction_blue[] = {
     UI_BLUE_TEXT(0x10, 130, 200, 160, NULL, BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, BAGL_FONT_ALIGNMENT_RIGHT, COLOR_BLACK, COLOR_BG_1),
     UI_BLUE_TEXT(0x20, 284, 196, 6, BAGL_FONT_SYMBOLS_0_MINIRIGHT, BAGL_FONT_SYMBOLS_0, BAGL_FONT_ALIGNMENT_RIGHT, COLOR_GRAY, COLOR_BG_1),
     UI_BLUE_TOUCHZONE(0, 168, 320, 48, ui_transaction_blue_1_details, ui_menu_item_out_over, ui_menu_item_out_over),
-    {{BAGL_RECTANGLE, 0x20, 0, 168, 5, 48, 0, 0, BAGL_FILL, COLOR_BG_1, COLOR_BG_1, 0, 0}, 
+    {{BAGL_RECTANGLE, 0x20, 0, 168, 5, 48, 0, 0, BAGL_FILL, COLOR_BG_1, COLOR_BG_1, 0, 0},
     NULL, 0, 0x41CCB4, 0, NULL, NULL, NULL},
 
     // separator when second details is to be displayed
@@ -521,7 +521,7 @@ const bagl_element_t ui_transaction_blue[] = {
     UI_BLUE_TEXT(0x11, 130, 245, 160, NULL, BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, BAGL_FONT_ALIGNMENT_RIGHT, COLOR_BLACK, COLOR_BG_1),
     UI_BLUE_TEXT(0x21, 284, 245, 6, BAGL_FONT_SYMBOLS_0_MINIRIGHT, BAGL_FONT_SYMBOLS_0, BAGL_FONT_ALIGNMENT_RIGHT, COLOR_GRAY, COLOR_BG_1),
     UI_BLUE_TOUCHZONE(0, 217, 320, 48, ui_transaction_blue_2_details, ui_menu_item_out_over, ui_menu_item_out_over),
-    {{BAGL_RECTANGLE, 0x21, 0, 217, 5, 48, 0, 0, BAGL_FILL, COLOR_BG_1, COLOR_BG_1, 0, 0}, 
+    {{BAGL_RECTANGLE, 0x21, 0, 217, 5, 48, 0, 0, BAGL_FILL, COLOR_BG_1, COLOR_BG_1, 0, 0},
     NULL, 0, 0x41CCB4, 0, NULL, NULL, NULL},
 
     // separator when second details is to be displayed
@@ -649,7 +649,7 @@ const bagl_element_t ui_display_derivation_warning[] = {
     UI_BLUE_TEXT(0, 0, 331, 320, vars.tmp_warning.derivation_path+60, BAGL_FONT_OPEN_SANS_SEMIBOLD_11_16PX, BAGL_FONT_ALIGNMENT_CENTER, COLOR_BLACK, COLOR_BG_1),
     UI_BLUE_TEXT(0, 0, 348, 320, vars.tmp_warning.derivation_path+90, BAGL_FONT_OPEN_SANS_SEMIBOLD_11_16PX, BAGL_FONT_ALIGNMENT_CENTER, COLOR_BLACK, COLOR_BG_1),
 
-   
+
     UI_BLUE_BUTTONS_REJECT_OR_CONFIRM("REJECT", "CONFIRM", io_seproxyhal_touch_display_cancel, io_seproxyhal_touch_display_address_blue)
 };
 
@@ -858,7 +858,7 @@ const bagl_element_t ui_display_address_nanos[] = {
 };
 
 const bagl_element_t ui_display_token_nanos[] = {
-    
+
     UI_NANOS_BACKGROUND(),
     UI_NANOS_ICON_LEFT(0, BAGL_GLYPH_ICON_CROSS),
     UI_NANOS_ICON_RIGHT(0, BAGL_GLYPH_ICON_CHECK),
@@ -889,7 +889,7 @@ const bagl_element_t ui_request_change_path_approval_nanos[] = {
     UI_NANOS_ICON_LEFT(4, BAGL_GLYPH_ICON_CROSS),
     UI_NANOS_ICON_RIGHT(4, BAGL_GLYPH_ICON_CHECK),
     UI_NANOS_TEXT(4, 0, 12, 128, "Reject if you're", BAGL_FONT_OPEN_SANS_EXTRABOLD_11px),
-    UI_NANOS_TEXT(4, 0, 26, 128, "not sure", BAGL_FONT_OPEN_SANS_EXTRABOLD_11px)     
+    UI_NANOS_TEXT(4, 0, 26, 128, "not sure", BAGL_FONT_OPEN_SANS_EXTRABOLD_11px)
 };
 
 unsigned int ui_display_address_nanos_prepro(const bagl_element_t *element) {
@@ -898,7 +898,7 @@ unsigned int ui_display_address_nanos_prepro(const bagl_element_t *element) {
         unsigned int display = (ux_step == (0x7F & element->component.userid) - 1);
         if (display) {
             switch (element->component.userid) {
-            case 0x83: 
+            case 0x83:
                 ux_loop_over_curr_element = 1;
                 UX_CALLBACK_SET_INTERVAL(MAX(
                     3000, 1000 + bagl_label_roundtrip_duration_ms(element, 7)));
@@ -941,7 +941,7 @@ unsigned int ui_display_address_nanos_button(unsigned int button_mask,
 unsigned int ui_display_token_nanos_button(unsigned int button_mask,
                                              unsigned int button_mask_counter);
 unsigned int ui_request_pubkey_approval_nanos_button(unsigned int button_mask,
-                                             unsigned int button_mask_counter);                                             
+                                             unsigned int button_mask_counter);
 unsigned int ui_request_change_path_approval_nanos_button(unsigned int button_mask,
                                              unsigned int button_mask_counter);
 
@@ -1120,7 +1120,7 @@ unsigned int io_seproxyhal_touch_exit(const bagl_element_t *e) {
 unsigned int io_seproxyhal_touch_display_address_blue(const bagl_element_t *e) {
     load_qr_code(G_io_apdu_buffer + 200);
     UX_DISPLAY(ui_display_address_blue, ui_display_address_blue_prepro);
-    return 0; 
+    return 0;
 }
 #endif // TARGET_BLUE
 
@@ -1177,7 +1177,7 @@ unsigned int io_seproxyhal_touch_display_ok(const bagl_element_t *e) {
 }
 
 unsigned int io_seproxyhal_touch_display_token_cancel(const bagl_element_t *e) {
-    // revoke previous valid token if there was one 
+    // revoke previous valid token if there was one
     context_D.has_valid_token = false;
     // user denied the token, tell the USB side
     bagl_user_action_display(0);
@@ -1438,16 +1438,16 @@ void ui_transaction_p2sh_blue_init(void) {
 #if defined(TARGET_NANOX)
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_NOCB(
-    ux_idle_flow_1_step, 
-    bnn, //pnn, 
+    ux_idle_flow_1_step,
+    bnn, //pnn,
 {
       "", //&C_icon_dashboard,
       "Application",
       "is ready",
     });
 UX_FLOW_DEF_NOCB(
-    ux_idle_flow_2_step, 
-    bn, 
+    ux_idle_flow_2_step,
+    bn,
     {
       "Version",
       APPVERSION,
@@ -1469,16 +1469,16 @@ const ux_flow_step_t *        const ux_idle_flow [] = {
 
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_NOCB(
-    ux_sign_flow_1_step, 
-    pnn, 
+    ux_sign_flow_1_step,
+    pnn,
     {
       &C_icon_certificate,
       "Sign",
       "message",
     });
 UX_FLOW_DEF_NOCB(
-    ux_sign_flow_2_step, 
-    bnnn_paging, 
+    ux_sign_flow_2_step,
+    bnnn_paging,
     {
       .title = "Message hash",
       .text = vars.tmp.fullAmount,
@@ -1512,37 +1512,37 @@ const ux_flow_step_t *        const ux_sign_flow [] = {
 
 //////////////////////////////////////////////////////////////////////
 
-UX_FLOW_DEF_NOCB(ux_confirm_full_flow_1_step, 
-    pnn, 
+UX_FLOW_DEF_NOCB(ux_confirm_full_flow_1_step,
+    pnn,
     {
       &C_icon_eye,
       "Review",
       "transaction",
     });
 UX_FLOW_DEF_NOCB(
-    ux_confirm_full_flow_2_step, 
-    bnnn_paging, 
+    ux_confirm_full_flow_2_step,
+    bnnn_paging,
     {
       .title = "Amount",
       .text = vars.tmp.fullAmount
     });
 UX_FLOW_DEF_NOCB(
-    ux_confirm_full_flow_3_step, 
-    bnnn_paging, 
+    ux_confirm_full_flow_3_step,
+    bnnn_paging,
     {
       .title = "Address",
       .text = vars.tmp.fullAddress,
     });
 UX_FLOW_DEF_NOCB(
-    ux_confirm_full_flow_4_step, 
-    bnnn_paging, 
+    ux_confirm_full_flow_4_step,
+    bnnn_paging,
     {
       .title = "Fees",
       .text = vars.tmp.feesAmount,
     });
 UX_FLOW_DEF_VALID(
-    ux_confirm_full_flow_5_step, 
-    pbb, 
+    ux_confirm_full_flow_5_step,
+    pbb,
     io_seproxyhal_touch_verify_ok(NULL),
     {
       &C_icon_validate_14,
@@ -1550,8 +1550,8 @@ UX_FLOW_DEF_VALID(
       "and send",
     });
 UX_FLOW_DEF_VALID(
-    ux_confirm_full_flow_6_step, 
-    pb, 
+    ux_confirm_full_flow_6_step,
+    pb,
     io_seproxyhal_touch_verify_cancel(NULL),
     {
       &C_icon_crossmark,
@@ -1571,38 +1571,38 @@ const ux_flow_step_t *        const ux_confirm_full_flow [] = {
 //////////////////////////////////////////////////////////////////////
 
 UX_FLOW_DEF_NOCB(
-    ux_confirm_single_flow_2_step, 
-    pnn, 
+    ux_confirm_single_flow_2_step,
+    pnn,
     {
       &C_icon_eye,
       "Review",
       vars.tmp.feesAmount,
     });
 UX_FLOW_DEF_NOCB(
-    ux_confirm_single_flow_3_step, 
-    bnnn_paging, 
+    ux_confirm_single_flow_3_step,
+    bnnn_paging,
     {
       .title = "Amount",
       .text = vars.tmp.fullAmount,
     });
 UX_FLOW_DEF_NOCB(
-    ux_confirm_single_flow_4_step, 
-    bnnn_paging, 
+    ux_confirm_single_flow_4_step,
+    bnnn_paging,
     {
       .title = "Address",
       .text = vars.tmp.fullAddress,
     });
 UX_FLOW_DEF_VALID(
-    ux_confirm_single_flow_5_step, 
+    ux_confirm_single_flow_5_step,
     pb,
-    io_seproxyhal_touch_verify_ok(NULL), 
+    io_seproxyhal_touch_verify_ok(NULL),
     {
       &C_icon_validate_14,
       "Accept",
     });
 UX_FLOW_DEF_VALID(
-    ux_confirm_single_flow_6_step, 
-    pb, 
+    ux_confirm_single_flow_6_step,
+    pb,
     io_seproxyhal_touch_verify_cancel(NULL),
     {
       &C_icon_crossmark,
@@ -1621,8 +1621,8 @@ const ux_flow_step_t *        const ux_confirm_single_flow [] = {
 //////////////////////////////////////////////////////////////////////
 
 // UX_FLOW_DEF_NOCB(
-//     ux_finalize_flow_1_step, 
-//     pnn, 
+//     ux_finalize_flow_1_step,
+//     pnn,
 //     {
 //       &C_icon_eye,
 //       "Review",
@@ -1630,15 +1630,15 @@ const ux_flow_step_t *        const ux_confirm_single_flow [] = {
 //     });
 
 UX_FLOW_DEF_NOCB(
-    ux_finalize_flow_4_step, 
-    bnnn_paging, 
+    ux_finalize_flow_4_step,
+    bnnn_paging,
     {
       .title = "Fees",
       .text = vars.tmp.feesAmount,
     });
 UX_FLOW_DEF_VALID(
-    ux_finalize_flow_5_step, 
-    pbb, 
+    ux_finalize_flow_5_step,
+    pbb,
     io_seproxyhal_touch_verify_ok(NULL),
     {
       &C_icon_validate_14,
@@ -1646,8 +1646,8 @@ UX_FLOW_DEF_VALID(
       "and send"
     });
 UX_FLOW_DEF_VALID(
-    ux_finalize_flow_6_step, 
-    pb, 
+    ux_finalize_flow_6_step,
+    pb,
     io_seproxyhal_touch_verify_cancel(NULL),
     {
       &C_icon_crossmark,
@@ -1664,31 +1664,31 @@ const ux_flow_step_t *        const ux_finalize_flow [] = {
 
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_NOCB(
-    ux_display_public_flow_1_step, 
-    pnn, 
+    ux_display_public_flow_1_step,
+    pnn,
     {
       &C_icon_eye,
       "Verify",
       "address",
     });
 UX_FLOW_DEF_NOCB(
-    ux_display_public_flow_4_step, 
-    bnnn_paging, 
+    ux_display_public_flow_4_step,
+    bnnn_paging,
     {
       .title = "Address",
       .text = G_io_apdu_buffer+200,
     });
 UX_FLOW_DEF_VALID(
-    ux_display_public_flow_5_step, 
-    pb, 
+    ux_display_public_flow_5_step,
+    pb,
     io_seproxyhal_touch_display_ok(NULL),
     {
       &C_icon_validate_14,
       "Approve",
     });
 UX_FLOW_DEF_VALID(
-    ux_display_public_flow_6_step, 
-    pb, 
+    ux_display_public_flow_6_step,
+    pb,
     io_seproxyhal_touch_display_cancel(NULL),
     {
       &C_icon_crossmark,
@@ -1707,8 +1707,8 @@ const ux_flow_step_t *        const ux_display_public_flow [] = {
 
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_VALID(
-    ux_display_token_flow_1_step, 
-    pbb, 
+    ux_display_token_flow_1_step,
+    pbb,
     io_seproxyhal_touch_display_ok(NULL),
     {
       &C_icon_validate_14,
@@ -1716,15 +1716,15 @@ UX_FLOW_DEF_VALID(
       G_io_apdu_buffer+200,
     });
 UX_FLOW_DEF_VALID(
-    ux_display_token_flow_2_step, 
-    pb, 
+    ux_display_token_flow_2_step,
+    pb,
     io_seproxyhal_touch_display_cancel(NULL),
     {
       &C_icon_crossmark,
       "Reject",
     });
 
-const ux_flow_step_t *        const ux_display_token_flow [] = { 
+const ux_flow_step_t *        const ux_display_token_flow [] = {
   &ux_display_token_flow_1_step,
   &ux_display_token_flow_2_step,
   FLOW_END_STEP,
@@ -1732,8 +1732,8 @@ const ux_flow_step_t *        const ux_display_token_flow [] = {
 
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_VALID(
-    ux_request_pubkey_approval_flow_1_step, 
-    pbb, 
+    ux_request_pubkey_approval_flow_1_step,
+    pbb,
     io_seproxyhal_touch_display_ok(NULL),
     {
       &C_icon_validate_14,
@@ -1741,15 +1741,15 @@ UX_FLOW_DEF_VALID(
       "public key?",
     });
 UX_FLOW_DEF_VALID(
-    ux_request_pubkey_approval_flow_2_step, 
-    pb, 
+    ux_request_pubkey_approval_flow_2_step,
+    pb,
     io_seproxyhal_touch_display_cancel(NULL),
     {
       &C_icon_crossmark,
       "Reject",
     });
 
-const ux_flow_step_t *        const ux_request_pubkey_approval_flow [] = { 
+const ux_flow_step_t *        const ux_request_pubkey_approval_flow [] = {
   &ux_request_pubkey_approval_flow_1_step,
   &ux_request_pubkey_approval_flow_2_step,
   FLOW_END_STEP,
@@ -1757,23 +1757,23 @@ const ux_flow_step_t *        const ux_request_pubkey_approval_flow [] = {
 
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_NOCB(
-    ux_request_change_path_approval_flow_1_step, 
-    pbb, 
+    ux_request_change_path_approval_flow_1_step,
+    pbb,
     {
       &C_icon_eye,
       "The change path",
       "is unusual",
     });
 UX_FLOW_DEF_NOCB(
-    ux_request_change_path_approval_flow_2_step, 
-    bnnn_paging, 
+    ux_request_change_path_approval_flow_2_step,
+    bnnn_paging,
     {
       .title = "Change path",
       .text = vars.tmp_warning.derivation_path,
     });
 UX_FLOW_DEF_VALID(
-    ux_request_change_path_approval_flow_3_step, 
-    pbb, 
+    ux_request_change_path_approval_flow_3_step,
+    pbb,
     io_seproxyhal_touch_display_cancel(NULL),
     {
       &C_icon_crossmark,
@@ -1781,15 +1781,15 @@ UX_FLOW_DEF_VALID(
       "not sure",
     });
 UX_FLOW_DEF_VALID(
-    ux_request_change_path_approval_flow_4_step, 
-    pb, 
+    ux_request_change_path_approval_flow_4_step,
+    pb,
     io_seproxyhal_touch_display_ok(NULL),
     {
       &C_icon_validate_14,
       "Approve",
     });
 
-const ux_flow_step_t *        const ux_request_change_path_approval_flow [] = { 
+const ux_flow_step_t *        const ux_request_change_path_approval_flow [] = {
   &ux_request_change_path_approval_flow_1_step,
   &ux_request_change_path_approval_flow_2_step,
   &ux_request_change_path_approval_flow_3_step,
@@ -1973,7 +1973,7 @@ uint8_t prepare_single_output()
         addressOffset = offset + 3;
         version = context_D.payToScriptHashVersion;
     }
-    if (vars.tmp.fullAddress[0] == 0) 
+    if (vars.tmp.fullAddress[0] == 0)
     {
 
         if (version > 255)
@@ -1986,7 +1986,7 @@ uint8_t prepare_single_output()
         {
             versionSize = 1;
             address[0] = version;
-        } 
+        }
         os_memmove(address + versionSize,
                    context_D.currentOutput + addressOffset, 20);
 
@@ -2198,18 +2198,18 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
                 os_memmove(address + versionSize,
                             context_D.currentOutput + addressOffset,
                             20);
-                
+
                 // if we're processing the real output (not the change one)
                 if (currentPos == outputPos)
                 {
                     unsigned short textSize = 0;
-                    
+
                     // Prepare address
                     textSize = public_key_to_encoded_base58(
                         address, 20 + versionSize, (unsigned char *)tmp,
                         sizeof(tmp), version, 1);
                     tmp[textSize] = '\0';
-                    
+
                     strcpy(vars.tmp.fullAddress, tmp);
 
                     // Prepare amount
@@ -2321,7 +2321,7 @@ unsigned int bagl_confirm_single_output() {
 #endif // #if TARGET_ID
 #ifdef TARGET_NANOX
     ux_flow_init(0, ux_confirm_single_flow, NULL);
-#endif // TARGET_NANOX 
+#endif // TARGET_NANOX
     return 1;
 }
 
@@ -2339,7 +2339,7 @@ unsigned int bagl_finalize_tx() {
 #endif // #if TARGET_ID
 #ifdef TARGET_NANOX
     ux_flow_init(0, ux_finalize_flow, NULL);
-#endif // TARGET_NANOX 
+#endif // TARGET_NANOX
     return 1;
 }
 
@@ -2357,7 +2357,7 @@ void bagl_confirm_message_signature() {
 #endif // #if TARGET_ID
 #ifdef TARGET_NANOX
     ux_flow_init(0, ux_sign_flow, NULL);
-#endif // TARGET_NANOX 
+#endif // TARGET_NANOX
 }
 
 void bagl_display_public_key(unsigned char* derivation_path) {
@@ -2366,7 +2366,7 @@ void bagl_display_public_key(unsigned char* derivation_path) {
 
     bip32_print_path(derivation_path, vars.tmp_warning.derivation_path, MAX_DERIV_PATH_ASCII_LENGTH);
     uint8_t is_derivation_path_unusual = bip44_derivation_guard(derivation_path, false);
-  
+
 #if defined(TARGET_BLUE)
 
     if(is_derivation_path_unusual){
@@ -2376,7 +2376,7 @@ void bagl_display_public_key(unsigned char* derivation_path) {
         load_qr_code(G_io_apdu_buffer + 200);
     UX_DISPLAY(ui_display_address_blue, ui_display_address_blue_prepro);
     }
-    
+
 #elif defined(TARGET_NANOS)
     // prepend a white space to the address
     G_io_apdu_buffer[199] = ' ';
@@ -2558,7 +2558,7 @@ __attribute__((section(".boot"))) int main(int arg0) {
                 // more if another app does not resetup after app switch)
                 UX_SET_STATUS_BAR_COLOR(COLOR_WHITE, G_coin_config->color_header);
 #endif // TARGET_ID
- 
+
                 app_main();
             }
             CATCH(EXCEPTION_IO_RESET) {

@@ -1,6 +1,6 @@
 /*******************************************************************************
-*   Ledger Blue - Bitcoin Wallet
-*   (c) 2016 Ledger
+*   Ledger App - Bitcoin Wallet
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ unsigned short apdu_get_wallet_public_key() {
     }
     os_memmove(keyPath, G_io_apdu_buffer + ISO_OFFSET_CDATA,
                MAX_BIP32_PATH_LENGTH);
-            
+
     if(display_request_token){
         uint8_t request_token_offset = ISO_OFFSET_CDATA + G_io_apdu_buffer[ISO_OFFSET_CDATA]*4 + 1;
         request_token = read_u32(G_io_apdu_buffer + request_token_offset, true, false);
@@ -113,7 +113,7 @@ unsigned short apdu_get_wallet_public_key() {
         bagl_display_public_key(keyPath);
         }
     // If the token requested has already been approved in a previous call, the source is trusted so don't ask for approval again
-    else if(display_request_token && 
+    else if(display_request_token &&
            (!context_D.has_valid_token || os_memcmp(&request_token, context_D.last_token, 4)))
     {
         // disable the has_valid_token flag and store the new token
