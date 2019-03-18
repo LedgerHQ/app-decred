@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger App - Bitcoin Wallet
-*   (c) 2016-2019 Ledger
+*   (c) 2016-2019-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -10,28 +10,29 @@
 *
 *  Unless required by applicable law or agreed to in writing, software
 *  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITBTCHIP_HOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BTCHIP_H
+#include "btchip_internal.h"
 
-#define BTCHIP_H
+void sbSet(secu8 *target, unsigned char source) {
+    *target = (((unsigned char)~source) << 8) + source;
+}
 
-#include "btchip_config.h"
-#include "os.h"
-#include "os_io_seproxyhal.h"
+void sbCheck(secu8 source) {
+    if (((source >> 8) & 0xff) != (unsigned char)(~(source & 0xff))) {
+        reset();
+    }
+}
 
-#include "stdlib.h"
-#include "stdbool.h"
+void ssSet(secu16 *target, unsigned short source) {
+    *target = (((unsigned long int)((unsigned short)~source)) << 16) + source;
+}
 
-#define L_DEBUG_APP(x)
-#define L_DEBUG_NOPREFIX(x)
-#define L_DEBUG_BUF(x)
-
-#define SW_TECBTCHIP_HNICAL_DETAILS(x) BTCHIP_SW_TECBTCHIP_HNICAL_PROBLEM
-
-#include "btchip_secure_value.h"
-
-#endif
+void ssCheck(secu16 source) {
+    if (((source >> 16) & 0xffff) != (unsigned short)(~(source & 0xffff))) {
+        reset();
+    }
+}

@@ -10,28 +10,19 @@
 *
 *  Unless required by applicable law or agreed to in writing, software
 *  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITBTCHIP_HOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BTCHIP_H
+#ifndef BTCHIP_ECC_H
 
-#define BTCHIP_H
+#define BTCHIP_ECC_H
 
-#include "btchip_config.h"
 #include "os.h"
-#include "os_io_seproxyhal.h"
 
-#include "stdlib.h"
-#include "stdbool.h"
+#define BTCHIP_CURVE CX_CURVE_256K1
 
-#define L_DEBUG_APP(x)
-#define L_DEBUG_NOPREFIX(x)
-#define L_DEBUG_BUF(x)
-
-#define SW_TECBTCHIP_HNICAL_DETAILS(x) BTCHIP_SW_TECBTCHIP_HNICAL_PROBLEM
-
-#include "btchip_secure_value.h"
+void btchip_compress_public_key_value(unsigned char *value);
 
 #endif
