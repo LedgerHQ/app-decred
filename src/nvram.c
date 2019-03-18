@@ -15,12 +15,12 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "internal.h"
+#include "btchip_internal.h"
 
-#include "public_ram_variables.h"
+#include "btchip_public_ram_variables.h"
 
 #if 0
-WIDE storage_t N_real;
+WIDE btchip_storage_t N_real;
 #else
-WIDE storage_t const N_real;
+WIDE btchip_storage_t const N_real;
 #endif

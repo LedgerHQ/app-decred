@@ -15,8 +15,8 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "internal.h"
-#include "apdu_constants.h"
+#include "btchip_internal.h"
+#include "btchip_apdu_constants.h"
 #include "blake256.h"
 
 const unsigned char TRANSACTION_OUTPUT_SCRIPT_PRE[] = {
@@ -32,7 +32,7 @@ const unsigned char TRANSACTION_OUTPUT_SCRIPT_P2SH_POST[] = {0x87}; // OP_EQUAL
 const unsigned char TRANSACTION_OUTPUT_SCRIPT_P2WPKH_PRE[] = {0x16, 0x00, 0x14};
 const unsigned char TRANSACTION_OUTPUT_SCRIPT_P2WSH_PRE[] = {0x22, 0x00, 0x20};
 
-unsigned char output_script_is_regular(unsigned char *buffer) {
+unsigned char btchip_output_script_is_regular(unsigned char *buffer) {
 
     if ((os_memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_PRE,
                    sizeof(TRANSACTION_OUTPUT_SCRIPT_PRE)) == 0) &&
@@ -45,7 +45,7 @@ unsigned char output_script_is_regular(unsigned char *buffer) {
     return 0;
 }
 
-unsigned char output_script_is_p2sh(unsigned char *buffer) {
+unsigned char btchip_output_script_is_p2sh(unsigned char *buffer) {
     if ((os_memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_P2SH_PRE,
                    sizeof(TRANSACTION_OUTPUT_SCRIPT_P2SH_PRE)) == 0) &&
         (os_memcmp(buffer + sizeof(TRANSACTION_OUTPUT_SCRIPT_P2SH_PRE) + 20,
@@ -56,25 +56,25 @@ unsigned char output_script_is_p2sh(unsigned char *buffer) {
     return 0;
 }
 
-unsigned char output_script_is_op_return(unsigned char *buffer) {
+unsigned char btchip_output_script_is_op_return(unsigned char *buffer) {
     return (buffer[1] == 0x6A);
 }
 
-unsigned char output_script_is_op_create(unsigned char *buffer) {
-    return (!output_script_is_regular(buffer) &&
-            !output_script_is_p2sh(buffer) &&
-            !output_script_is_op_return(buffer) && (buffer[0] <= 0xEA) &&
+unsigned char btchip_output_script_is_op_create(unsigned char *buffer) {
+    return (!btchip_output_script_is_regular(buffer) &&
+            !btchip_output_script_is_p2sh(buffer) &&
+            !btchip_output_script_is_op_return(buffer) && (buffer[0] <= 0xEA) &&
             (buffer[buffer[0]] == 0xC1));
 }
 
-unsigned char output_script_is_op_call(unsigned char *buffer) {
-    return (!output_script_is_regular(buffer) &&
-            !output_script_is_p2sh(buffer) &&
-            !output_script_is_op_return(buffer) && (buffer[0] <= 0xEA) &&
+unsigned char btchip_output_script_is_op_call(unsigned char *buffer) {
+    return (!btchip_output_script_is_regular(buffer) &&
+            !btchip_output_script_is_p2sh(buffer) &&
+            !btchip_output_script_is_op_return(buffer) && (buffer[0] <= 0xEA) &&
             (buffer[buffer[0]] == 0xC2));
 }
 
-unsigned char rng_u8_modulo(unsigned char modulo) {
+unsigned char btchip_rng_u8_modulo(unsigned char modulo) {
     unsigned int rng_max = 256 % modulo;
     unsigned int rng_limit = 256 - rng_max;
     unsigned char candidate;
@@ -83,7 +83,7 @@ unsigned char rng_u8_modulo(unsigned char modulo) {
     return (candidate % modulo);
 }
 
-unsigned char secure_memcmp(const void WIDE *buf1, const void WIDE *buf2,
+unsigned char btchip_secure_memcmp(const void WIDE *buf1, const void WIDE *buf2,
                                    unsigned short length) {
     unsigned char error = 0;
     while (length--) {
@@ -96,7 +96,7 @@ unsigned char secure_memcmp(const void WIDE *buf1, const void WIDE *buf2,
     return error;
 }
 
-unsigned long int read_u32(unsigned char WIDE *buffer, unsigned char be,
+unsigned long int btchip_read_u32(unsigned char WIDE *buffer, unsigned char be,
                                   unsigned char skipSign) {
     unsigned char i;
     unsigned long int result = 0;
@@ -116,32 +116,32 @@ unsigned long int read_u32(unsigned char WIDE *buffer, unsigned char be,
     return result;
 }
 
-void write_u32_be(unsigned char *buffer, unsigned long int value) {
+void btchip_write_u32_be(unsigned char *buffer, unsigned long int value) {
     buffer[0] = ((value >> 24) & 0xff);
     buffer[1] = ((value >> 16) & 0xff);
     buffer[2] = ((value >> 8) & 0xff);
     buffer[3] = (value & 0xff);
 }
 
-void write_u32_le(unsigned char *buffer, unsigned long int value) {
+void btchip_write_u32_le(unsigned char *buffer, unsigned long int value) {
     buffer[0] = (value & 0xff);
     buffer[1] = ((value >> 8) & 0xff);
     buffer[2] = ((value >> 16) & 0xff);
     buffer[3] = ((value >> 24) & 0xff);
 }
 
-void retrieve_keypair_discard(unsigned char WIDE *privateComponent,
+void btchip_retrieve_keypair_discard(unsigned char WIDE *privateComponent,
                                      unsigned char derivePublic) {
     BEGIN_TRY {
         TRY {
-            cx_ecdsa_init_private_key(CURVE, privateComponent, 32,
-                                      &private_key_D);
+            cx_ecdsa_init_private_key(BTCHIP_CURVE, privateComponent, 32,
+                                      &btchip_private_key_D);
 
             L_DEBUG_BUF(("Using private component\n", privateComponent, 32));
 
             if (derivePublic) {
-                cx_ecfp_generate_pair(CURVE, &public_key_D,
-                                      &private_key_D, 1);
+                cx_ecfp_generate_pair(BTCHIP_CURVE, &btchip_public_key_D,
+                                      &btchip_private_key_D, 1);
             }
         }
         FINALLY {
@@ -150,7 +150,7 @@ void retrieve_keypair_discard(unsigned char WIDE *privateComponent,
     END_TRY;
 }
 
-void public_key_hash160(unsigned char WIDE *in, unsigned short inlen,
+void btchip_public_key_hash160(unsigned char WIDE *in, unsigned short inlen,
                                unsigned char *out) {
     union {
         //cx_blake2b_t blake;
@@ -168,7 +168,7 @@ void public_key_hash160(unsigned char WIDE *in, unsigned short inlen,
     cx_hash(&u.riprip.header, CX_LAST, buffer, 32, out);
 }
 
-unsigned short public_key_to_encoded_base58(
+unsigned short btchip_public_key_to_encoded_base58(
     unsigned char WIDE *in, unsigned short inlen, unsigned char *out,
     unsigned short outlen, unsigned short version,
     unsigned char alreadyHashed) {
@@ -181,7 +181,7 @@ unsigned short public_key_to_encoded_base58(
 
     if (!alreadyHashed) {
         L_DEBUG_BUF(("To hash\n", in, inlen));
-        public_key_hash160(in, inlen, tmpBuffer + versionSize);
+        btchip_public_key_hash160(in, inlen, tmpBuffer + versionSize);
         L_DEBUG_BUF(("Hash160\n", (tmpBuffer + versionSize), 20));
         if (version > 255) {
             tmpBuffer[0] = (version >> 8);
@@ -208,13 +208,13 @@ unsigned short public_key_to_encoded_base58(
     os_memmove(tmpBuffer + 20 + versionSize, checksumBuffer, 4);
 
     outputLen = outlen;
-    if (encode_base58(tmpBuffer, 24 + versionSize, out, &outputLen) < 0) {
+    if (btchip_encode_base58(tmpBuffer, 24 + versionSize, out, &outputLen) < 0) {
         THROW(EXCEPTION);
     }
     return outputLen;
 }
 
-void swap_bytes(unsigned char *target, unsigned char *source,
+void btchip_swap_bytes(unsigned char *target, unsigned char *source,
                        unsigned char size) {
     unsigned char i;
     for (i = 0; i < size; i++) {
@@ -222,14 +222,14 @@ void swap_bytes(unsigned char *target, unsigned char *source,
     }
 }
 
-unsigned short decode_base58_address(unsigned char WIDE *in,
+unsigned short btchip_decode_base58_address(unsigned char WIDE *in,
                                             unsigned short inlen,
                                             unsigned char *out,
                                             unsigned short outlen) {
     unsigned char hashBuffer[32];
     cx_sha256_t hash;
     size_t outputLen = outlen;
-    if (decode_base58((char *)in, inlen, out, &outputLen) < 0) {
+    if (btchip_decode_base58((char *)in, inlen, out, &outputLen) < 0) {
         THROW(EXCEPTION);
     }
     outlen = outputLen;
@@ -248,7 +248,7 @@ unsigned short decode_base58_address(unsigned char WIDE *in,
     return outlen;
 }
 
-void private_derive_keypair(unsigned char WIDE *bip32Path,
+void btchip_private_derive_keypair(unsigned char WIDE *bip32Path,
                                    unsigned char derivePublic,
                                    unsigned char *out_chainCode) {
     unsigned char bip32PathLength;
@@ -262,12 +262,12 @@ void private_derive_keypair(unsigned char WIDE *bip32Path,
     }
     bip32Path++;
     for (i = 0; i < bip32PathLength; i++) {
-        bip32PathInt[i] = read_u32(bip32Path, 1, 0);
+        bip32PathInt[i] = btchip_read_u32(bip32Path, 1, 0);
         bip32Path += 4;
     }
     os_perso_derive_node_bip32(CX_CURVE_256K1, bip32PathInt, bip32PathLength,
                                privateComponent, out_chainCode);
-    retrieve_keypair_discard(privateComponent, derivePublic);
+    btchip_retrieve_keypair_discard(privateComponent, derivePublic);
     os_memset(privateComponent, 0, sizeof(privateComponent));
 }
 
@@ -288,7 +288,7 @@ unsigned char bip44_derivation_guard(unsigned char WIDE *bip32Path, bool is_chan
     }
 
     for (i = 0; i < path_len; i++) {
-        bip32PathInt[i] = read_u32(bip32Path, 1, 0);
+        bip32PathInt[i] = btchip_read_u32(bip32Path, 1, 0);
         bip32Path += 4;
     }
 
@@ -328,7 +328,7 @@ unsigned char bip32_print_path(unsigned char WIDE *bip32Path, char* out, unsigne
     out[0] = ' ';
     offset=1;
     for (i = 0; i < bip32PathLength; i++) {
-        current_level = read_u32(bip32Path, 1, 0);
+        current_level = btchip_read_u32(bip32Path, 1, 0);
         hardened = (bool)(current_level & 0x80000000);
         if(hardened) {
             //remove hardening flag
@@ -360,7 +360,7 @@ unsigned char bip32_print_path(unsigned char WIDE *bip32Path, char* out, unsigne
     return offset -1;
 }
 
-void transaction_add_output(unsigned char *hash160Address,
+void btchip_transaction_add_output(unsigned char *hash160Address,
                                    unsigned char *amount, unsigned char p2sh) {
     const unsigned char *pre = (p2sh ? TRANSACTION_OUTPUT_SCRIPT_P2SH_PRE
                                      : TRANSACTION_OUTPUT_SCRIPT_PRE);
@@ -371,19 +371,19 @@ void transaction_add_output(unsigned char *hash160Address,
     unsigned char sizePost = (p2sh ? sizeof(TRANSACTION_OUTPUT_SCRIPT_P2SH_POST)
                                    : sizeof(TRANSACTION_OUTPUT_SCRIPT_POST));
     if (amount != NULL) {
-        swap_bytes(context_D.tmp, amount, 8);
-        context_D.tmp += 8;
+        btchip_swap_bytes(btchip_context_D.tmp, amount, 8);
+        btchip_context_D.tmp += 8;
     }
-    os_memmove(context_D.tmp, (void *)pre, sizePre);
-    context_D.tmp += sizePre;
-    os_memmove(context_D.tmp, hash160Address, 20);
-    context_D.tmp += 20;
-    os_memmove(context_D.tmp, (void *)post, sizePost);
-    context_D.tmp += sizePost;
+    os_memmove(btchip_context_D.tmp, (void *)pre, sizePre);
+    btchip_context_D.tmp += sizePre;
+    os_memmove(btchip_context_D.tmp, hash160Address, 20);
+    btchip_context_D.tmp += 20;
+    os_memmove(btchip_context_D.tmp, (void *)post, sizePost);
+    btchip_context_D.tmp += sizePost;
 }
 
 
-void signverify_finalhash(void WIDE *keyContext, unsigned char sign,
+void btchip_signverify_finalhash(void WIDE *keyContext, unsigned char sign,
                                  unsigned char WIDE *in, unsigned short inlen,
                                  unsigned char *out, unsigned short outlen,
                                  unsigned char rfc6979) {

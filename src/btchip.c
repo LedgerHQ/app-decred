@@ -17,13 +17,13 @@
 
 #include "os.h"
 
-#include "internal.h"
+#include "btchip_internal.h"
 
 #include "os_io_seproxyhal.h"
 
-#include "apdu_constants.h"
+#include "btchip_apdu_constants.h"
 
-#define TECHNICAL_NOT_IMPLEMENTED 0x99
+#define BTCHIP_TECHNICAL_NOT_IMPLEMENTED 0x99
 
 void app_dispatch(void) {
     unsigned char cla;
@@ -31,15 +31,15 @@ void app_dispatch(void) {
     unsigned char dispatched;
 
     // nothing to reply for now
-    context_D.outLength = 0;
-    context_D.io_flags = 0;
+    btchip_context_D.outLength = 0;
+    btchip_context_D.io_flags = 0;
 
     BEGIN_TRY {
         TRY {
             // If halted, then notify
-            SB_CHECK(context_D.halted);
-            if (SB_GET(context_D.halted)) {
-                context_D.sw = SW_HALTED;
+            SB_CHECK(btchip_context_D.halted);
+            if (SB_GET(btchip_context_D.halted)) {
+                btchip_context_D.sw = BTCHIP_SW_HALTED;
                 goto sendSW;
             }
 
@@ -52,20 +52,20 @@ void app_dispatch(void) {
                 }
             }
             if (dispatched == DISPATCHER_APDUS) {
-                context_D.sw = SW_INS_NOT_SUPPORTED;
+                btchip_context_D.sw = BTCHIP_SW_INS_NOT_SUPPORTED;
                 goto sendSW;
             }
             if (DISPATCHER_DATA_IN[dispatched]) {
                 if (G_io_apdu_buffer[ISO_OFFSET_LC] == 0x00 ||
-                    context_D.inLength - 5 == 0) {
-                    context_D.sw = SW_INCORRECT_LENGTH;
+                    btchip_context_D.inLength - 5 == 0) {
+                    btchip_context_D.sw = BTCHIP_SW_INCORRECT_LENGTH;
                     goto sendSW;
                 }
                 // notify we need to receive data
                 // io_exchange(CHANNEL_APDU | IO_RECEIVE_DATA, 0);
             }
             // call the apdu handler
-            context_D.sw = ((apduProcessingFunction)PIC(
+            btchip_context_D.sw = ((apduProcessingFunction)PIC(
                 DISPATCHER_FUNCTIONS[dispatched]))();
 
 // an APDU has been replied. request for power off time extension from the
@@ -76,11 +76,11 @@ void app_dispatch(void) {
 
         sendSW:
             // prepare SW after replied data
-            G_io_apdu_buffer[context_D.outLength] =
-                (context_D.sw >> 8);
-            G_io_apdu_buffer[context_D.outLength + 1] =
-                (context_D.sw & 0xff);
-            context_D.outLength += 2;
+            G_io_apdu_buffer[btchip_context_D.outLength] =
+                (btchip_context_D.sw >> 8);
+            G_io_apdu_buffer[btchip_context_D.outLength + 1] =
+                (btchip_context_D.sw & 0xff);
+            btchip_context_D.outLength += 2;
         }
         CATCH(EXCEPTION_IO_RESET) {
             THROW(EXCEPTION_IO_RESET);
@@ -88,10 +88,10 @@ void app_dispatch(void) {
         CATCH_OTHER(e) {
             // uncaught exception detected
             G_io_apdu_buffer[0] = 0x6F;
-            context_D.outLength = 2;
+            btchip_context_D.outLength = 2;
             G_io_apdu_buffer[1] = e;
             // we caught something suspicious
-            SB_SET(context_D.halted, 1);
+            SB_SET(btchip_context_D.halted, 1);
         }
         FINALLY;
     }
@@ -104,18 +104,18 @@ void app_main(void) {
     // Process the incoming APDUs
 
     // first exchange, no out length :) only wait the apdu
-    context_D.outLength = 0;
-    context_D.io_flags = 0;
+    btchip_context_D.outLength = 0;
+    btchip_context_D.io_flags = 0;
     for (;;) {
         L_DEBUG_APP(("Main Loop\n"));
 
         // os_memset(G_io_apdu_buffer, 0, 255); // paranoia
 
         // receive the whole apdu using the 7 bytes headers (ledger transport)
-        context_D.inLength =
-            io_exchange(CHANNEL_APDU | context_D.io_flags,
+        btchip_context_D.inLength =
+            io_exchange(CHANNEL_APDU | btchip_context_D.io_flags,
                         // use the previous outlength as the reply
-                        context_D.outLength);
+                        btchip_context_D.outLength);
 
         app_dispatch();
 

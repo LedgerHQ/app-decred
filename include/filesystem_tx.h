@@ -15,9 +15,9 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef FS_TX_H
+#ifndef BTCHIP_FS_TX_H
 
-#define FS_TX_H
+#define BTCHIP_FS_TX_H
 
 #include "os.h"
 
@@ -34,7 +34,7 @@
 // A path contains 10 elements max, which max length in ascii is 1 whitespace + 10 char + optional quote "'" + "/" + \0"
 #define MAX_DERIV_PATH_ASCII_LENGTH 1 + 10*(10+2) + 1
 
-struct transaction_summary_data_s {
+struct btchip_transaction_summary_data_s {
     unsigned char
         transactionNonce[8]; // used to bind to the current set of inputs
     unsigned char pin[4];    // transaction PIN
@@ -48,17 +48,17 @@ struct transaction_summary_data_s {
     unsigned char changeAddress[21]; // only in wallet mode
     unsigned char keyPath[MAX_BIP32_PATH_LENGTH];
 };
-typedef struct transaction_summary_data_s
-    transaction_summary_data_t;
+typedef struct btchip_transaction_summary_data_s
+    btchip_transaction_summary_data_t;
 
-struct transaction_summary_s {
+struct btchip_transaction_summary_s {
     unsigned char active;
     unsigned char payToAddressVersion;
     unsigned char payToScriptHashVersion;
     unsigned char authorizationHash[32];
-    transaction_summary_data_t summarydata;
+    btchip_transaction_summary_data_t summarydata;
     unsigned short messageLength;
 };
-typedef struct transaction_summary_s transaction_summary_t;
+typedef struct btchip_transaction_summary_s btchip_transaction_summary_t;
 
 #endif

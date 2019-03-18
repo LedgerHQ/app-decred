@@ -15,10 +15,10 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "internal.h"
-#include "apdu_constants.h"
+#include "btchip_internal.h"
+#include "btchip_apdu_constants.h"
 
-#include "bagl_extensions.h"
+#include "btchip_bagl_extensions.h"
 
 #define P1_NO_DISPLAY 0x00
 #define P1_DISPLAY 0x01
@@ -26,10 +26,10 @@
 
 #define P2_LEGACY 0x00
 
-unsigned short apdu_get_wallet_public_key() {
+unsigned short btchip_apdu_get_wallet_public_key() {
     unsigned char keyLength;
     unsigned char uncompressedPublicKeys =
-        ((N_btchip.bkp.config.options & OPTION_UNCOMPRESSED_KEYS) != 0);
+        ((N_btchip.bkp.config.options & BTCHIP_OPTION_UNCOMPRESSED_KEYS) != 0);
     unsigned char keyPath[MAX_BIP32_PATH_LENGTH];
     uint32_t request_token;
     unsigned char chainCode[32];
@@ -44,51 +44,51 @@ unsigned short apdu_get_wallet_public_key() {
     case P1_REQUEST_TOKEN:
         break;
     default:
-        return SW_INCORRECT_P1_P2;
+        return BTCHIP_SW_INCORRECT_P1_P2;
     }
 
     switch (G_io_apdu_buffer[ISO_OFFSET_P2]) {
     case P2_LEGACY:
         break;
     default:
-        return SW_INCORRECT_P1_P2;
+        return BTCHIP_SW_INCORRECT_P1_P2;
     }
 
     if (G_io_apdu_buffer[ISO_OFFSET_LC] < 0x01) {
-        return SW_INCORRECT_LENGTH;
+        return BTCHIP_SW_INCORRECT_LENGTH;
     }
     os_memmove(keyPath, G_io_apdu_buffer + ISO_OFFSET_CDATA,
                MAX_BIP32_PATH_LENGTH);
 
     if(display_request_token){
         uint8_t request_token_offset = ISO_OFFSET_CDATA + G_io_apdu_buffer[ISO_OFFSET_CDATA]*4 + 1;
-        request_token = read_u32(G_io_apdu_buffer + request_token_offset, true, false);
+        request_token = btchip_read_u32(G_io_apdu_buffer + request_token_offset, true, false);
     }
 
 
     if (!os_global_pin_is_validated()) {
-        return SW_SECURITY_STATUS_NOT_SATISFIED;
+        return BTCHIP_SW_SECURITY_STATUS_NOT_SATISFIED;
     }
 
-    private_derive_keypair(keyPath, 1, chainCode);
+    btchip_private_derive_keypair(keyPath, 1, chainCode);
     G_io_apdu_buffer[0] = 65;
 
     // Then encode it
     if (uncompressedPublicKeys) {
         keyLength = 65;
     } else {
-        compress_public_key_value(public_key_D.W);
+        btchip_compress_public_key_value(btchip_public_key_D.W);
         keyLength = 33;
     }
 
-    os_memmove(G_io_apdu_buffer + 1, public_key_D.W,
-               sizeof(public_key_D.W));
+    os_memmove(G_io_apdu_buffer + 1, btchip_public_key_D.W,
+               sizeof(btchip_public_key_D.W));
 
-    keyLength = public_key_to_encoded_base58(G_io_apdu_buffer + 1,  // IN
+    keyLength = btchip_public_key_to_encoded_base58(G_io_apdu_buffer + 1,  // IN
                                                     keyLength,             // INLEN
                                                     G_io_apdu_buffer + 67, // OUT
                                                     150,                   // MAXOUTLEN
-                                                    context_D.payToAddressVersion, 0);
+                                                    btchip_context_D.payToAddressVersion, 0);
 
     G_io_apdu_buffer[66] = keyLength;
     L_DEBUG_APP(("Length %d\n", keyLength));
@@ -100,53 +100,53 @@ unsigned short apdu_get_wallet_public_key() {
     // output chain code
     os_memmove(G_io_apdu_buffer + 1 + 65 + 1 + keyLength, chainCode,
                sizeof(chainCode));
-    context_D.outLength = 1 + 65 + 1 + keyLength + sizeof(chainCode);
+    btchip_context_D.outLength = 1 + 65 + 1 + keyLength + sizeof(chainCode);
 
     if (display) {
         if (keyLength > 50) {
-            return SW_INCORRECT_DATA;
+            return BTCHIP_SW_INCORRECT_DATA;
         }
         // Hax, avoid wasting space
         os_memmove(G_io_apdu_buffer + 200, G_io_apdu_buffer + 67, keyLength);
         G_io_apdu_buffer[200 + keyLength] = '\0';
-        context_D.io_flags |= IO_ASYNCH_REPLY;
-        bagl_display_public_key(keyPath);
+        btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
+        btchip_bagl_display_public_key(keyPath);
         }
     // If the token requested has already been approved in a previous call, the source is trusted so don't ask for approval again
     else if(display_request_token &&
-           (!context_D.has_valid_token || os_memcmp(&request_token, context_D.last_token, 4)))
+           (!btchip_context_D.has_valid_token || os_memcmp(&request_token, btchip_context_D.last_token, 4)))
     {
         // disable the has_valid_token flag and store the new token
-        context_D.has_valid_token = false;
-        os_memcpy(context_D.last_token, &request_token, 4);
+        btchip_context_D.has_valid_token = false;
+        os_memcpy(btchip_context_D.last_token, &request_token, 4);
         // Hax, avoid wasting space
         snprintf(G_io_apdu_buffer + 200, 9, "%08X", request_token);
         G_io_apdu_buffer[200 + 8] = '\0';
-        context_D.io_flags |= IO_ASYNCH_REPLY;
-        bagl_display_token();
+        btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
+        btchip_bagl_display_token();
     }
     else if(require_user_approval)
     {
-        context_D.io_flags |= IO_ASYNCH_REPLY;
-        bagl_request_pubkey_approval();
+        btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
+        btchip_bagl_request_pubkey_approval();
     }
 
-    return SW_OK;
+    return BTCHIP_SW_OK;
 }
 
-void bagl_user_action_display(unsigned char confirming) {
-    unsigned short sw = SW_OK;
+void btchip_bagl_user_action_display(unsigned char confirming) {
+    unsigned short sw = BTCHIP_SW_OK;
     // confirm and finish the apdu exchange //spaghetti
     if (confirming) {
-        context_D.outLength -=
+        btchip_context_D.outLength -=
             2; // status was already set by the last call
 
     } else {
-        sw = SW_CONDITIONS_OF_USE_NOT_SATISFIED;
-        context_D.outLength = 0;
+        sw = BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
+        btchip_context_D.outLength = 0;
     }
-    G_io_apdu_buffer[context_D.outLength++] = sw >> 8;
-    G_io_apdu_buffer[context_D.outLength++] = sw;
+    G_io_apdu_buffer[btchip_context_D.outLength++] = sw >> 8;
+    G_io_apdu_buffer[btchip_context_D.outLength++] = sw;
 
-    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, context_D.outLength);
+    io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, btchip_context_D.outLength);
 }

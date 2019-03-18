@@ -15,7 +15,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "public_ram_key_variables.h"
+#include "btchip_public_ram_key_variables.h"
 
-cx_ecfp_public_key_t public_key_D;
-cx_ecfp_private_key_t private_key_D;
+cx_ecfp_public_key_t btchip_public_key_D;
+cx_ecfp_private_key_t btchip_private_key_D;

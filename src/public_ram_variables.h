@@ -19,13 +19,13 @@
 
 #define PUBLIC_RAM_VARIABLES_H
 
-#include "config.h"
+#include "btchip_config.h"
 
-#include "secure_value.h"
-#include "context.h"
+#include "btchip_secure_value.h"
+#include "btchip_context.h"
 
-extern context_t context_D;
+extern btchip_context_t btchip_context_D;
 
-extern altcoin_config_t *G_coin_config;
+extern btchip_altcoin_config_t *G_coin_config;
 
 #endif

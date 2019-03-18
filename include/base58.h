@@ -15,16 +15,16 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BASE58_H
+#ifndef BTCHIP_BASE58_H
 
-#define BASE58_H
+#define BTCHIP_BASE58_H
 
 #include <stdlib.h>
 
-int decode_base58(const char WIDE *in, size_t length,
+int btchip_decode_base58(const char WIDE *in, size_t length,
                          unsigned char *out, size_t *outlen);
 
-int encode_base58(const unsigned char WIDE *in, size_t length,
+int btchip_encode_base58(const unsigned char WIDE *in, size_t length,
                          unsigned char *out, size_t *outlen);
 
 #endif

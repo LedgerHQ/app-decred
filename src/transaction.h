@@ -15,7 +15,7 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "secure_value.h"
+#include "btchip_secure_value.h"
 
 #ifndef TRANSACTION_H
 

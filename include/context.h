@@ -15,13 +15,13 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef CONTEXT_H
+#ifndef BTCHIP_CONTEXT_H
 
-#define CONTEXT_H
+#define BTCHIP_CONTEXT_H
 
 #include "os.h"
-#include "secure_value.h"
-#include "filesystem_tx.h"
+#include "btchip_secure_value.h"
+#include "btchip_filesystem_tx.h"
 #include "blake256.h"
 
 #define MAX_OUTPUT_TO_CHECK 200
@@ -31,65 +31,65 @@
 #define MAGIC_TRUSTED_INPUT 0x32
 #define MAGIC_DEV_KEY 0x01
 
-enum modes_e {
-    MODE_WALLET = 0x01,
+enum btchip_modes_e {
+    BTCHIP_MODE_WALLET = 0x01,
 };
 
-enum options_e {
-    OPTION_UNCOMPRESSED_KEYS = 0x01,
-    OPTION_DETERMINISTIC_SIGNATURE = 0x02,
-    OPTION_FREE_SIGHASHTYPE = 0x04,
-    OPTION_SKIP_2FA_P2SH = 0x08,
-    OPTION_ALLOW_ARBITRARY_CHANGE = 0x10
+enum btchip_options_e {
+    BTCHIP_OPTION_UNCOMPRESSED_KEYS = 0x01,
+    BTCHIP_OPTION_DETERMINISTIC_SIGNATURE = 0x02,
+    BTCHIP_OPTION_FREE_SIGHASHTYPE = 0x04,
+    BTCHIP_OPTION_SKIP_2FA_P2SH = 0x08,
+    BTCHIP_OPTION_ALLOW_ARBITRARY_CHANGE = 0x10
 };
 
 /**
  * Current state of an untrusted transaction hashing
  */
-enum transaction_state_e {
+enum btchip_transaction_state_e {
     /** No transaction in progress */
-    TRANSACTION_NONE = 0x00,
+    BTCHIP_TRANSACTION_NONE = 0x00,
     /** Transaction defined, waiting for an input to be hashed */
-    TRANSACTION_DEFINED_WAIT_INPUT = 0x01,
+    BTCHIP_TRANSACTION_DEFINED_WAIT_INPUT = 0x01,
     /** Transaction defined, input hashing in progress, pending input script
        data */
-    TRANSACTION_INPUT_HASHING_IN_PROGRESS_INPUT_SCRIPT = 0x02,
+    BTCHIP_TRANSACTION_INPUT_HASHING_IN_PROGRESS_INPUT_SCRIPT = 0x02,
     /** Transaction defined, input hashing done, pending output hashing for this
        input */
-    TRANSACTION_INPUT_HASHING_DONE = 0x03,
+    BTCHIP_TRANSACTION_INPUT_HASHING_DONE = 0x03,
     /** Transaction defined, waiting for an output to be hashed */
-    TRANSACTION_DEFINED_WAIT_OUTPUT = 0x04,
+    BTCHIP_TRANSACTION_DEFINED_WAIT_OUTPUT = 0x04,
     /** Transaction defined, output hashing in progress for a complex script,
        pending output script data */
-    TRANSACTION_OUTPUT_HASHING_IN_PROGRESS_OUTPUT_SCRIPT = 0x05,
+    BTCHIP_TRANSACTION_OUTPUT_HASHING_IN_PROGRESS_OUTPUT_SCRIPT = 0x05,
     /** Transaction defined, output hashing done, pending finalization */
-    TRANSACTION_OUTPUT_HASHING_DONE = 0x06,
+    BTCHIP_TRANSACTION_OUTPUT_HASHING_DONE = 0x06,
     /** Extra data present */
-    TRANSACTION_PROCESS_EXTRA = 0x07,
+    BTCHIP_TRANSACTION_PROCESS_EXTRA = 0x07,
     /** Transaction parsed */
-    TRANSACTION_PARSED = 0x08,
+    BTCHIP_TRANSACTION_PARSED = 0x08,
     /** Transaction parsed, ready to prepare for signature after validating the
        user outputs */
-    TRANSACTION_PRESIGN_READY = 0x09,
+    BTCHIP_TRANSACTION_PRESIGN_READY = 0x09,
     /** Transaction fully parsed, ready to be signed */
-    TRANSACTION_SIGN_READY = 0x0a,
+    BTCHIP_TRANSACTION_SIGN_READY = 0x0a,
 };
-typedef enum transaction_state_e transaction_state_t;
+typedef enum btchip_transaction_state_e btchip_transaction_state_t;
 
-enum output_parsing_state_e {
-    OUTPUT_PARSING_NONE = 0x00,
-    OUTPUT_PARSING_NUMBER_OUTPUTS = 0x01,
-    OUTPUT_PARSING_OUTPUT = 0x02,
-    OUTPUT_FINALIZE_TX = 0x03,
-    OUTPUT_HANDLE_LEGACY = 0xFF
+enum btchip_output_parsing_state_e {
+    BTCHIP_OUTPUT_PARSING_NONE = 0x00,
+    BTCHIP_OUTPUT_PARSING_NUMBER_OUTPUTS = 0x01,
+    BTCHIP_OUTPUT_PARSING_OUTPUT = 0x02,
+    BTCHIP_OUTPUT_FINALIZE_TX = 0x03,
+    BTCHIP_OUTPUT_HANDLE_LEGACY = 0xFF
 };
-typedef enum output_parsing_state_e output_parsing_state_t;
+typedef enum btchip_output_parsing_state_e btchip_output_parsing_state_t;
 
 
 /**
  * Structure defining an operation on a transaction
  */
-struct transaction_context_s {
+struct btchip_transaction_context_s {
     /** Transient over signing components */
 
     /** Remaining number of inputs/outputs to process for this transaction */
@@ -101,7 +101,7 @@ struct transaction_context_s {
 
     /** Persistent over signing components */
 
-    /** State of the transaction, type transaction_state_t */
+    /** State of the transaction, type btchip_transaction_state_t */
     unsigned char transactionState;
     /** Computed sum of transaction inputs or value of the output to convert to
      * a trusted input */
@@ -113,9 +113,9 @@ struct transaction_context_s {
     /** If the transaction consumes a P2SH input */
     unsigned char consumeP2SH;
 };
-typedef struct transaction_context_s transaction_context_t;
+typedef struct btchip_transaction_context_s btchip_transaction_context_t;
 
-struct tmp_output_s {
+struct btchip_tmp_output_s {
     /** Change address if initialized */
     unsigned char changeAddress[21];
     /** Flag set if the change address was initialized */
@@ -127,15 +127,15 @@ struct tmp_output_s {
     /** Flag set if the outputs have been fragmented */
     unsigned char multipleOutput;
 };
-typedef struct tmp_output_s tmp_output_t;
+typedef struct btchip_tmp_output_s btchip_tmp_output_t;
 
-struct context_s {
+struct btchip_context_s {
     /** Flag if dongle has been halted */
     secu8 halted;
     /** Index of the output to convert into a trusted input in a transaction */
     unsigned long int trustedInputIndex;
     /** (Integrity protected) transaction context */
-    transaction_context_t transactionContext;
+    btchip_transaction_context_t transactionContext;
 
     /** Current Pay To Address version */
     unsigned short payToAddressVersion;
@@ -195,13 +195,13 @@ struct context_s {
     unsigned char *tmp;
 
     // was previously in NVRAM
-    transaction_summary_t transactionSummary;
+    btchip_transaction_summary_t transactionSummary;
 
 
     unsigned short hashedMessageLength;
 
     union {
-        tmp_output_t output;
+        btchip_tmp_output_t output;
     } tmpCtx;
 
     unsigned char currentOutput[MAX_OUTPUT_TO_CHECK];
@@ -213,24 +213,24 @@ struct context_s {
     unsigned char totalOutputAmount[8];
     unsigned char changeOutputFound;
 };
-typedef struct context_s context_t;
+typedef struct btchip_context_s btchip_context_t;
 
 
 /**
  * Structure to configure the bitcoin application for a given altcoin
  *
  */
-typedef enum coin_flags_e {
+typedef enum btchip_coin_flags_e {
     DUMMY_FLAG=1
-} coin_flags_t;
+} btchip_coin_flags_t;
 
 
-typedef enum coin_kind_e {
+typedef enum btchip_coin_kind_e {
     COIN_KIND_DECRED,
     COIN_KIND_DECRED_TESTNET,
-} coin_kind_t;
+} btchip_coin_kind_t;
 
-typedef struct altcoin_config_s {
+typedef struct btchip_altcoin_config_s {
     unsigned short p2pkh_version;
     unsigned short p2sh_version;
     unsigned char family;
@@ -245,10 +245,10 @@ typedef struct altcoin_config_s {
     const char* name; // for ux displays
     const char* name_short; // for unit in ux displays
     unsigned int forkid;
-    coin_kind_t kind;
+    btchip_coin_kind_t kind;
     unsigned int flags;
-} altcoin_config_t;
+} btchip_altcoin_config_t;
 
-void context_init(void);
+void btchip_context_init(void);
 
 #endif

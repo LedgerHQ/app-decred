@@ -10,16 +10,16 @@
 *
 *  Unless required by applicable law or agreed to in writing, software
 *  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  WITBTCHIP_HOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef H
+#ifndef BTCHIP_H
 
-#define H
+#define BTCHIP_H
 
-#include "config.h"
+#include "btchip_config.h"
 #include "os.h"
 #include "os_io_seproxyhal.h"
 
@@ -30,8 +30,8 @@
 #define L_DEBUG_NOPREFIX(x)
 #define L_DEBUG_BUF(x)
 
-#define SW_TECHNICAL_DETAILS(x) SW_TECHNICAL_PROBLEM
+#define SW_TECBTCHIP_HNICAL_DETAILS(x) BTCHIP_SW_TECBTCHIP_HNICAL_PROBLEM
 
-#include "secure_value.h"
+#include "btchip_secure_value.h"
 
 #endif

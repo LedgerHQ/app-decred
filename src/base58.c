@@ -15,12 +15,12 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "internal.h"
+#include "btchip_internal.h"
 
 #define MAX_DEC_INPUT_SIZE 164
 #define MAX_ENC_INPUT_SIZE 120
 
-int decode_base58(const char WIDE *in, size_t length,
+int btchip_decode_base58(const char WIDE *in, size_t length,
                          unsigned char *out, size_t *outlen) {
   unsigned char tmp[MAX_DEC_INPUT_SIZE];
   unsigned char buffer[MAX_DEC_INPUT_SIZE] = {0};
@@ -76,7 +76,7 @@ int decode_base58(const char WIDE *in, size_t length,
   return 0;
 }
 
-int encode_base58(const unsigned char WIDE *in, size_t length,
+int btchip_encode_base58(const unsigned char WIDE *in, size_t length,
                          unsigned char *out, size_t *outlen) {
   unsigned char buffer[MAX_ENC_INPUT_SIZE * 138 / 100 + 1] = {0};
   size_t i = 0, j;

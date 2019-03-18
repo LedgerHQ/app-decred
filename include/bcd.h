@@ -15,11 +15,11 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef BCD_H
+#ifndef BTCHIP_BCD_H
 
-#define BCD_H
+#define BTCHIP_BCD_H
 
 unsigned char
-convert_hex_amount_to_displayable(unsigned char WIDE *amount);
+btchip_convert_hex_amount_to_displayable(unsigned char WIDE *amount);
 
 #endif

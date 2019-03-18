@@ -15,9 +15,9 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#ifndef CONFIG_H
+#ifndef BTCHIP_CONFIG_H
 
-#define CONFIG_H
+#define BTCHIP_CONFIG_H
 
 //#define DISABLE_SECURE_VALUE
 

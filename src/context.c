@@ -15,9 +15,9 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "internal.h"
+#include "btchip_internal.h"
 
-void autosetup(void){
+void btchip_autosetup(void){
     config_t config;
     unsigned char i;
     unsigned char tmp[32];
@@ -36,20 +36,20 @@ void autosetup(void){
 /**
  * Initialize the application context on boot
  */
-void context_init() {
+void btchip_context_init() {
     L_DEBUG_APP(("Context init\n"));
     L_DEBUG_APP((N_btchip.bkp));
-    os_memset(&context_D, 0, sizeof(context_D));
-    SB_SET(context_D.halted, 0);
-    context_D.currentOutputOffset = 0;
-    context_D.outputParsingState = OUTPUT_PARSING_NUMBER_OUTPUTS;
-    os_memset(context_D.totalOutputAmount, 0,
-              sizeof(context_D.totalOutputAmount));
-    context_D.changeOutputFound = 0;
+    os_memset(&btchip_context_D, 0, sizeof(btchip_context_D));
+    SB_SET(btchip_context_D.halted, 0);
+    btchip_context_D.currentOutputOffset = 0;
+    btchip_context_D.outputParsingState = BTCHIP_OUTPUT_PARSING_NUMBER_OUTPUTS;
+    os_memset(btchip_context_D.totalOutputAmount, 0,
+              sizeof(btchip_context_D.totalOutputAmount));
+    btchip_context_D.changeOutputFound = 0;
 
 
     if (N_btchip.config_valid != 0x01) {
-        autosetup();
+        btchip_autosetup();
     }
 
     if (!N_btchip.config_valid) {
@@ -59,16 +59,16 @@ void context_init() {
 
     }
     else {
-        context_D.payToAddressVersion = G_coin_config->p2pkh_version;
-        context_D.payToScriptHashVersion = G_coin_config->p2sh_version;
-        context_D.coinFamily = G_coin_config->family;
-        context_D.coinIdLength = strlen(PIC(G_coin_config->coinid));
-        os_memmove(context_D.coinId, PIC(G_coin_config->coinid),
-                   context_D.coinIdLength);
-        context_D.shortCoinIdLength =
+        btchip_context_D.payToAddressVersion = G_coin_config->p2pkh_version;
+        btchip_context_D.payToScriptHashVersion = G_coin_config->p2sh_version;
+        btchip_context_D.coinFamily = G_coin_config->family;
+        btchip_context_D.coinIdLength = strlen(PIC(G_coin_config->coinid));
+        os_memmove(btchip_context_D.coinId, PIC(G_coin_config->coinid),
+                   btchip_context_D.coinIdLength);
+        btchip_context_D.shortCoinIdLength =
             strlen(PIC(G_coin_config->name_short));
-        os_memmove(context_D.shortCoinId, PIC(G_coin_config->name_short),
-                   context_D.shortCoinIdLength);
+        os_memmove(btchip_context_D.shortCoinId, PIC(G_coin_config->name_short),
+                   btchip_context_D.shortCoinIdLength);
 
     }
     if (!N_btchip.storageInitialized) {

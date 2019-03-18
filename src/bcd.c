@@ -15,12 +15,12 @@
 *  limitations under the License.
 ********************************************************************************/
 
-#include "internal.h"
+#include "btchip_internal.h"
 
 #define SCRATCH_SIZE 21
 
 unsigned char
-convert_hex_amount_to_displayable(unsigned char WIDE *amount) {
+btchip_convert_hex_amount_to_displayable(unsigned char WIDE *amount) {
     unsigned char LOOP1;
     unsigned char LOOP2;
 
@@ -67,11 +67,11 @@ convert_hex_amount_to_displayable(unsigned char WIDE *amount) {
             offset++;
         } else {
             nonZero = 1;
-            context_D.tmp[targetOffset++] = scratch[offset++] + '0';
+            btchip_context_D.tmp[targetOffset++] = scratch[offset++] + '0';
         }
     }
     if (targetOffset == 0) {
-        context_D.tmp[targetOffset++] = '0';
+        btchip_context_D.tmp[targetOffset++] = '0';
     }
     workOffset = offset;
     for (i = 0; i < LOOP2; i++) {
@@ -87,10 +87,10 @@ convert_hex_amount_to_displayable(unsigned char WIDE *amount) {
             break;
         }
         if (!comma) {
-            context_D.tmp[targetOffset++] = '.';
+            btchip_context_D.tmp[targetOffset++] = '.';
             comma = 1;
         }
-        context_D.tmp[targetOffset++] = scratch[offset++] + '0';
+        btchip_context_D.tmp[targetOffset++] = scratch[offset++] + '0';
     }
     return targetOffset;
 }

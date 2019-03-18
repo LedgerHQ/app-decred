@@ -19,12 +19,12 @@
 
 #define PUBLIC_RAM_KEY_VARIABLES_H
 
-#include "config.h"
+#include "btchip_config.h"
 
-#include "secure_value.h"
-#include "context.h"
+#include "btchip_secure_value.h"
+#include "btchip_context.h"
 
-extern cx_ecfp_public_key_t public_key_D;
-extern cx_ecfp_private_key_t private_key_D;
+extern cx_ecfp_public_key_t btchip_public_key_D;
+extern cx_ecfp_private_key_t btchip_private_key_D;
 
 #endif
