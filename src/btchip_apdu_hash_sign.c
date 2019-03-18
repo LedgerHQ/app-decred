@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger App - Bitcoin Wallet
-*   (c) 2016-2019-2019 Ledger
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -53,8 +53,7 @@ unsigned short btchip_apdu_hash_sign() {
             btchip_set_check_internal_structure_integrity(0);
             if (btchip_context_D.transactionContext.transactionState !=
                 BTCHIP_TRANSACTION_SIGN_READY) {
-                L_DEBUG_APP(("Invalid transaction state %d\n",
-                     btchip_context_D.transactionContext.transactionState));
+                PRINTF("Invalid transaction state %d\n", btchip_context_D.transactionContext.transactionState);
                 sw = BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
                 goto discardTransaction;
             }
@@ -99,7 +98,7 @@ unsigned short btchip_apdu_hash_sign() {
 
             // Fetch the private key
 
-            btchip_private_derive_keypair(keyPath, 1, NULL);
+            btchip_private_derive_keypair(keyPath, 0, NULL);
 
             // TODO optional : check the public key against the associated non
             // blank input to sign

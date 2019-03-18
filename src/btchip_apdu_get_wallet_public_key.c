@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger App - Bitcoin Wallet
-*   (c) 2016-2019-2019 Ledger
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ unsigned short btchip_apdu_get_wallet_public_key() {
                                                     btchip_context_D.payToAddressVersion, 0);
 
     G_io_apdu_buffer[66] = keyLength;
-    L_DEBUG_APP(("Length %d\n", keyLength));
+    PRINTF("Length %d\n", keyLength);
     if (!uncompressedPublicKeys) {
         // Restore for the full key component
         G_io_apdu_buffer[1] = 0x04;
@@ -114,8 +114,7 @@ unsigned short btchip_apdu_get_wallet_public_key() {
         }
     // If the token requested has already been approved in a previous call, the source is trusted so don't ask for approval again
     else if(display_request_token &&
-           (!btchip_context_D.has_valid_token || os_memcmp(&request_token, btchip_context_D.last_token, 4)))
-    {
+           (!btchip_context_D.has_valid_token || os_memcmp(&request_token, btchip_context_D.last_token, 4))) {
         // disable the has_valid_token flag and store the new token
         btchip_context_D.has_valid_token = false;
         os_memcpy(btchip_context_D.last_token, &request_token, 4);
@@ -125,8 +124,7 @@ unsigned short btchip_apdu_get_wallet_public_key() {
         btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
         btchip_bagl_display_token();
     }
-    else if(require_user_approval)
-    {
+    else if(require_user_approval) {
         btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
         btchip_bagl_request_pubkey_approval();
     }

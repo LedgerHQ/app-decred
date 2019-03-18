@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger App - Bitcoin Wallet
-*   (c) 2016-2019-2019 Ledger
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ const unsigned char TRANSACTION_OUTPUT_SCRIPT_P2WPKH_PRE[] = {0x16, 0x00, 0x14};
 const unsigned char TRANSACTION_OUTPUT_SCRIPT_P2WSH_PRE[] = {0x22, 0x00, 0x20};
 
 unsigned char btchip_output_script_is_regular(unsigned char *buffer) {
-
     if ((os_memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_PRE,
                    sizeof(TRANSACTION_OUTPUT_SCRIPT_PRE)) == 0) &&
         (os_memcmp(buffer + sizeof(TRANSACTION_OUTPUT_SCRIPT_PRE) + 20,
@@ -137,7 +136,7 @@ void btchip_retrieve_keypair_discard(unsigned char *privateComponent,
             cx_ecdsa_init_private_key(BTCHIP_CURVE, privateComponent, 32,
                                       &btchip_private_key_D);
 
-            L_DEBUG_BUF(("Using private component\n", privateComponent, 32));
+            PRINTF("Using private component\n%.*H\n",32,privateComponent);
 
             if (derivePublic) {
                 cx_ecfp_generate_pair(BTCHIP_CURVE, &btchip_public_key_D,
@@ -153,19 +152,16 @@ void btchip_retrieve_keypair_discard(unsigned char *privateComponent,
 void btchip_public_key_hash160(unsigned char *in, unsigned short inlen,
                                unsigned char *out) {
     union {
-        //cx_blake2b_t blake;
         BLAKE256_CTX blake;
         cx_ripemd160_t riprip;
     } u;
     unsigned char buffer[32];
 
-    /*cx_blake2b_init(&u.blake, 256);
-    cx_hash(&u.blake.header, CX_LAST, in, inlen, buffer);*/
     blake256_Init(&u.blake);
     blake256_Update(&u.blake, in, inlen);
     blake256_Final(&u.blake, buffer);
     cx_ripemd160_init(&u.riprip);
-    cx_hash(&u.riprip.header, CX_LAST, buffer, 32, out);
+    cx_hash(&u.riprip.header, CX_LAST, buffer, 32, out, 32);
 }
 
 unsigned short btchip_public_key_to_encoded_base58(
@@ -180,9 +176,9 @@ unsigned short btchip_public_key_to_encoded_base58(
     size_t outputLen;
 
     if (!alreadyHashed) {
-        L_DEBUG_BUF(("To hash\n", in, inlen));
+        PRINTF("To hash\n%.*H\n",inlen,in);
         btchip_public_key_hash160(in, inlen, tmpBuffer + versionSize);
-        L_DEBUG_BUF(("Hash160\n", (tmpBuffer + versionSize), 20));
+        PRINTF("Hash160\n%.*H\n",20,(tmpBuffer + versionSize));
         if (version > 255) {
             tmpBuffer[0] = (version >> 8);
             tmpBuffer[1] = version;
@@ -199,12 +195,8 @@ unsigned short btchip_public_key_to_encoded_base58(
     blake256_Init(&hash);
     blake256_Update(&hash, checksumBuffer, 32);
     blake256_Final(&hash, checksumBuffer);
-    /*cx_blake2b_init(&hash, 256);
-    cx_hash(&hash.header, CX_LAST, tmpBuffer, 20 + versionSize, checksumBuffer);
-    cx_blake2b_init(&hash, 256);
-    cx_hash(&hash.header, CX_LAST, checksumBuffer, 32, checksumBuffer);*/
 
-    L_DEBUG_BUF(("Checksum\n", checksumBuffer, 4));
+    PRINTF("Checksum\n%.*H\n",4,checksumBuffer);
     os_memmove(tmpBuffer + 20 + versionSize, checksumBuffer, 4);
 
     outputLen = outlen;
@@ -236,12 +228,12 @@ unsigned short btchip_decode_base58_address(unsigned char *in,
 
     // Compute hash to verify address
     cx_sha256_init(&hash);
-    cx_hash(&hash.header, CX_LAST, out, outlen - 4, hashBuffer);
+    cx_hash(&hash.header, CX_LAST, out, outlen - 4, hashBuffer, 32);
     cx_sha256_init(&hash);
-    cx_hash(&hash.header, CX_LAST, hashBuffer, 32, hashBuffer);
+    cx_hash(&hash.header, CX_LAST, hashBuffer, 32, hashBuffer, 32);
 
     if (os_memcmp(out + outlen - 4, hashBuffer, 4)) {
-        PRINTF("Hash checksum mismatch:\n", sizeof(hashBuffer), hashBuffer);
+        PRINTF("Hash checksum mismatch\n%.*H\n",sizeof(hashBuffer),hashBuffer);
         THROW(INVALID_CHECKSUM);
     }
 
@@ -279,7 +271,6 @@ unsigned char bip44_derivation_guard(unsigned char *bip32Path, bool is_change_pa
 
     unsigned char i, path_len;
     unsigned int bip32PathInt[MAX_BIP32_PATH];
-    unsigned char privateComponent[32];
 
     path_len = bip32Path[0];
     bip32Path++;
@@ -311,14 +302,13 @@ unsigned char bip44_derivation_guard(unsigned char *bip32Path, bool is_change_pa
 }
 
 // Print a BIP32 path as an ascii string to display on the device screen
-// On the Ledger App, if the string is longer than 30 char, the string will be split in multiple lines
+// On the Ledger Blue, if the string is longer than 30 char, the string will be split in multiple lines
 unsigned char bip32_print_path(unsigned char *bip32Path, char* out, unsigned char max_out_len) {
 
     unsigned char bip32PathLength;
     unsigned char i, offset;
     unsigned int current_level;
     bool hardened;
-    unsigned char privateComponent[32];
 
     bip32PathLength = bip32Path[0];
     if (bip32PathLength > MAX_BIP32_PATH) {
@@ -391,7 +381,7 @@ void btchip_signverify_finalhash(void *keyContext, unsigned char sign,
         unsigned int info = 0;
         cx_ecdsa_sign((cx_ecfp_private_key_t *)keyContext,
                       CX_LAST | (rfc6979 ? CX_RND_RFC6979 : CX_RND_TRNG),
-                      CX_SHA256, in, inlen, out, &info);
+                      CX_SHA256, in, inlen, out, outlen, &info);
         if (info & CX_ECCINFO_PARITY_ODD) {
             out[0] |= 0x01;
         }

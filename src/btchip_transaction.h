@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger App - Bitcoin Wallet
-*   (c) 2016-2019-2019 Ledger
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
 *  limitations under the License.
 ********************************************************************************/
 
+#ifndef _BTCHIP_TRANSACTION_H_
+#define _BTCHIP_TRANSACTION_H_
+
 #include "btchip_secure_value.h"
-
-#ifndef TRANSACTION_H
-
-#define TRANSACTION_H
 
 #define TRANSACTION_HASH_NONE 0x00
 #define TRANSACTION_HASH_FULL 0x01
@@ -42,4 +41,4 @@ unsigned char transaction_amount_sub_be(unsigned char *target,
                                         unsigned char *a,
                                         unsigned char *b);
 
-#endif
+#endif /* _BTCHIP_TRANSACTION_H_ */

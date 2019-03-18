@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger App - Bitcoin Wallet
-*   (c) 2016-2019-2019 Ledger
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -224,7 +224,7 @@ const bagl_element_t ui_idle_blue[] = {
     UI_BLUE_BUTTON_SETTINGS(io_seproxyhal_touch_settings),
     UI_BLUE_BUTTON_EXIT(io_seproxyhal_touch_exit),
     UI_BLUE_TEXT(0, 0, 270, 320, "Open your wallet", BAGL_FONT_OPEN_SANS_LIGHT_16_22PX, BAGL_FONT_ALIGNMENT_CENTER,  COLOR_BLACK, COLOR_BG_1),
-    UI_BLUE_TEXT(0, 0, 308, 320, "Connect your Ledger App and open your", BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, BAGL_FONT_ALIGNMENT_CENTER, COLOR_BLACK, COLOR_BG_1),
+    UI_BLUE_TEXT(0, 0, 308, 320, "Connect your Ledger Blue and open your", BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, BAGL_FONT_ALIGNMENT_CENTER, COLOR_BLACK, COLOR_BG_1),
     UI_BLUE_TEXT(0, 0, 331, 320, "preferred wallet to view your accounts.", BAGL_FONT_OPEN_SANS_REGULAR_10_13PX, BAGL_FONT_ALIGNMENT_CENTER, COLOR_BLACK, COLOR_BG_1),
     UI_BLUE_TEXT(0, 0, 450, 320, "Validation requests will show automatically.", BAGL_FONT_OPEN_SANS_REGULAR_8_11PX, BAGL_FONT_ALIGNMENT_CENTER, COLOR_GRAY, COLOR_BG_1)
 
@@ -1104,6 +1104,7 @@ unsigned int ui_verify_message_prepro(const bagl_element_t *element) {
 
 #endif // #if defined(TARGET_NANOS)
 
+
 #ifdef TARGET_BLUE
 
 unsigned int io_seproxyhal_touch_settings(const bagl_element_t *e) {
@@ -1185,6 +1186,7 @@ unsigned int io_seproxyhal_touch_display_token_cancel(const bagl_element_t *e) {
     ui_idle();
     return 0; // DO NOT REDRAW THE BUTTON
 }
+
  unsigned int io_seproxyhal_touch_display_token_ok(const bagl_element_t *e) {
     // Set the valid token flag
     btchip_context_D.has_valid_token = true;
@@ -1256,9 +1258,9 @@ ui_verify_message_signature_nanos_button(unsigned int button_mask,
 unsigned int ui_display_address_nanos_button(unsigned int button_mask,
                                              unsigned int button_mask_counter) {
     if (ux_step == 3)
-{
-    switch (button_mask)
     {
+        switch (button_mask)
+        {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT:
         io_seproxyhal_touch_display_cancel(NULL);
         break;
@@ -1435,42 +1437,113 @@ void ui_transaction_p2sh_blue_init(void) {
 }
 #endif // #if defined(TARGET_BLUE)
 
+
 #if defined(TARGET_NANOX)
+
+const char* settings_submenu_getter(unsigned int idx);
+void settings_submenu_selector(unsigned int idx);
+
+
+void settings_pubkey_export_change(unsigned int enabled) {
+    nvm_write((void *)&N_btchip.pubKeyRequestRestriction, &enabled, 1);
+    ui_idle();
+}
+//////////////////////////////////////////////////////////////////////////////////////
+// Public keys export submenu:
+
+const char* const settings_pubkey_export_getter_values[] = {
+  "Auto Approval",
+  "Manual Approval",
+  "Back"
+};
+
+const char* settings_pubkey_export_getter(unsigned int idx) {
+  if (idx < ARRAYLEN(settings_pubkey_export_getter_values)) {
+    return settings_pubkey_export_getter_values[idx];
+  }
+  return NULL;
+}
+
+void settings_pubkey_export_selector(unsigned int idx) {
+  switch(idx) {
+    case 0:
+      settings_pubkey_export_change(0);
+      break;
+    case 1:
+      settings_pubkey_export_change(1);
+      break;
+    default:
+      ux_menulist_init(settings_submenu_getter, settings_submenu_selector);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+// Settings menu:
+
+const char* const settings_submenu_getter_values[] = {
+  "Public keys export",
+  "Back",
+};
+
+const char* settings_submenu_getter(unsigned int idx) {
+  if (idx < ARRAYLEN(settings_submenu_getter_values)) {
+    return settings_submenu_getter_values[idx];
+  }
+  return NULL;
+}
+
+void settings_submenu_selector(unsigned int idx) {
+  switch(idx) {
+    case 0:
+      ux_menulist_init_select(settings_pubkey_export_getter, settings_pubkey_export_selector, N_btchip.pubKeyRequestRestriction);
+      break;
+    default:
+      ui_idle();
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_NOCB(
     ux_idle_flow_1_step,
-    bnn, //pnn,
-{
-      "", //&C_icon_dashboard,
+    nn, 
+    {
       "Application",
       "is ready",
     });
-UX_FLOW_DEF_NOCB(
+UX_FLOW_DEF_VALID(
     ux_idle_flow_2_step,
-    bn,
+    pb,
+    ux_menulist_init(settings_submenu_getter, settings_submenu_selector),
+    {
+      &C_icon_coggle,
+      "Settings",
+    });
+UX_FLOW_DEF_NOCB(
+    ux_idle_flow_3_step, 
+    bn, 
     {
       "Version",
       APPVERSION,
     });
 UX_FLOW_DEF_VALID(
-    ux_idle_flow_3_step,
+    ux_idle_flow_4_step,
     pb,
     os_sched_exit(-1),
     {
       &C_icon_dashboard,
       "Quit",
     });
-const ux_flow_step_t *        const ux_idle_flow [] = {
+UX_DEF(ux_idle_flow,
   &ux_idle_flow_1_step,
   &ux_idle_flow_2_step,
   &ux_idle_flow_3_step,
-  FLOW_END_STEP,
-};
+  &ux_idle_flow_4_step
+);
 
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_NOCB(
     ux_sign_flow_1_step,
-    pnn,
+    pnn, 
     {
       &C_icon_certificate,
       "Sign",
@@ -1478,10 +1551,10 @@ UX_FLOW_DEF_NOCB(
     });
 UX_FLOW_DEF_NOCB(
     ux_sign_flow_2_step,
-    bnnn_paging,
+    bnnn_paging, 
     {
       .title = "Message hash",
-      .text = vars.tmp.fullAmount,
+      .text = vars.tmp.fullAddress,
     });
 UX_FLOW_DEF_VALID(
     ux_sign_flow_3_step,
@@ -1502,18 +1575,17 @@ UX_FLOW_DEF_VALID(
       "signature",
     });
 
-const ux_flow_step_t *        const ux_sign_flow [] = {
+UX_DEF(ux_sign_flow,
   &ux_sign_flow_1_step,
   &ux_sign_flow_2_step,
   &ux_sign_flow_3_step,
-  &ux_sign_flow_4_step,
-  FLOW_END_STEP,
-};
+  &ux_sign_flow_4_step
+);
 
 //////////////////////////////////////////////////////////////////////
 
 UX_FLOW_DEF_NOCB(ux_confirm_full_flow_1_step,
-    pnn,
+    pnn, 
     {
       &C_icon_eye,
       "Review",
@@ -1521,21 +1593,21 @@ UX_FLOW_DEF_NOCB(ux_confirm_full_flow_1_step,
     });
 UX_FLOW_DEF_NOCB(
     ux_confirm_full_flow_2_step,
-    bnnn_paging,
+    bnnn_paging, 
     {
       .title = "Amount",
       .text = vars.tmp.fullAmount
     });
 UX_FLOW_DEF_NOCB(
     ux_confirm_full_flow_3_step,
-    bnnn_paging,
+    bnnn_paging, 
     {
       .title = "Address",
       .text = vars.tmp.fullAddress,
     });
 UX_FLOW_DEF_NOCB(
     ux_confirm_full_flow_4_step,
-    bnnn_paging,
+    bnnn_paging, 
     {
       .title = "Fees",
       .text = vars.tmp.feesAmount,
@@ -1558,44 +1630,50 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 // confirm_full: confirm transaction / Amount: fullAmount / Address: fullAddress / Fees: feesAmount
-const ux_flow_step_t *        const ux_confirm_full_flow [] = {
+UX_DEF(ux_confirm_full_flow,
   &ux_confirm_full_flow_1_step,
   &ux_confirm_full_flow_2_step,
   &ux_confirm_full_flow_3_step,
   &ux_confirm_full_flow_4_step,
   &ux_confirm_full_flow_5_step,
-  &ux_confirm_full_flow_6_step,
-  FLOW_END_STEP,
-};
+  &ux_confirm_full_flow_6_step
+);
 
 //////////////////////////////////////////////////////////////////////
 
 UX_FLOW_DEF_NOCB(
-    ux_confirm_single_flow_2_step,
-    pnn,
+    ux_confirm_single_flow_1_step, 
+    pnn, 
     {
       &C_icon_eye,
       "Review",
-      vars.tmp.feesAmount,
+      "transaction"
     });
 UX_FLOW_DEF_NOCB(
-    ux_confirm_single_flow_3_step,
-    bnnn_paging,
+    ux_confirm_single_flow_2_step, 
+    bnnn_paging, 
     {
       .title = "Amount",
       .text = vars.tmp.fullAmount,
     });
 UX_FLOW_DEF_NOCB(
-    ux_confirm_single_flow_4_step,
-    bnnn_paging,
+    ux_confirm_single_flow_3_step, 
+    bnnn_paging, 
     {
       .title = "Address",
       .text = vars.tmp.fullAddress,
     });
+UX_FLOW_DEF_NOCB(
+    ux_confirm_single_flow_4_step, 
+    bnnn_paging, 
+    {
+      .title = "Fees",
+      .text = vars.tmp.feesAmount,
+    });
 UX_FLOW_DEF_VALID(
     ux_confirm_single_flow_5_step,
     pb,
-    io_seproxyhal_touch_verify_ok(NULL),
+    io_seproxyhal_touch_verify_ok(NULL), 
     {
       &C_icon_validate_14,
       "Accept",
@@ -1609,29 +1687,28 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 // confirm_single: confirm output #x(feesAmount) / Amount: fullAmount / Address: fullAddress
-const ux_flow_step_t *        const ux_confirm_single_flow [] = {
+UX_DEF(ux_confirm_single_flow,
+  &ux_confirm_single_flow_1_step,
   &ux_confirm_single_flow_2_step,
   &ux_confirm_single_flow_3_step,
   &ux_confirm_single_flow_4_step,
   &ux_confirm_single_flow_5_step,
-  &ux_confirm_single_flow_6_step,
-  FLOW_END_STEP,
-};
+  &ux_confirm_single_flow_6_step
+);
 
 //////////////////////////////////////////////////////////////////////
 
-// UX_FLOW_DEF_NOCB(
-//     ux_finalize_flow_1_step,
-//     pnn,
-//     {
-//       &C_icon_eye,
-//       "Review",
-//       "transaction"
-//     });
-
+UX_FLOW_DEF_NOCB(
+    ux_finalize_flow_1_step, 
+    pnn, 
+    {
+      &C_icon_eye,
+      "Review",
+      "transaction"
+    });
 UX_FLOW_DEF_NOCB(
     ux_finalize_flow_4_step,
-    bnnn_paging,
+    bnnn_paging, 
     {
       .title = "Fees",
       .text = vars.tmp.feesAmount,
@@ -1654,32 +1731,55 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 // finalize: confirm transaction / Fees: feesAmount
-const ux_flow_step_t *        const ux_finalize_flow [] = {
-  // &ux_finalize_flow_1_step,
+UX_DEF(ux_finalize_flow,
+  &ux_finalize_flow_1_step,
   &ux_finalize_flow_4_step,
   &ux_finalize_flow_5_step,
-  &ux_finalize_flow_6_step,
-  FLOW_END_STEP,
-};
+  &ux_finalize_flow_6_step
+);
 
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_NOCB(
     ux_display_public_flow_1_step,
-    pnn,
+    pnn, 
     {
-      &C_icon_eye,
-      "Verify",
-      "address",
+      &C_icon_warning,
+      "The derivation",
+      "path is unusual!",
+    });
+UX_FLOW_DEF_NOCB(
+    ux_display_public_flow_2_step, 
+    bnnn_paging, 
+    {
+      .title = "Derivation path",
+      .text = vars.tmp_warning.derivation_path,
+    });
+UX_FLOW_DEF_VALID(
+    ux_display_public_flow_3_step, 
+    pnn,
+    io_seproxyhal_touch_display_cancel(NULL),
+    {
+      &C_icon_crossmark,
+      "Reject if you're",
+      "not sure",
     });
 UX_FLOW_DEF_NOCB(
     ux_display_public_flow_4_step,
-    bnnn_paging,
+    pnn, 
+    {
+      &C_icon_validate_14,
+      "Approve derivation",
+      "path",
+    });
+UX_FLOW_DEF_NOCB(
+    ux_display_public_flow_5_step, 
+    bnnn_paging, 
     {
       .title = "Address",
       .text = G_io_apdu_buffer+200,
     });
 UX_FLOW_DEF_VALID(
-    ux_display_public_flow_5_step,
+    ux_display_public_flow_6_step, 
     pb,
     io_seproxyhal_touch_display_ok(NULL),
     {
@@ -1687,7 +1787,7 @@ UX_FLOW_DEF_VALID(
       "Approve",
     });
 UX_FLOW_DEF_VALID(
-    ux_display_public_flow_6_step,
+    ux_display_public_flow_7_step, 
     pb,
     io_seproxyhal_touch_display_cancel(NULL),
     {
@@ -1695,14 +1795,22 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 
-const ux_flow_step_t *        const ux_display_public_flow [] = {
+UX_DEF(ux_display_public_with_warning_flow,
   &ux_display_public_flow_1_step,
+  &ux_display_public_flow_2_step,
+  &ux_display_public_flow_3_step,
   &ux_display_public_flow_4_step,
+  FLOW_BARRIER,
   &ux_display_public_flow_5_step,
   &ux_display_public_flow_6_step,
-  FLOW_END_STEP,
-};
+  &ux_display_public_flow_7_step
+);
 
+UX_DEF(ux_display_public_flow,
+  &ux_display_public_flow_5_step,
+  &ux_display_public_flow_6_step,
+  &ux_display_public_flow_7_step
+);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -1724,11 +1832,10 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 
-const ux_flow_step_t *        const ux_display_token_flow [] = {
+UX_DEF(ux_display_token_flow,
   &ux_display_token_flow_1_step,
-  &ux_display_token_flow_2_step,
-  FLOW_END_STEP,
-};
+  &ux_display_token_flow_2_step
+);
 
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_VALID(
@@ -1749,16 +1856,15 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 
-const ux_flow_step_t *        const ux_request_pubkey_approval_flow [] = {
+UX_DEF(ux_request_pubkey_approval_flow,
   &ux_request_pubkey_approval_flow_1_step,
-  &ux_request_pubkey_approval_flow_2_step,
-  FLOW_END_STEP,
-};
+  &ux_request_pubkey_approval_flow_2_step
+);
 
 //////////////////////////////////////////////////////////////////////
 UX_FLOW_DEF_NOCB(
     ux_request_change_path_approval_flow_1_step,
-    pbb,
+    pbb, 
     {
       &C_icon_eye,
       "The change path",
@@ -1766,7 +1872,7 @@ UX_FLOW_DEF_NOCB(
     });
 UX_FLOW_DEF_NOCB(
     ux_request_change_path_approval_flow_2_step,
-    bnnn_paging,
+    bnnn_paging, 
     {
       .title = "Change path",
       .text = vars.tmp_warning.derivation_path,
@@ -1789,13 +1895,12 @@ UX_FLOW_DEF_VALID(
       "Approve",
     });
 
-const ux_flow_step_t *        const ux_request_change_path_approval_flow [] = {
+UX_DEF(ux_request_change_path_approval_flow,
   &ux_request_change_path_approval_flow_1_step,
   &ux_request_change_path_approval_flow_2_step,
   &ux_request_change_path_approval_flow_3_step,
-  &ux_request_change_path_approval_flow_4_step,
-  FLOW_END_STEP,
-};
+  &ux_request_change_path_approval_flow_4_step
+);
 
 #endif // #if defined(TARGET_NANOX)
 
@@ -1912,8 +2017,7 @@ uint8_t prepare_fees() {
         unsigned short textSize;
         if (transaction_amount_sub_be(
                 fees, btchip_context_D.transactionContext.transactionAmount,
-                btchip_context_D.totalOutputAmount))
-        {
+                btchip_context_D.totalOutputAmount)) {
             PRINTF("Fees: %.*H\n", 8, fees);
             PRINTF("transactionAmount:: %.*H\n", 8, btchip_context_D.transactionContext.transactionAmount);
             PRINTF("totalOutputAmount: %.*H\n", 8, btchip_context_D.totalOutputAmount);
@@ -1935,8 +2039,7 @@ error:
     return 0;
 }
 
-uint8_t prepare_single_output()
-{
+uint8_t prepare_single_output() {
     // TODO : special display for OP_RETURN
     unsigned char amount[8];
     char tmp[80];
@@ -1958,32 +2061,25 @@ uint8_t prepare_single_output()
     PRINTF("amount: %.*H\n", 8, amount);
 
     if (btchip_output_script_is_op_return(btchip_context_D.currentOutput +
-                                          offset))
-    {
+                                          offset)) {
         strcpy(vars.tmp.fullAddress, "OP_RETURN");
     }
     else if (btchip_output_script_is_regular(btchip_context_D.currentOutput +
-                                             offset))
-    {
+                                             offset)) {
         addressOffset = offset + 4;
         version = btchip_context_D.payToAddressVersion;
     }
-    else
-    {
+    else {
         addressOffset = offset + 3;
         version = btchip_context_D.payToScriptHashVersion;
     }
-    if (vars.tmp.fullAddress[0] == 0)
-    {
+    if (vars.tmp.fullAddress[0] == 0) {
 
-        if (version > 255)
-        {
+        if (version > 255) {
             versionSize = 2;
             address[0] = (version >> 8);
             address[1] = version;
-        }
-        else
-        {
+        } else {
             versionSize = 1;
             address[0] = version;
         }
@@ -2026,18 +2122,14 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
     unsigned char script_version[2]; // Decred thing
 
     if (btchip_context_D.transactionContext.relaxed &&
-        !btchip_context_D.transactionContext.consumeP2SH)
-    {
-        if (!checkOnly)
-        {
+        !btchip_context_D.transactionContext.consumeP2SH) {
+        if (!checkOnly) {
             PRINTF("Error : Mixed inputs");
         }
         goto error;
     }
-    if (btchip_context_D.transactionContext.consumeP2SH)
-    {
-        if (checkOnly)
-        {
+    if (btchip_context_D.transactionContext.consumeP2SH) {
+        if (checkOnly) {
             goto error;
         }
         vars.tmp.fullAmount[0] = '\0';
@@ -2049,25 +2141,20 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
     os_memset(totalOutputAmount, 0, sizeof(totalOutputAmount));
     numberOutputs = btchip_context_D.currentOutput[offset++];
     PRINTF("%d outputs\n", numberOutputs);
-    if (numberOutputs > 3)
-    {
-        if (!checkOnly)
-        {
+    if (numberOutputs > 3) {
+        if (!checkOnly) {
             PRINTF("Error : Too many outputs");
         }
         goto error;
     }
-    for (i = 0; i < numberOutputs; i++)
-    {
+    for (i = 0; i < numberOutputs; i++) {
         unsigned char nullAmount = 1;
         unsigned int j;
         unsigned char isOpReturn, isP2sh;
         unsigned char isOpCreate, isOpCall;
 
-        for (j = 0; j < 8; j++)
-        {
-            if (btchip_context_D.currentOutput[offset + j] != 0)
-            {
+        for (j = 0; j < 8; j++) {
+            if (btchip_context_D.currentOutput[offset + j] != 0) {
                 nullAmount = 0;
                 break;
             }
@@ -2088,49 +2175,45 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
         isOpCall = btchip_output_script_is_op_call(
             btchip_context_D.currentOutput + offset);
         PRINTF("REGULAR SCRIPT: %d\n", btchip_output_script_is_regular(btchip_context_D.currentOutput + offset));
+        // Always notify OP_RETURN to the user
+        if (nullAmount && isOpReturn) {
+            if (!checkOnly) {
+                PRINTF("Error : Unexpected OP_RETURN");
+            }
+            goto error;
+        }
         if (!btchip_output_script_is_regular(btchip_context_D.currentOutput +
                                              offset) &&
             !isP2sh && !(nullAmount && isOpReturn) &&
-             (!isOpCreate && !isOpCall))
-        {
-            if (!checkOnly)
-            {
+             (!isOpCreate && !isOpCall)) {
+            if (!checkOnly) {
                 PRINTF("Error : Unrecognized input script");
             }
             goto error;
-        }
-        else if (!btchip_output_script_is_regular(
+        } else if (!btchip_output_script_is_regular(
                      btchip_context_D.currentOutput + offset) &&
-                 !isP2sh && !(nullAmount && isOpReturn))
-        {
-            if (!checkOnly)
-            {
+                 !isP2sh && !(nullAmount && isOpReturn)) {
+            if (!checkOnly) {
                 PRINTF("Error : Unrecognized input script");
             }
             goto error;
         }
-        if (btchip_context_D.tmpCtx.output.changeInitialized && !isOpReturn)
-        {
+        if (btchip_context_D.tmpCtx.output.changeInitialized && !isOpReturn) {
             unsigned char addressOffset =
                 (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH
                                          : OUTPUT_SCRIPT_REGULAR_PRE_LENGTH);
             if (os_memcmp(btchip_context_D.currentOutput + offset +
                               addressOffset,
                           btchip_context_D.tmpCtx.output.changeAddress + 1,
-                          20) == 0)
-            {
-                if (changeFound)
-                {
-                    if (!checkOnly)
-                    {
+                          20) == 0) {
+                if (changeFound) {
+                    if (!checkOnly) {
                         PRINTF("Error : Multiple change output found");
                     }
                     goto error;
                 }
                 changeFound = 1;
-            }
-            else
-            {
+            } else {
                 // outputPos is the real output pointer (opposed to the change address output)
                 outputPos = currentPos;
             }
@@ -2138,36 +2221,29 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
         offset += 1 + btchip_context_D.currentOutput[offset];
         currentPos++;
     }
-    if (btchip_context_D.tmpCtx.output.changeInitialized && !changeFound)
-    {
-        if (!checkOnly)
-        {
+    if (btchip_context_D.tmpCtx.output.changeInitialized && !changeFound) {
+        if (!checkOnly) {
             PRINTF("Error : change output not found");
         }
         goto error;
     }
     if (transaction_amount_sub_be(
             fees, btchip_context_D.transactionContext.transactionAmount,
-            totalOutputAmount))
-    {
+            totalOutputAmount)) {
         PRINTF("tx_amount: ", 8, btchip_context_D.transactionContext.transactionAmount);
         PRINTF("total_amount: ", 8, totalOutputAmount);
-        if (!checkOnly)
-        {
+        if (!checkOnly) {
             PRINTF("Error : Fees not consistent");
         }
         goto error;
     }
-    if (!checkOnly)
-    {
+    if (!checkOnly) {
         // Format validation message
         currentPos = 0;
         offset = 1;
         btchip_context_D.tmp = (unsigned char *)tmp;
-        for (i = 0; i < numberOutputs; i++)
-        {
-            if (!btchip_output_script_is_op_return(btchip_context_D.currentOutput + offset + 8 + 2))
-            {
+        for (i = 0; i < numberOutputs; i++) {
+            if (!btchip_output_script_is_op_return(btchip_context_D.currentOutput + offset + 8 + 2)) {
                 unsigned char versionSize;
                 int addressOffset;
                 unsigned char address[22];
@@ -2200,8 +2276,7 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
                             20);
 
                 // if we're processing the real output (not the change one)
-                if (currentPos == outputPos)
-                {
+                if (currentPos == outputPos) {
                     unsigned short textSize = 0;
 
                     // Prepare address
@@ -2248,9 +2323,7 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
                         '\0';
                     break;
                 }
-            }
-            else
-            {
+            } else {
                 // amount + version
                 offset += 8 + 2;
             }
@@ -2264,23 +2337,21 @@ error:
 }
 
 #define HASH_LENGTH 4
-uint8_t prepare_message_signature()
-{
+uint8_t prepare_message_signature() {
+    uint8_t buffer[32];
+
     cx_hash(&btchip_context_D.transactionHashWitness.header, CX_LAST,
-            vars.tmp.fullAmount, 0, vars.tmp.fullAmount);
+            vars.tmp.fullAmount, 0, buffer, 32);
+
     snprintf(vars.tmp.fullAddress, sizeof(vars.tmp.fullAddress), "%.*H...%.*H",
-             8, vars.tmp.fullAmount, 8, vars.tmp.fullAmount + 32 - 8);
+             8, buffer, 8, buffer + 32 - 8);
     return 1;
 }
 
-unsigned int btchip_bagl_confirm_full_output()
-{
-    if (!prepare_full_output(0))
-    {
-        //PRINTF("FAIL\n");
+unsigned int btchip_bagl_confirm_full_output() {
+    if (!prepare_full_output(0)) {
         return 0;
     }
-    //PRINTF("WIN\n");
 
 #if defined(TARGET_BLUE)
     ui_transaction_full_blue_init();
@@ -2288,8 +2359,7 @@ unsigned int btchip_bagl_confirm_full_output()
     ux_step = 0;
     ux_step_count = 4;
     UX_DISPLAY(ui_verify_nanos, ui_verify_prepro);
-#endif // #if TARGET_ID
-#ifdef TARGET_NANOX
+#elif defined(TARGET_NANOX)
     ux_flow_init(0, ux_confirm_full_flow, NULL);
 #endif // TARGET_NANOX
     return 1;
@@ -2318,8 +2388,7 @@ unsigned int btchip_bagl_confirm_single_output() {
     ux_step = 0;
     ux_step_count = 3;
     UX_DISPLAY(ui_verify_output_nanos, ui_verify_output_prepro);
-#endif // #if TARGET_ID
-#ifdef TARGET_NANOX
+#elif defined(TARGET_NANOX)
     ux_flow_init(0, ux_confirm_single_flow, NULL);
 #endif // TARGET_NANOX
     return 1;
@@ -2336,8 +2405,7 @@ unsigned int btchip_bagl_finalize_tx() {
     ux_step = 0;
     ux_step_count = 2;
     UX_DISPLAY(ui_finalize_nanos, ui_finalize_prepro);
-#endif // #if TARGET_ID
-#ifdef TARGET_NANOX
+#elif defined(TARGET_NANOX)
     ux_flow_init(0, ux_finalize_flow, NULL);
 #endif // TARGET_NANOX
     return 1;
@@ -2354,8 +2422,7 @@ void btchip_bagl_confirm_message_signature() {
     ux_step = 0;
     ux_step_count = 2;
     UX_DISPLAY(ui_verify_message_signature_nanos, ui_verify_message_prepro);
-#endif // #if TARGET_ID
-#ifdef TARGET_NANOX
+#elif defined(TARGET_NANOX)
     ux_flow_init(0, ux_sign_flow, NULL);
 #endif // TARGET_NANOX
 }
@@ -2383,9 +2450,9 @@ void btchip_bagl_display_public_key(unsigned char* derivation_path) {
     ux_step = is_derivation_path_unusual?0:4;
     ux_step_count = 6;
     UX_DISPLAY(ui_display_address_nanos, ui_display_address_nanos_prepro);
-#endif // #if TARGET_ID
-#ifdef TARGET_NANOX
-    ux_flow_init(0, ux_display_public_flow, NULL);
+    
+#elif defined(TARGET_NANOX)
+    ux_flow_init(0, is_derivation_path_unusual?ux_display_public_with_warning_flow:ux_display_public_flow, NULL);
 #endif // TARGET_NANOX
 }
 
@@ -2493,10 +2560,8 @@ __attribute__((section(".boot"))) int main(int arg0) {
     coin_config.name = name;
     coin_config.name_short = name_short;
 
-    BEGIN_TRY
-    {
-        TRY
-        {
+    BEGIN_TRY {
+        TRY {
             // ensure syscall will accept us
             check_api_level(CX_COMPAT_APILEVEL);
             // delegate to bitcoin app/lib
@@ -2541,7 +2606,6 @@ __attribute__((section(".boot"))) int main(int arg0) {
 #endif // TARGET_NANOX
 
                 btchip_context_init();
-
 
                 USB_power(0);
                 USB_power(1);

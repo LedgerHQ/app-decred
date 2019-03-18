@@ -1,6 +1,6 @@
 /*******************************************************************************
 *   Ledger App - Bitcoin Wallet
-*   (c) 2016-2019-2019 Ledger
+*   (c) 2016-2019 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
+
+#ifndef _BTCHIP_ROM_VARIABLES_
+#define _BTCHIP_ROM_VARIABLES_
 
 #include "btchip_internal.h"
 
@@ -57,3 +60,5 @@ extern unsigned char const DISPATCHER_CLA[DISPATCHER_APDUS];
 extern unsigned char const DISPATCHER_INS[DISPATCHER_APDUS];
 extern unsigned char const DISPATCHER_DATA_IN[DISPATCHER_APDUS];
 extern apduProcessingFunction const DISPATCHER_FUNCTIONS[DISPATCHER_APDUS];
+
+#endif /* _BTCHIP_ROM_VARIABLES_ */

@@ -22,8 +22,7 @@
   (p)[0] = (uint8_t)((v) >> 24); (p)[1] = (uint8_t)((v) >> 16); \
   (p)[2] = (uint8_t)((v) >>  8); (p)[3] = (uint8_t)((v)      );
 
-static const uint8_t sigma[][16] =
-{
+static const uint8_t sigma[][16] = {
   { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 },
   {14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3 },
   {11, 8, 12, 0, 5, 2, 15, 13, 10, 14, 3, 6, 7, 1, 9, 4 },
@@ -42,16 +41,14 @@ static const uint8_t sigma[][16] =
   { 2, 12, 6, 10, 0, 11, 8, 3, 4, 13, 7, 5, 15, 14, 1, 9 }
 };
 
-static const uint32_t u256[16] =
-{
+static const uint32_t u256[16] = {
   0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344,
   0xa4093822, 0x299f31d0, 0x082efa98, 0xec4e6c89,
   0x452821e6, 0x38d01377, 0xbe5466cf, 0x34e90c6c,
   0xc0ac29b7, 0xc97c50dd, 0x3f84d5b5, 0xb5470917
 };
 
-static const uint8_t padding[129] =
-{
+static const uint8_t padding[129] = {
   0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -62,8 +59,7 @@ static const uint8_t padding[129] =
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static void blake256_compress( BLAKE256_CTX *S, const uint8_t *block )
-{
+static void blake256_compress( BLAKE256_CTX *S, const uint8_t *block ) {
   uint32_t v[16], m[16], i;
 #define ROT(x,n) (((x)<<(32-n))|( (x)>>(n)))
 #define G(a,b,c,d,e)          \
@@ -90,16 +86,14 @@ static void blake256_compress( BLAKE256_CTX *S, const uint8_t *block )
   v[15] = u256[7];
 
   /* don't xor t when the block is only padding */
-  if ( !S->nullt )
-  {
+  if ( !S->nullt ) {
     v[12] ^= S->t[0];
     v[13] ^= S->t[0];
     v[14] ^= S->t[1];
     v[15] ^= S->t[1];
   }
 
-  for( i = 0; i < 14; ++i )
-  {
+  for( i = 0; i < 14; ++i ) {
     /* column step */
     G( 0,  4,  8, 12,  0 );
     G( 1,  5,  9, 13,  2 );
@@ -118,8 +112,7 @@ static void blake256_compress( BLAKE256_CTX *S, const uint8_t *block )
 }
 
 
-void blake256_Init( BLAKE256_CTX *S )
-{
+void blake256_Init( BLAKE256_CTX *S ) {
   S->h[0] = 0x6a09e667;
   S->h[1] = 0xbb67ae85;
   S->h[2] = 0x3c6ef372;
@@ -133,14 +126,12 @@ void blake256_Init( BLAKE256_CTX *S )
 }
 
 
-void blake256_Update( BLAKE256_CTX *S, const uint8_t *in, size_t inlen )
-{
+void blake256_Update( BLAKE256_CTX *S, const uint8_t *in, size_t inlen ) {
   size_t left = S->buflen;
   size_t fill = 64 - left;
 
   /* data left and data received fill a block  */
-  if( left && ( inlen >= fill ) )
-  {
+  if( left && ( inlen >= fill ) ) {
     memcpy( ( void * ) ( S->buf + left ), ( void * ) in, fill );
     S->t[0] += 512;
 
@@ -153,8 +144,7 @@ void blake256_Update( BLAKE256_CTX *S, const uint8_t *in, size_t inlen )
   }
 
   /* compress blocks of data received */
-  while( inlen >= 64 )
-  {
+  while( inlen >= 64 ) {
     S->t[0] += 512;
 
     if ( S->t[0] == 0 ) S->t[1]++;
@@ -165,8 +155,7 @@ void blake256_Update( BLAKE256_CTX *S, const uint8_t *in, size_t inlen )
   }
 
   /* store any data left */
-  if( inlen > 0 )
-  {
+  if( inlen > 0 ) {
     memcpy( ( void * ) ( S->buf + left ),   \
             ( void * ) in, ( size_t ) inlen );
     S->buflen = left + ( int )inlen;
@@ -175,8 +164,7 @@ void blake256_Update( BLAKE256_CTX *S, const uint8_t *in, size_t inlen )
 }
 
 
-void blake256_Final( BLAKE256_CTX *S, uint8_t *out )
-{
+void blake256_Final( BLAKE256_CTX *S, uint8_t *out ) {
   uint8_t msglen[8], zo = 0x01, oo = 0x81;
   uint32_t lo = S->t[0] + ( S->buflen << 3 ), hi = S->t[1];
 
@@ -186,22 +174,18 @@ void blake256_Final( BLAKE256_CTX *S, uint8_t *out )
   U32TO8_BIG(  msglen + 0, hi );
   U32TO8_BIG(  msglen + 4, lo );
 
-  if ( S->buflen == 55 )   /* one padding byte */
-  {
+  if ( S->buflen == 55 )   /* one padding byte */ {
     S->t[0] -= 8;
     blake256_Update( S, &oo, 1 );
   }
-  else
-  {
-    if ( S->buflen < 55 )   /* enough space to fill the block  */
-    {
+  else {
+    if ( S->buflen < 55 )   /* enough space to fill the block  */ {
       if ( !S->buflen ) S->nullt = 1;
 
       S->t[0] -= 440 - ( S->buflen << 3 );
       blake256_Update( S, padding, 55 - S->buflen );
     }
-    else   /* need 2 compressions */
-    {
+    else   /* need 2 compressions */ {
       S->t[0] -= 512 - ( S->buflen << 3 );
       blake256_Update( S, padding, 64 - S->buflen );
       S->t[0] -= 440;
@@ -226,8 +210,7 @@ void blake256_Final( BLAKE256_CTX *S, uint8_t *out )
 }
 
 
-void blake256( const uint8_t *in, size_t inlen, uint8_t *out )
-{
+void blake256( const uint8_t *in, size_t inlen, uint8_t *out ) {
   BLAKE256_CTX S;
   blake256_Init( &S );
   blake256_Update( &S, in, inlen );
