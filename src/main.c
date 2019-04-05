@@ -1503,14 +1503,14 @@ void settings_submenu_selector(unsigned int idx) {
 }
 
 //////////////////////////////////////////////////////////////////////
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_idle_flow_1_step,
     nn, 
     {
       "Application",
       "is ready",
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_idle_flow_2_step,
     pb,
     ux_menulist_init(settings_submenu_getter, settings_submenu_selector),
@@ -1518,14 +1518,14 @@ UX_FLOW_DEF_VALID(
       &C_icon_coggle,
       "Settings",
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_idle_flow_3_step, 
     bn, 
     {
       "Version",
       APPVERSION,
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_idle_flow_4_step,
     pb,
     os_sched_exit(-1),
@@ -1533,7 +1533,7 @@ UX_FLOW_DEF_VALID(
       &C_icon_dashboard,
       "Quit",
     });
-UX_DEF(ux_idle_flow,
+UX_FLOW(ux_idle_flow,
   &ux_idle_flow_1_step,
   &ux_idle_flow_2_step,
   &ux_idle_flow_3_step,
@@ -1541,7 +1541,7 @@ UX_DEF(ux_idle_flow,
 );
 
 //////////////////////////////////////////////////////////////////////
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_sign_flow_1_step,
     pnn, 
     {
@@ -1549,14 +1549,14 @@ UX_FLOW_DEF_NOCB(
       "Sign",
       "message",
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_sign_flow_2_step,
     bnnn_paging, 
     {
       .title = "Message hash",
       .text = vars.tmp.fullAddress,
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_sign_flow_3_step,
     pbb,
     io_seproxyhal_touch_message_signature_verify_ok(NULL),
@@ -1565,7 +1565,7 @@ UX_FLOW_DEF_VALID(
       "Sign",
       "message",
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_sign_flow_4_step,
     pbb,
     io_seproxyhal_touch_message_signature_verify_cancel(NULL),
@@ -1575,7 +1575,7 @@ UX_FLOW_DEF_VALID(
       "signature",
     });
 
-UX_DEF(ux_sign_flow,
+UX_FLOW(ux_sign_flow,
   &ux_sign_flow_1_step,
   &ux_sign_flow_2_step,
   &ux_sign_flow_3_step,
@@ -1584,35 +1584,35 @@ UX_DEF(ux_sign_flow,
 
 //////////////////////////////////////////////////////////////////////
 
-UX_FLOW_DEF_NOCB(ux_confirm_full_flow_1_step,
+UX_STEP_NOCB(ux_confirm_full_flow_1_step,
     pnn, 
     {
       &C_icon_eye,
       "Review",
       "transaction",
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_confirm_full_flow_2_step,
     bnnn_paging, 
     {
       .title = "Amount",
       .text = vars.tmp.fullAmount
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_confirm_full_flow_3_step,
     bnnn_paging, 
     {
       .title = "Address",
       .text = vars.tmp.fullAddress,
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_confirm_full_flow_4_step,
     bnnn_paging, 
     {
       .title = "Fees",
       .text = vars.tmp.feesAmount,
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_confirm_full_flow_5_step,
     pbb,
     io_seproxyhal_touch_verify_ok(NULL),
@@ -1621,7 +1621,7 @@ UX_FLOW_DEF_VALID(
       "Accept",
       "and send",
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_confirm_full_flow_6_step,
     pb,
     io_seproxyhal_touch_verify_cancel(NULL),
@@ -1630,7 +1630,7 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 // confirm_full: confirm transaction / Amount: fullAmount / Address: fullAddress / Fees: feesAmount
-UX_DEF(ux_confirm_full_flow,
+UX_FLOW(ux_confirm_full_flow,
   &ux_confirm_full_flow_1_step,
   &ux_confirm_full_flow_2_step,
   &ux_confirm_full_flow_3_step,
@@ -1641,7 +1641,7 @@ UX_DEF(ux_confirm_full_flow,
 
 //////////////////////////////////////////////////////////////////////
 
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_confirm_single_flow_1_step, 
     pnn, 
     {
@@ -1649,28 +1649,28 @@ UX_FLOW_DEF_NOCB(
       "Review",
       "transaction"
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_confirm_single_flow_2_step, 
     bnnn_paging, 
     {
       .title = "Amount",
       .text = vars.tmp.fullAmount,
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_confirm_single_flow_3_step, 
     bnnn_paging, 
     {
       .title = "Address",
       .text = vars.tmp.fullAddress,
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_confirm_single_flow_4_step, 
     bnnn_paging, 
     {
       .title = "Fees",
       .text = vars.tmp.feesAmount,
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_confirm_single_flow_5_step,
     pb,
     io_seproxyhal_touch_verify_ok(NULL), 
@@ -1678,7 +1678,7 @@ UX_FLOW_DEF_VALID(
       &C_icon_validate_14,
       "Accept",
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_confirm_single_flow_6_step,
     pb,
     io_seproxyhal_touch_verify_cancel(NULL),
@@ -1687,7 +1687,7 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 // confirm_single: confirm output #x(feesAmount) / Amount: fullAmount / Address: fullAddress
-UX_DEF(ux_confirm_single_flow,
+UX_FLOW(ux_confirm_single_flow,
   &ux_confirm_single_flow_1_step,
   &ux_confirm_single_flow_2_step,
   &ux_confirm_single_flow_3_step,
@@ -1698,7 +1698,7 @@ UX_DEF(ux_confirm_single_flow,
 
 //////////////////////////////////////////////////////////////////////
 
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_finalize_flow_1_step, 
     pnn, 
     {
@@ -1706,14 +1706,14 @@ UX_FLOW_DEF_NOCB(
       "Review",
       "transaction"
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_finalize_flow_4_step,
     bnnn_paging, 
     {
       .title = "Fees",
       .text = vars.tmp.feesAmount,
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_finalize_flow_5_step,
     pbb,
     io_seproxyhal_touch_verify_ok(NULL),
@@ -1722,7 +1722,7 @@ UX_FLOW_DEF_VALID(
       "Accept",
       "and send"
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_finalize_flow_6_step,
     pb,
     io_seproxyhal_touch_verify_cancel(NULL),
@@ -1731,7 +1731,7 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 // finalize: confirm transaction / Fees: feesAmount
-UX_DEF(ux_finalize_flow,
+UX_FLOW(ux_finalize_flow,
   &ux_finalize_flow_1_step,
   &ux_finalize_flow_4_step,
   &ux_finalize_flow_5_step,
@@ -1739,7 +1739,7 @@ UX_DEF(ux_finalize_flow,
 );
 
 //////////////////////////////////////////////////////////////////////
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_display_public_flow_1_step,
     pnn, 
     {
@@ -1747,14 +1747,14 @@ UX_FLOW_DEF_NOCB(
       "The derivation",
       "path is unusual!",
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_display_public_flow_2_step, 
     bnnn_paging, 
     {
       .title = "Derivation path",
       .text = vars.tmp_warning.derivation_path,
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_display_public_flow_3_step, 
     pnn,
     io_seproxyhal_touch_display_cancel(NULL),
@@ -1763,7 +1763,7 @@ UX_FLOW_DEF_VALID(
       "Reject if you're",
       "not sure",
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_display_public_flow_4_step,
     pnn, 
     {
@@ -1771,14 +1771,14 @@ UX_FLOW_DEF_NOCB(
       "Approve derivation",
       "path",
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_display_public_flow_5_step, 
     bnnn_paging, 
     {
       .title = "Address",
       .text = G_io_apdu_buffer+200,
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_display_public_flow_6_step, 
     pb,
     io_seproxyhal_touch_display_ok(NULL),
@@ -1786,7 +1786,7 @@ UX_FLOW_DEF_VALID(
       &C_icon_validate_14,
       "Approve",
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_display_public_flow_7_step, 
     pb,
     io_seproxyhal_touch_display_cancel(NULL),
@@ -1795,7 +1795,7 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 
-UX_DEF(ux_display_public_with_warning_flow,
+UX_FLOW(ux_display_public_with_warning_flow,
   &ux_display_public_flow_1_step,
   &ux_display_public_flow_2_step,
   &ux_display_public_flow_3_step,
@@ -1806,7 +1806,7 @@ UX_DEF(ux_display_public_with_warning_flow,
   &ux_display_public_flow_7_step
 );
 
-UX_DEF(ux_display_public_flow,
+UX_FLOW(ux_display_public_flow,
   &ux_display_public_flow_5_step,
   &ux_display_public_flow_6_step,
   &ux_display_public_flow_7_step
@@ -1814,7 +1814,7 @@ UX_DEF(ux_display_public_flow,
 
 
 //////////////////////////////////////////////////////////////////////
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_display_token_flow_1_step,
     pbb,
     io_seproxyhal_touch_display_ok(NULL),
@@ -1823,7 +1823,7 @@ UX_FLOW_DEF_VALID(
       "Confirm token",
       G_io_apdu_buffer+200,
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_display_token_flow_2_step,
     pb,
     io_seproxyhal_touch_display_cancel(NULL),
@@ -1832,13 +1832,13 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 
-UX_DEF(ux_display_token_flow,
+UX_FLOW(ux_display_token_flow,
   &ux_display_token_flow_1_step,
   &ux_display_token_flow_2_step
 );
 
 //////////////////////////////////////////////////////////////////////
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_request_pubkey_approval_flow_1_step,
     pbb,
     io_seproxyhal_touch_display_ok(NULL),
@@ -1847,7 +1847,7 @@ UX_FLOW_DEF_VALID(
       "Export",
       "public key?",
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_request_pubkey_approval_flow_2_step,
     pb,
     io_seproxyhal_touch_display_cancel(NULL),
@@ -1856,13 +1856,13 @@ UX_FLOW_DEF_VALID(
       "Reject",
     });
 
-UX_DEF(ux_request_pubkey_approval_flow,
+UX_FLOW(ux_request_pubkey_approval_flow,
   &ux_request_pubkey_approval_flow_1_step,
   &ux_request_pubkey_approval_flow_2_step
 );
 
 //////////////////////////////////////////////////////////////////////
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_request_change_path_approval_flow_1_step,
     pbb, 
     {
@@ -1870,14 +1870,14 @@ UX_FLOW_DEF_NOCB(
       "The change path",
       "is unusual",
     });
-UX_FLOW_DEF_NOCB(
+UX_STEP_NOCB(
     ux_request_change_path_approval_flow_2_step,
     bnnn_paging, 
     {
       .title = "Change path",
       .text = vars.tmp_warning.derivation_path,
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_request_change_path_approval_flow_3_step,
     pbb,
     io_seproxyhal_touch_display_cancel(NULL),
@@ -1886,7 +1886,7 @@ UX_FLOW_DEF_VALID(
       "Reject if you're",
       "not sure",
     });
-UX_FLOW_DEF_VALID(
+UX_STEP_VALID(
     ux_request_change_path_approval_flow_4_step,
     pb,
     io_seproxyhal_touch_display_ok(NULL),
@@ -1895,7 +1895,7 @@ UX_FLOW_DEF_VALID(
       "Approve",
     });
 
-UX_DEF(ux_request_change_path_approval_flow,
+UX_FLOW(ux_request_change_path_approval_flow,
   &ux_request_change_path_approval_flow_1_step,
   &ux_request_change_path_approval_flow_2_step,
   &ux_request_change_path_approval_flow_3_step,
