@@ -1473,7 +1473,7 @@ void settings_pubkey_export_selector(unsigned int idx) {
       settings_pubkey_export_change(1);
       break;
     default:
-      ux_menulist_init(settings_submenu_getter, settings_submenu_selector);
+      ux_menulist_init(0, settings_submenu_getter, settings_submenu_selector);
   }
 }
 
@@ -1495,7 +1495,7 @@ const char* settings_submenu_getter(unsigned int idx) {
 void settings_submenu_selector(unsigned int idx) {
   switch(idx) {
     case 0:
-      ux_menulist_init_select(settings_pubkey_export_getter, settings_pubkey_export_selector, N_btchip.pubKeyRequestRestriction);
+      ux_menulist_init_select(0, settings_pubkey_export_getter, settings_pubkey_export_selector, N_btchip.pubKeyRequestRestriction);
       break;
     default:
       ui_idle();
@@ -1513,7 +1513,7 @@ UX_STEP_NOCB(
 UX_STEP_VALID(
     ux_idle_flow_2_step,
     pb,
-    ux_menulist_init(settings_submenu_getter, settings_submenu_selector),
+    ux_menulist_init(0, settings_submenu_getter, settings_submenu_selector),
     {
       &C_icon_coggle,
       "Settings",
