@@ -25,7 +25,7 @@
 
 #include "btchip_bagl_extensions.h"
 
-#include "glyphs.h"
+#include "ux.h"
 
 #define __NAME3(a, b, c) a##b##c
 #define NAME3(a, b, c) __NAME3(a, b, c)
