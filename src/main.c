@@ -30,7 +30,9 @@
 #define __NAME3(a, b, c) a##b##c
 #define NAME3(a, b, c)   __NAME3(a, b, c)
 
+#ifndef TARGET_FATSTACKS
 bagl_element_t tmp_element;
+#endif
 
 unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 
@@ -123,6 +125,7 @@ union {
     */
 } vars;
 
+#ifndef TARGET_FATSTACKS
 unsigned int io_seproxyhal_touch_verify_cancel(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_verify_ok(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_message_signature_verify_cancel(const bagl_element_t *e);
@@ -133,6 +136,7 @@ unsigned int io_seproxyhal_touch_display_token_cancel(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_display_token_ok(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_settings(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_exit(const bagl_element_t *e);
+#endif
 void ui_idle(void);
 
 #if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
@@ -148,11 +152,13 @@ unsigned int ux_step;
 unsigned int ux_step_count;
 uint8_t ux_loop_over_curr_element;  // Nano S only
 
+#ifndef TARGET_FATSTACKS
 const bagl_element_t *ui_menu_item_out_over(const bagl_element_t *e) {
     // the selection rectangle is after the none|touchable
     e = (const bagl_element_t *) (((unsigned int) e) + sizeof(bagl_element_t));
     return e;
 }
+#endif
 
 #if defined(TARGET_NANOS)
 
@@ -453,7 +459,8 @@ unsigned int ui_verify_message_prepro(const bagl_element_t *element) {
     return 1;
 }
 
-#endif  // #if defined(TARGET_NANOS)
+#endif // #if defined(TARGET_NANOS)
+#ifndef TARGET_FATSTACKS
 unsigned int io_seproxyhal_touch_verify_cancel(const bagl_element_t *e) {
     // user denied the transaction, tell the USB side
     if (!btchip_bagl_user_action(0)) {
@@ -523,6 +530,7 @@ unsigned int io_seproxyhal_touch_display_token_ok(const bagl_element_t *e) {
     ui_idle();
     return 0;  // DO NOT REDRAW THE BUTTON
 }
+#endif
 
 #if defined(TARGET_NANOS)
 unsigned int ui_verify_nanos_button(unsigned int button_mask, unsigned int button_mask_counter) {
@@ -1085,12 +1093,14 @@ void ui_idle(void) {
 #endif  // #if TARGET_ID
 }
 
+#ifndef TARGET_FATSTACKS
 // override point, but nothing more to do
 void io_seproxyhal_display(const bagl_element_t *element) {
     if ((element->component.type & (~BAGL_TYPE_FLAGS_MASK)) != BAGL_NONE) {
         io_seproxyhal_display_default((bagl_element_t *) element);
     }
 }
+#endif
 
 unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
     switch (channel & ~(IO_FLAGS)) {
