@@ -27,6 +27,9 @@
 
 #include "ux.h"
 
+#include "ui_main_menu.h"
+#include "ui_shared.h"
+
 #define __NAME3(a, b, c) a##b##c
 #define NAME3(a, b, c)   __NAME3(a, b, c)
 
@@ -684,68 +687,6 @@ unsigned int ui_request_change_path_approval_nanos_button(unsigned int button_ma
 
 #if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 
-const char *settings_submenu_getter(unsigned int idx);
-void settings_submenu_selector(unsigned int idx);
-
-void settings_pubkey_export_change(unsigned int enabled) {
-    nvm_write((void *) &N_btchip.pubKeyRequestRestriction, &enabled, 1);
-    ui_idle();
-}
-//////////////////////////////////////////////////////////////////////////////////////
-// Public keys export submenu:
-
-const char *const settings_pubkey_export_getter_values[] = {"Auto Approval",
-                                                            "Manual Approval",
-                                                            "Back"};
-
-const char *settings_pubkey_export_getter(unsigned int idx) {
-    if (idx < ARRAYLEN(settings_pubkey_export_getter_values)) {
-        return settings_pubkey_export_getter_values[idx];
-    }
-    return NULL;
-}
-
-void settings_pubkey_export_selector(unsigned int idx) {
-    switch (idx) {
-        case 0:
-            settings_pubkey_export_change(0);
-            break;
-        case 1:
-            settings_pubkey_export_change(1);
-            break;
-        default:
-            ux_menulist_init(0, settings_submenu_getter, settings_submenu_selector);
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////
-// Settings menu:
-
-const char *const settings_submenu_getter_values[] = {
-    "Public keys export",
-    "Back",
-};
-
-const char *settings_submenu_getter(unsigned int idx) {
-    if (idx < ARRAYLEN(settings_submenu_getter_values)) {
-        return settings_submenu_getter_values[idx];
-    }
-    return NULL;
-}
-
-void settings_submenu_selector(unsigned int idx) {
-    switch (idx) {
-        case 0:
-            ux_menulist_init_select(0,
-                                    settings_pubkey_export_getter,
-                                    settings_pubkey_export_selector,
-                                    N_btchip.pubKeyRequestRestriction);
-            break;
-        default:
-            ui_idle();
-    }
-}
-
 //////////////////////////////////////////////////////////////////////
 UX_STEP_NOCB(ux_idle_flow_1_step,
              nn,
@@ -1137,20 +1078,27 @@ unsigned char io_event(unsigned char channel) {
             UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
             break;
 
-        case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
-            UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
-            break;
+#ifndef TARGET_FATSTACKS
+    case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
+        UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
+        break;
+#endif
 
-        case SEPROXYHAL_TAG_STATUS_EVENT:
-            if (G_io_apdu_media == IO_APDU_MEDIA_USB_HID &&
-                !(U4BE(G_io_seproxyhal_spi_buffer, 3) &
-                  SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
-                THROW(EXCEPTION_IO_RESET);
-            }
-        // no break is intentional
-        default:
-            UX_DEFAULT_EVENT();
-            break;
+    case SEPROXYHAL_TAG_STATUS_EVENT:
+        if (G_io_apdu_media == IO_APDU_MEDIA_USB_HID &&
+            !(U4BE(G_io_seproxyhal_spi_buffer, 3) &
+              SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
+            THROW(EXCEPTION_IO_RESET);
+        }
+    // no break is intentional
+    default:
+        UX_DEFAULT_EVENT();
+        break;
+#ifndef TARGET_FATSTACKS
+    case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
+        UX_DISPLAYED_EVENT({});
+        break;
+#endif
 
         case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
             UX_DISPLAYED_EVENT({});
