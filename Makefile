@@ -59,9 +59,7 @@ endif
 APP_LOAD_PARAMS += $(APP_LOAD_FLAGS)
 DEFINES += $(DEFINES_LIB)
 
-ifeq ($(TARGET_NAME),TARGET_BLUE)
-ICONNAME=blue_app_$(COIN).gif
-else ifeq ($(TARGET_NAME),TARGET_NANOS)
+ifeq ($(TARGET_NAME),TARGET_NANOS)
 ICONNAME=nanos_app_$(COIN).gif
 else ifeq ($(TARGET_NAME),TARGET_FATSTACKS)
 ICONNAME=stax_app_$(COIN).bmp

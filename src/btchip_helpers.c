@@ -335,17 +335,6 @@ unsigned char bip32_print_path(unsigned char *bip32Path, char *out, unsigned cha
     // remove last '/'
     out[offset - 1] = '\0';
 
-#if defined(TARGET_BLUE)
-    // if the path is longer than 30 char, split the string in multiple strings of length 30
-    uint8_t len = strnlen(out, MAX_DERIV_PATH_ASCII_LENGTH);
-    uint8_t num_split = len / 30;
-
-    for (i = 1; i <= num_split; i++) {
-        os_memmove(out + 30 * i, out + (30 * i - 1), len - 29 * i);
-        out[30 * i - 1] = '\0';
-    }
-#endif
-
     return offset - 1;
 }
 
