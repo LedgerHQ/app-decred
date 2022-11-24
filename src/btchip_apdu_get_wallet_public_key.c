@@ -19,6 +19,7 @@
 #include "btchip_apdu_constants.h"
 
 #include "btchip_bagl_extensions.h"
+#include "ui_pubkey.h"
 
 #define P1_NO_DISPLAY    0x00
 #define P1_DISPLAY       0x01

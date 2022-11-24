@@ -14,9 +14,8 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
-#include "ui_shared.h"
+#pragma once
 
-unsigned int ux_step;
-unsigned int ux_step_count;
-uint8_t ux_loop_over_curr_element;
-vars_u_t vars;
+void btchip_bagl_display_public_key(unsigned char* derivation_path);
+void btchip_bagl_request_pubkey_approval(void);
+void btchip_bagl_display_token(void);
