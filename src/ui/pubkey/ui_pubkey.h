@@ -16,6 +16,6 @@
 ********************************************************************************/
 #pragma once
 
-void btchip_bagl_display_public_key(unsigned char* derivation_path);
-void btchip_bagl_request_pubkey_approval(void);
-void btchip_bagl_display_token(void);
+void ui_display_public_key(unsigned char* derivation_path);
+void ui_display_request_pubkey_approval(void);
+void ui_display_token(void);

@@ -319,7 +319,7 @@ UX_FLOW(ux_display_token_flow,
 
 #endif
 
-void btchip_bagl_display_public_key(unsigned char* derivation_path) {
+void ui_display_public_key(unsigned char* derivation_path) {
     // append a white space at the end of the address to avoid glitch on nano S
     strcat(G_io_apdu_buffer + 200, " ");
 
@@ -338,7 +338,7 @@ void btchip_bagl_display_public_key(unsigned char* derivation_path) {
 #endif // TARGET_NANOX
 }
 
-void btchip_bagl_request_pubkey_approval(void)
+void ui_display_request_pubkey_approval(void)
 {
 #if defined(TARGET_NANOS)
     // append and prepend a white space to the address
@@ -350,7 +350,7 @@ void btchip_bagl_request_pubkey_approval(void)
 #endif // #if TARGET_ID
 }
 
-void btchip_bagl_display_token(void)
+void ui_display_token(void)
 {
 #if defined(TARGET_NANOS)
     ux_step = 0;

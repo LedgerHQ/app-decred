@@ -89,7 +89,7 @@ static void warningChoiceClbk(bool reject) {
   }
 }
 
-void btchip_bagl_display_public_key(unsigned char* derivation_path) {
+void ui_display_public_key(unsigned char* derivation_path) {
     display_type = DISPLAY_ADDRESS;
     bip32_print_path(derivation_path, vars.tmp_warning.derivation_path, MAX_DERIV_PATH_ASCII_LENGTH);
     uint8_t is_derivation_path_unusual = bip44_derivation_guard(derivation_path, false);
@@ -108,13 +108,13 @@ void btchip_bagl_display_public_key(unsigned char* derivation_path) {
     }
 }
 
-void btchip_bagl_request_pubkey_approval(void)
+void ui_display_request_pubkey_approval(void)
 {
     display_type = EXPORT_REQUEST;
     nbgl_useCaseChoice("Export public key ?",NULL,"Export","Cancel",confirmationChoiceClbk);
 }
 
-void btchip_bagl_display_token(void)
+void ui_display_token(void)
 {
     display_type = DISPLAY_TOKEN;
     explicit_bzero(choice_text, sizeof(choice_text));
