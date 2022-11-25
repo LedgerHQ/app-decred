@@ -59,8 +59,6 @@ unsigned int
 io_seproxyhal_touch_message_signature_verify_cancel(const bagl_element_t *e);
 unsigned int
 io_seproxyhal_touch_message_signature_verify_ok(const bagl_element_t *e);
-unsigned int io_seproxyhal_touch_display_cancel(const bagl_element_t *e);
-unsigned int io_seproxyhal_touch_display_ok(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_display_token_cancel(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_display_token_ok(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_settings(const bagl_element_t *e);
@@ -311,22 +309,6 @@ unsigned int
 io_seproxyhal_touch_message_signature_verify_ok(const bagl_element_t *e) {
     // user accepted the transaction, tell the USB side
     btchip_bagl_user_action_message_signing(1);
-    // redraw ui
-    ui_idle();
-    return 0; // DO NOT REDRAW THE BUTTON
-}
-
-unsigned int io_seproxyhal_touch_display_cancel(const bagl_element_t *e) {
-    // user denied the transaction, tell the USB side
-    btchip_bagl_user_action_display(0);
-    // redraw ui
-    ui_idle();
-    return 0; // DO NOT REDRAW THE BUTTON
-}
-
-unsigned int io_seproxyhal_touch_display_ok(const bagl_element_t *e) {
-    // user accepted the transaction, tell the USB side
-    btchip_bagl_user_action_display(1);
     // redraw ui
     ui_idle();
     return 0; // DO NOT REDRAW THE BUTTON

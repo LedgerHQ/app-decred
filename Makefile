@@ -76,11 +76,6 @@ all: default
 # Platform #
 ############
 
-ifneq ($(TARGET_NAME),TARGET_FATSTACKS)
-    DEFINES   += HAVE_BAGL
-	DEFINES   += NBGL_QRCODE
-endif
-
 DEFINES   += OS_IO_SEPROXYHAL IO_SEPROXYHAL_BUFFER_SIZE_B=300
 DEFINES   += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
 DEFINES   += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=4 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
@@ -99,6 +94,11 @@ DEFINES   += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
 DEFINES   += UNUSED\(x\)=\(void\)x
 DEFINES   += APPVERSION=\"$(APPVERSION)\"
 
+ifeq ($(TARGET_NAME),TARGET_FATSTACKS)
+	DEFINES   += NBGL_QRCODE NBGL_USE_CASE NBGL_PAGE
+else
+    DEFINES   += HAVE_BAGL
+endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 DEFINES       += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000
@@ -165,13 +165,13 @@ include $(BOLOS_SDK)/Makefile.glyphs
 
 ### variables processed by the common makefile.rules of the SDK to grab source files and include dirs
 APP_SOURCE_PATH  += src
-SDK_SOURCE_PATH  += lib_stusb lib_stusb_impl lib_u2f qrcode
+SDK_SOURCE_PATH  += lib_stusb lib_stusb_impl lib_u2f 
 
 ifeq ($(TARGET_NAME),TARGET_FATSTACKS)
 SDK_SOURCE_PATH += lib_nbgl/src
-SDK_SOURCE_PATH += lib_nbgl/src
+SDK_SOURCE_PATH += lib_ux_fatstacks
 else
-SDK_SOURCE_PATH += lib_ux
+SDK_SOURCE_PATH += lib_ux qrcode
 endif
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)

@@ -16,14 +16,13 @@
 ********************************************************************************/
 #ifdef HAVE_BAGL
 #include "ui_main_menu.h"
+#include "ui_pubkey.h"
 #include "ui_shared.h"
 #include "os.h"
 #include "os_io_seproxyhal.h"
 #include "ux.h"
 #include "string.h"
-
 #include "btchip_internal.h"
-#include "ui_shared.h"
 
 #if defined(TARGET_NANOS)
 
