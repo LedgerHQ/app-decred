@@ -707,6 +707,7 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
 }
 
 unsigned char io_event(unsigned char channel) {
+    UNUSED(channel);
     // nothing done with the event, throw an error on the transport layer if
     // needed
 
@@ -1223,7 +1224,7 @@ __attribute__((section(".boot"))) int main(int arg0) {
     strcpy(name_short, COIN_COINID_SHORT);
 
     btchip_altcoin_config_t coin_config;
-    os_memmove(&coin_config, &C_coin_config, sizeof(coin_config));
+    memmove(&coin_config, &C_coin_config, sizeof(coin_config));
     coin_config.coinid = coinid;
     coin_config.name = name;
     coin_config.name_short = name_short;

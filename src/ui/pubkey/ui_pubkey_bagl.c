@@ -115,6 +115,7 @@ unsigned int ui_display_address_nanos_prepro(const bagl_element_t *element) {
 
 unsigned int ui_display_address_nanos_button(unsigned int button_mask,
                                              unsigned int button_mask_counter) {
+    UNUSED(button_mask_counter);
     if (ux_step == 3)
     {
         switch (button_mask)
@@ -163,6 +164,7 @@ unsigned int ui_display_address_nanos_button(unsigned int button_mask,
 unsigned int ui_request_pubkey_approval_nanos_button(unsigned int button_mask,
                                              unsigned int button_mask_counter)
 {
+    UNUSED(button_mask_counter);
     switch (button_mask)
     {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT:
@@ -178,6 +180,7 @@ unsigned int ui_request_pubkey_approval_nanos_button(unsigned int button_mask,
 unsigned int ui_display_token_nanos_button(unsigned int button_mask,
                                              unsigned int button_mask_counter)
 {
+    UNUSED(button_mask_counter);
     switch (button_mask)
     {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT:
@@ -321,7 +324,7 @@ UX_FLOW(ux_display_token_flow,
 
 void ui_display_public_key(unsigned char* derivation_path) {
     // append a white space at the end of the address to avoid glitch on nano S
-    strcat(G_io_apdu_buffer + 200, " ");
+    strcat((char*)G_io_apdu_buffer + 200, " ");
 
     bip32_print_path(derivation_path, vars.tmp_warning.derivation_path, MAX_DERIV_PATH_ASCII_LENGTH);
     uint8_t is_derivation_path_unusual = bip44_derivation_guard(derivation_path, false);
