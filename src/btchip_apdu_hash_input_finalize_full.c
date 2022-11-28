@@ -21,6 +21,7 @@
 #include "btchip_internal.h"
 #include "btchip_apdu_constants.h"
 #include "btchip_bagl_extensions.h"
+#include "ui_transaction.h"
 
 #define FINALIZE_P1_MORE 0x00
 #define FINALIZE_P1_LAST 0x80

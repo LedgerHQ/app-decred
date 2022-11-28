@@ -62,3 +62,15 @@ extern uint8_t ux_loop_over_curr_element;
 
 unsigned int io_seproxyhal_touch_display_cancel(const void* e);
 unsigned int io_seproxyhal_touch_display_ok(const void* e);
+
+unsigned int io_seproxyhal_touch_verify_cancel(const void *e);
+unsigned int io_seproxyhal_touch_verify_ok(const void *e);
+unsigned int io_seproxyhal_touch_message_signature_verify_cancel(const void *e);
+unsigned int io_seproxyhal_touch_message_signature_verify_ok(const void *e);
+unsigned int io_seproxyhal_touch_display_token_cancel(const void *e);
+unsigned int io_seproxyhal_touch_display_token_ok(const void *e);
+
+uint8_t prepare_fees();
+uint8_t prepare_message_signature();
+uint8_t prepare_single_output();
+uint8_t prepare_full_output(uint8_t checkOnly);

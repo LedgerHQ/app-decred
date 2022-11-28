@@ -1,6 +1,6 @@
 /*******************************************************************************
-*   Ledger App - Bitcoin Wallet
-*   (c) 2016-2019 Ledger
+*   Ledger App - Decred Wallet
+*   (c) 2022 Ledger
 *
 *  Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -14,16 +14,10 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 ********************************************************************************/
+#pragma once
 
-#ifndef _BTCHIP_BAGL_H_
-#define _BTCHIP_BAGL_H_
-
-// UI response to btchip to finish the exchange
-unsigned char btchip_bagl_user_action(unsigned char confirming);
-
-// UI response to message signature
-void btchip_bagl_user_action_message_signing(unsigned char confirming);
-
-void btchip_bagl_user_action_display(unsigned char confirming);
-
-#endif /* _BTCHIP_BAGL_H_ */
+unsigned int btchip_bagl_confirm_full_output(void);
+unsigned int btchip_bagl_confirm_single_output(void);
+unsigned int btchip_bagl_finalize_tx(void);
+void btchip_bagl_confirm_message_signature(void);
+void btchip_bagl_request_change_path_approval(unsigned char* change_path);

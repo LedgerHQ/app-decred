@@ -18,6 +18,7 @@
 #include "btchip_internal.h"
 #include "btchip_apdu_constants.h"
 #include "btchip_bagl_extensions.h"
+#include "ui_transaction.h"
 
 #define P1_PREPARE 0x00
 #define P1_SIGN 0x80
