@@ -31,8 +31,8 @@ unsigned int io_seproxyhal_touch_display_cancel(const void* e){
     UNUSED(e);
     // user denied the transaction, tell the USB side
     btchip_bagl_user_action_display(0);
-    // redraw ui
 #ifndef HAVE_NBGL
+    // redraw ui
     ui_idle();
 #endif
     return 0; // DO NOT REDRAW THE BUTTON
@@ -42,8 +42,8 @@ unsigned int io_seproxyhal_touch_display_ok(const void* e){
     UNUSED(e);
     // user accepted the transaction, tell the USB side
     btchip_bagl_user_action_display(1);
-    // redraw ui
 #ifndef HAVE_NBGL
+    // redraw ui
     ui_idle();
 #endif
     return 0; // DO NOT REDRAW THE BUTTON
@@ -54,8 +54,10 @@ unsigned int io_seproxyhal_touch_verify_cancel(const void *e) {
     
     // user denied the transaction, tell the USB side
     if (!btchip_bagl_user_action(0)) {
+#ifndef HAVE_NBGL
         // redraw ui
         ui_idle();
+#endif
     }
     return 0; // DO NOT REDRAW THE BUTTON
 }
@@ -64,8 +66,10 @@ unsigned int io_seproxyhal_touch_verify_ok(const void *e) {
     UNUSED(e);    
     // user accepted the transaction, tell the USB side
     if (!btchip_bagl_user_action(1)) {
+#ifndef HAVE_NBGL
         // redraw ui
         ui_idle();
+#endif
     }
     return 0; // DO NOT REDRAW THE BUTTON
 }
@@ -75,8 +79,10 @@ io_seproxyhal_touch_message_signature_verify_cancel(const void *e) {
     UNUSED(e);
     // user denied the transaction, tell the USB side
     btchip_bagl_user_action_message_signing(0);
+#ifndef HAVE_NBGL
     // redraw ui
     ui_idle();
+#endif
     return 0; // DO NOT REDRAW THE BUTTON
 }
 
@@ -85,8 +91,10 @@ io_seproxyhal_touch_message_signature_verify_ok(const void *e) {
     UNUSED(e);
     // user accepted the transaction, tell the USB side
     btchip_bagl_user_action_message_signing(1);
+#ifndef HAVE_NBGL
     // redraw ui
     ui_idle();
+#endif
     return 0; // DO NOT REDRAW THE BUTTON
 }
 
@@ -150,8 +158,13 @@ uint8_t prepare_message_signature() {
     cx_hash((cx_hash_t *)&btchip_context_D.transactionHashWitness.header, CX_LAST,
             (const unsigned char *) vars.tmp.fullAmount, 0, buffer, 32);
 
+#ifdef HAVE_NBGL
+    snprintf(vars.tmp.fullAddress, sizeof(vars.tmp.fullAddress), "%.*H",
+             32, buffer);
+#else
     snprintf(vars.tmp.fullAddress, sizeof(vars.tmp.fullAddress), "%.*H...%.*H",
              8, buffer, 8, buffer + 32 - 8);
+#endif
     return 1;
 }
 
