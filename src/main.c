@@ -67,12 +67,6 @@ ux_state_t ux;
 #endif // TARGET_NANOX || TARGET_NANOS2
 
 #ifndef TARGET_FATSTACKS
-const bagl_element_t *ui_menu_item_out_over(const bagl_element_t *e) {
-    // the selection rectangle is after the none|touchable
-    e = (const bagl_element_t *)(((unsigned int)e) + sizeof(bagl_element_t));
-    return e;
-}
-
 // override point, but nothing more to do
 void io_seproxyhal_display(const bagl_element_t *element) {
     if ((element->component.type & (~BAGL_TYPE_FLAGS_MASK)) != BAGL_NONE) {

@@ -82,7 +82,7 @@ unsigned short btchip_apdu_get_trusted_input() {
         memmove(G_io_apdu_buffer + 4 + 32 + 4,
                    btchip_context_D.transactionContext.transactionAmount, 8);
 
-        cx_hmac_sha256(N_btchip.bkp.trustedinput_key,
+        cx_hmac_sha256((const uint8_t*) N_btchip.bkp.trustedinput_key,
                        sizeof(N_btchip.bkp.trustedinput_key), G_io_apdu_buffer,
                        TRUSTEDINPUT_SIZE, trustedInputSignature, 32);
         memmove(G_io_apdu_buffer + TRUSTEDINPUT_SIZE, trustedInputSignature,

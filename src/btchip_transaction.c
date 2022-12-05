@@ -19,7 +19,7 @@
 #include "btchip_apdu_constants.h"
 #include "blake256.h"
 
-#define DEBUG_LONG "%ld"
+// #define DEBUG_LONG "%ld"
 
 #define DEBUG_LONG "%d"
 

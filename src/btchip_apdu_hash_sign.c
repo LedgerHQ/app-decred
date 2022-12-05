@@ -131,7 +131,6 @@ unsigned short btchip_apdu_hash_sign() {
 
 
             // Sign
-            PRINTF("Pub key: %.*H\n", sizeof(public_key_D.W), public_key_D.W);
             btchip_signverify_finalhash(
                 &btchip_private_key_D, 1, hash2, sizeof(hash2),
                 G_io_apdu_buffer, sizeof(G_io_apdu_buffer),

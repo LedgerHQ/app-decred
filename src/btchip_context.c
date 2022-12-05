@@ -38,7 +38,6 @@ void autosetup(void){
  */
 void btchip_context_init() {
     PRINTF("Context init\n");
-    PRINTF(N_btchip.bkp);
     explicit_bzero(&btchip_context_D, sizeof(btchip_context_D));
     SB_SET(btchip_context_D.halted, 0);
     btchip_context_D.currentOutputOffset = 0;
