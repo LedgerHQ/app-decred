@@ -232,7 +232,7 @@ unsigned short btchip_apdu_sign_message_internal() {
 unsigned short btchip_apdu_sign_message() {
     unsigned short sw = btchip_apdu_sign_message_internal();
     if (btchip_context_D.io_flags & IO_ASYNCH_REPLY) {
-        btchip_bagl_confirm_message_signature();
+        ui_tx_confirm_message_signature();
     }
     return sw;
 }

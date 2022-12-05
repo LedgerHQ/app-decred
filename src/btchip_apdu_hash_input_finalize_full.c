@@ -277,7 +277,7 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
                 if(bip44_derivation_guard(transactionSummary->summarydata.keyPath, true)) {
                     btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
                     btchip_context_D.outputParsingState = BTCHIP_BIP44_CHANGE_PATH_VALIDATION;
-                    btchip_bagl_request_change_path_approval(transactionSummary->summarydata.keyPath);
+                    ui_tx_request_change_path_approval(transactionSummary->summarydata.keyPath);
                 }
 
                 goto return_OK;
@@ -428,15 +428,15 @@ unsigned short btchip_apdu_hash_input_finalize_full() {
         }
         else if (btchip_context_D.outputParsingState == BTCHIP_OUTPUT_FINALIZE_TX) {
             PRINTF("BAGL finalize tx:\n");
-            status = btchip_bagl_finalize_tx();
+            status = ui_tx_finalize();
         } else if (btchip_context_D.outputParsingState ==
                  BTCHIP_OUTPUT_HANDLE_LEGACY) {
             PRINTF("BAGL confirm output legacy:\n");
-            status = btchip_bagl_confirm_full_output();
+            status = ui_tx_confirm_full_output();
         }
         else {
             PRINTF("BAGL confirm single output:\n");
-            status = btchip_bagl_confirm_single_output();
+            status = ui_tx_confirm_single_output();
         }
         if (!status) {
             btchip_context_D.io_flags &= ~IO_ASYNCH_REPLY;
@@ -475,7 +475,7 @@ unsigned char btchip_bagl_user_action(unsigned char confirming) {
                    (!(btchip_context_D.io_flags & IO_ASYNCH_REPLY)))
                 ;
             if (btchip_context_D.io_flags & IO_ASYNCH_REPLY) {
-                if (!btchip_bagl_confirm_single_output()) {
+                if (!ui_tx_confirm_single_output()) {
                     btchip_context_D.transactionContext.transactionState =
                         BTCHIP_TRANSACTION_NONE;
                     sw = BTCHIP_SW_INCORRECT_DATA;
@@ -494,7 +494,7 @@ unsigned char btchip_bagl_user_action(unsigned char confirming) {
              BTCHIP_OUTPUT_PARSING_OUTPUT) &&
             (btchip_context_D.remainingOutputs == 0)) {
             btchip_context_D.outputParsingState = BTCHIP_OUTPUT_FINALIZE_TX;
-            if (!btchip_bagl_finalize_tx()) {
+            if (!ui_tx_finalize()) {
                 btchip_context_D.outputParsingState =
                     BTCHIP_OUTPUT_PARSING_NONE;
                 btchip_context_D.transactionContext.transactionState =

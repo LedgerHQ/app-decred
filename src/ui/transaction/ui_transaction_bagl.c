@@ -557,7 +557,7 @@ UX_FLOW(ux_request_change_path_approval_flow,
 #endif // TARGET_NANOX || TARGET_NANOS2
 
 
-unsigned int btchip_bagl_confirm_full_output() {
+unsigned int ui_tx_confirm_full_output() {
     if (!prepare_full_output(0)) {
         return 0;
     }
@@ -572,7 +572,7 @@ unsigned int btchip_bagl_confirm_full_output() {
     return 1;
 }
 
-unsigned int btchip_bagl_confirm_single_output() {
+unsigned int ui_tx_confirm_single_output() {
 // TODO : remove when supporting multi output
     if (!prepare_single_output()) {
         return 0;
@@ -592,7 +592,7 @@ unsigned int btchip_bagl_confirm_single_output() {
     return 1;
 }
 
-unsigned int btchip_bagl_finalize_tx() {
+unsigned int ui_tx_finalize() {
     if (!prepare_fees()) {
         return 0;
     }
@@ -607,7 +607,7 @@ unsigned int btchip_bagl_finalize_tx() {
     return 1;
 }
 
-void btchip_bagl_confirm_message_signature() {
+void ui_tx_confirm_message_signature() {
     if (!prepare_message_signature()) {
         return;
     }
@@ -621,7 +621,7 @@ void btchip_bagl_confirm_message_signature() {
 #endif // TARGET_NANOX
 }
 
-void btchip_bagl_request_change_path_approval(unsigned char* change_path)
+void ui_tx_request_change_path_approval(unsigned char* change_path)
 {
     bip32_print_path(change_path, vars.tmp_warning.derivation_path, MAX_DERIV_PATH_ASCII_LENGTH);
 #if defined(TARGET_NANOS)

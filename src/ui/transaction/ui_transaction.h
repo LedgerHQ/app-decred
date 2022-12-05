@@ -16,8 +16,8 @@
 ********************************************************************************/
 #pragma once
 
-unsigned int btchip_bagl_confirm_full_output(void);
-unsigned int btchip_bagl_confirm_single_output(void);
-unsigned int btchip_bagl_finalize_tx(void);
-void btchip_bagl_confirm_message_signature(void);
-void btchip_bagl_request_change_path_approval(unsigned char* change_path);
+unsigned int ui_tx_confirm_full_output(void);
+unsigned int ui_tx_confirm_single_output(void);
+unsigned int ui_tx_finalize(void);
+void ui_tx_confirm_message_signature(void);
+void ui_tx_request_change_path_approval(unsigned char* change_path);
