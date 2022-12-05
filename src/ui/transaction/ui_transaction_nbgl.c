@@ -27,6 +27,7 @@
 #include "ui_transaction.h"
 #include "ui_shared.h"
 #include "btchip_internal.h"
+#include "glyphs.h"
 
 typedef enum {
     TX_TYPE_SINGLE_OUTPUT = 0,
@@ -113,7 +114,7 @@ static void reviewStart(void) {
 
     infoLongPress.text = "Accept and send";
     infoLongPress.longPressText = "Hold to accept";
-    infoLongPress.icon = NULL;//&C_decred_icon_64px;
+    infoLongPress.icon = &C_decred_icon_64px;
 
     pairs[0].item = "Amount";
     pairs[0].value = vars.tmp.fullAmount;
@@ -162,7 +163,7 @@ static void reviewStart(void) {
   }
   
   reviewStarted = false;
-  nbgl_useCaseReviewStart(NULL/*&C_decred_icon_64px*/, msgs.reviewStart, NULL,
+  nbgl_useCaseReviewStart(&C_decred_icon_64px, msgs.reviewStart, NULL,
                           msgs.reviewCancel, displayTransaction, rejectUseCaseChoice);
 }
 

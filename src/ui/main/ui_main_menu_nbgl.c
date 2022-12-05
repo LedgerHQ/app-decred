@@ -90,6 +90,6 @@ static void displaySettingsMenu(void) {
 
 void ui_idle(void) {
     setting_switch.initState = (bool) ! N_btchip.pubKeyRequestRestriction;
-    nbgl_useCaseHome("Decred", NULL/*&C_icon_stellar_64px*/, "This app confirms actions on\nthe Decred network.", true, displaySettingsMenu, onQuitCallback);
+    nbgl_useCaseHome("Decred",&C_decred_icon_64px, "This app confirms actions on\nthe Decred network.", true, displaySettingsMenu, onQuitCallback);
 }
 #endif // HAVE_NBGL
