@@ -155,7 +155,7 @@ error:
 uint8_t prepare_message_signature() {
     uint8_t buffer[32];
 
-    cx_hash((cx_hash_t *)&btchip_context_D.transactionHashWitness.header, CX_LAST,
+    cx_hash((cx_hash_t *)&btchip_context_D.messageHashWitness.header, CX_LAST,
             (const unsigned char *) vars.tmp.fullAmount, 0, buffer, 32);
 
 #ifdef HAVE_NBGL

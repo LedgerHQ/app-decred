@@ -121,17 +121,17 @@ unsigned short btchip_apdu_sign_message_internal() {
                         goto discard;
                     }
                     btchip_context_D.hashedMessageLength = 0;
-                    cx_sha256_init(&btchip_context_D.transactionHashPrefix);
+                    cx_sha256_init(&btchip_context_D.messageHashPrefix);
                     cx_sha256_init(
-                        &btchip_context_D.transactionHashWitness);
+                        &btchip_context_D.messageHashWitness);
                     chunkLength =
                         btchip_context_D.coinIdLength + SIGNMAGIC_LENGTH;
-                    cx_hash(&btchip_context_D.transactionHashPrefix.header, 0,
+                    cx_hash(&btchip_context_D.messageHashPrefix.header, 0,
                             &chunkLength, 1, NULL, 0);
-                    cx_hash(&btchip_context_D.transactionHashPrefix.header, 0,
+                    cx_hash(&btchip_context_D.messageHashPrefix.header, 0,
                             btchip_context_D.coinId,
                             btchip_context_D.coinIdLength, NULL, 0);
-                    cx_hash(&btchip_context_D.transactionHashPrefix.header, 0,
+                    cx_hash(&btchip_context_D.messageHashPrefix.header, 0,
                             (unsigned char *)SIGNMAGIC, SIGNMAGIC_LENGTH, NULL, 0);
                     if (btchip_context_D.transactionSummary.messageLength <
                         0xfd) {
@@ -149,7 +149,7 @@ unsigned short btchip_apdu_sign_message_internal() {
                                             0xff);
                         messageLengthSize = 3;
                     }
-                    cx_hash(&btchip_context_D.transactionHashPrefix.header, 0,
+                    cx_hash(&btchip_context_D.messageHashPrefix.header, 0,
                             messageLength, messageLengthSize, NULL, 0);
                     chunkLength = apduLength - (offset - ISO_OFFSET_CDATA);
                     if ((btchip_context_D.hashedMessageLength + chunkLength) >
@@ -159,10 +159,10 @@ unsigned short btchip_apdu_sign_message_internal() {
                         CLOSE_TRY;
                         goto discard;
                     }
-                    cx_hash(&btchip_context_D.transactionHashPrefix.header, 0,
+                    cx_hash(&btchip_context_D.messageHashPrefix.header, 0,
                             G_io_apdu_buffer + offset, chunkLength, NULL, 0);
                     cx_hash(
-                        &btchip_context_D.transactionHashWitness.header,
+                        &btchip_context_D.messageHashWitness.header,
                         0, G_io_apdu_buffer + offset, chunkLength, NULL, 0);
                     btchip_context_D.hashedMessageLength += chunkLength;
                     G_io_apdu_buffer[0] = 0x00;
@@ -181,10 +181,10 @@ unsigned short btchip_apdu_sign_message_internal() {
                         CLOSE_TRY;
                         goto discard;
                     }
-                    cx_hash(&btchip_context_D.transactionHashPrefix.header, 0,
+                    cx_hash(&btchip_context_D.messageHashPrefix.header, 0,
                             G_io_apdu_buffer + offset, apduLength, NULL, 0);
                     cx_hash(
-                        &btchip_context_D.transactionHashWitness.header,
+                        &btchip_context_D.messageHashWitness.header,
                         0, G_io_apdu_buffer + offset, apduLength, NULL, 0);
                     btchip_context_D.hashedMessageLength += apduLength;
                     G_io_apdu_buffer[0] = 0x00;
@@ -243,10 +243,10 @@ unsigned short btchip_compute_hash() {
     btchip_context_D.outLength = 0;
     BEGIN_TRY {
         TRY {
-            cx_hash(&btchip_context_D.transactionHashPrefix.header, CX_LAST, hash,
+            cx_hash(&btchip_context_D.messageHashPrefix.header, CX_LAST, hash,
                     0, hash, 32);
-            cx_sha256_init(&btchip_context_D.transactionHashPrefix);
-            cx_hash(&btchip_context_D.transactionHashPrefix.header, CX_LAST, hash,
+            cx_sha256_init(&btchip_context_D.messageHashPrefix);
+            cx_hash(&btchip_context_D.messageHashPrefix.header, CX_LAST, hash,
                     32, hash, 32);
             btchip_private_derive_keypair(
                 btchip_context_D.transactionSummary.summarydata.keyPath, 0,
