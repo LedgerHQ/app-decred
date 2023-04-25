@@ -62,7 +62,7 @@ DEFINES += $(DEFINES_LIB)
 ifeq ($(TARGET_NAME),TARGET_NANOS)
 ICONNAME=nanos_app_$(COIN).gif
 else ifeq ($(TARGET_NAME),TARGET_STAX)
-ICONNAME=stax_app_$(COIN).bmp
+ICONNAME=stax_app_$(COIN).gif
 else
 ICONNAME=nanox_app_$(COIN).gif
 endif
