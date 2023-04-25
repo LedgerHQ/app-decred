@@ -100,7 +100,7 @@ void ui_display_public_key(unsigned char* derivation_path) {
                  sizeof(choice_text),
                  "WARNING !\nThe derivation path is\nunusual :\n%s",
                  vars.tmp_warning.derivation_path);
-        nbgl_useCaseChoice(choice_text,"Reject if you're not sure","Reject","Continue",warningChoiceClbk);
+        nbgl_useCaseChoice(NULL, choice_text,"Reject if you're not sure","Reject","Continue",warningChoiceClbk);
     }
     else
     {
@@ -111,7 +111,7 @@ void ui_display_public_key(unsigned char* derivation_path) {
 void ui_display_request_pubkey_approval(void)
 {
     display_type = EXPORT_REQUEST;
-    nbgl_useCaseChoice("Export public key ?",NULL,"Export","Cancel",confirmationChoiceClbk);
+    nbgl_useCaseChoice(NULL,"Export public key ?",NULL,"Export","Cancel",confirmationChoiceClbk);
 }
 
 void ui_display_token(void)
@@ -122,7 +122,7 @@ void ui_display_token(void)
              sizeof(choice_text),
              "Approve token :\n%s",
              (char*)G_io_apdu_buffer+200);
-    nbgl_useCaseChoice(choice_text,NULL,"Approve","Reject",confirmationChoiceClbk);
+    nbgl_useCaseChoice(NULL,choice_text,NULL,"Approve","Reject",confirmationChoiceClbk);
 }
 
 #endif // HAVE_NBGL

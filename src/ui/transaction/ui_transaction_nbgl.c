@@ -37,12 +37,12 @@ typedef enum {
 } transaction_type_t;
 
 typedef struct {
-    char* reviewStart;
-    char* reviewCancel;
-    char* finishOk;
-    char* finishCancel;
-    char* choiceCancel;
-    char* choiceGoBack;
+    const char* reviewStart;
+    const char* reviewCancel;
+    const char* finishOk;
+    const char* finishCancel;
+    const char* choiceCancel;
+    const char* choiceGoBack;
 } messages_t;
 
 static nbgl_layoutTagValueList_t pairList;
@@ -93,7 +93,7 @@ static void reviewChoice(bool confirm) {
 
 static void rejectUseCaseChoice(void)
 {
-    nbgl_useCaseChoice(msgs.choiceCancel,NULL,"Yes, cancel",msgs.choiceGoBack,rejectChoice);
+    nbgl_useCaseChoice(NULL,msgs.choiceCancel,NULL,"Yes, cancel",msgs.choiceGoBack,rejectChoice);
 }
 
 static void displayTransaction(void) {
@@ -221,6 +221,6 @@ void ui_tx_request_change_path_approval(unsigned char* change_path)
              sizeof(genericText),
              "WARNING !\nThe change path is\nunusual :\n%s",
               vars.tmp_warning.derivation_path);
-    nbgl_useCaseChoice(genericText,"Reject if you're not sure","Reject","Continue",changePathWarningChoice);
+    nbgl_useCaseChoice(NULL,genericText,"Reject if you're not sure","Reject","Continue",changePathWarningChoice);
 }
 #endif
