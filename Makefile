@@ -171,7 +171,7 @@ APP_SOURCE_PATH  += src
 SDK_SOURCE_PATH  += lib_stusb lib_stusb_impl lib_u2f 
 
 ifneq ($(TARGET_NAME),TARGET_STAX)
-SDK_SOURCE_PATH += lib_ux qrcode
+SDK_SOURCE_PATH += lib_ux
 endif
 
 ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))

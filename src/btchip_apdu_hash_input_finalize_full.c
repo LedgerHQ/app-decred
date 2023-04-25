@@ -44,7 +44,6 @@ static bool check_output_displayable() {
     PRINTF("Check if output is displayable\n");
     bool displayable = true;
     unsigned char amount[8], isOpReturn, isP2sh, j, nullAmount = 1;
-    unsigned char isOpCreate, isOpCall;
 
     for (j = 0; j < 8; j++) {
         if (btchip_context_D.currentOutput[j] != 0) {
@@ -61,8 +60,8 @@ static bool check_output_displayable() {
     isOpReturn = btchip_output_script_is_op_return(
         btchip_context_D.currentOutput + 8 + 2);  // +2 for script version, decred particularity
     isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput + 8 + 2);
-    isOpCreate = btchip_output_script_is_op_create(btchip_context_D.currentOutput + 8 + 2);
-    isOpCall = btchip_output_script_is_op_call(btchip_context_D.currentOutput + 8 + 2);
+    btchip_output_script_is_op_create(btchip_context_D.currentOutput + 8 + 2);
+    btchip_output_script_is_op_call(btchip_context_D.currentOutput + 8 + 2);
 
     if (!btchip_output_script_is_regular(btchip_context_D.currentOutput + 8 + 2) && !isP2sh &&
         !(nullAmount && isOpReturn)) {

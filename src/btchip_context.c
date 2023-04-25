@@ -50,10 +50,7 @@ void btchip_context_init() {
     }
 
     if (!N_btchip.config_valid) {
-        unsigned char defaultMode;
         PRINTF("No configuration found\n");
-        defaultMode = BTCHIP_MODE_WALLET;
-
     } else {
         btchip_context_D.payToAddressVersion = G_coin_config->p2pkh_version;
         btchip_context_D.payToScriptHashVersion = G_coin_config->p2sh_version;

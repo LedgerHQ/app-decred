@@ -78,16 +78,6 @@ typedef union {
         char derivation_path[MAX_DERIV_PATH_ASCII_LENGTH];
     } tmp_warning;
 
-    /*
-    struct {
-      bagl_icon_details_t icon_details;
-      unsigned int colors[2];
-      unsigned char qrcode[qrcodegen_BUFFER_LEN_FOR_VERSION(3)];
-    } tmpqr;
-
-    unsigned int dummy; // ensure the whole vars is aligned for the CM0 to
-    operate correctly
-    */
 } vars_u_t;
 
 extern vars_u_t vars;

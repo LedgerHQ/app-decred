@@ -32,7 +32,6 @@ unsigned char btchip_convert_hex_amount_to_displayable(unsigned char *amount) {
     unsigned char i;
     unsigned char targetOffset = 0;
     unsigned char workOffset;
-    unsigned char j;
     unsigned char nscratch = SCRATCH_SIZE;
     unsigned char smin = nscratch - 2;
     unsigned char comma = 0;
@@ -41,6 +40,7 @@ unsigned char btchip_convert_hex_amount_to_displayable(unsigned char *amount) {
         scratch[i] = 0;
     }
     for (i = 0; i < 8; i++) {
+        unsigned char j;
         for (j = 0; j < 8; j++) {
             unsigned char k;
             unsigned short shifted_in =
