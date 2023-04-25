@@ -1,26 +1,25 @@
 /*******************************************************************************
-*   Ledger App - Bitcoin Wallet
-*   (c) 2016-2019 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger App - Bitcoin Wallet
+ *   (c) 2016-2019 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 
 #include "btchip_internal.h"
 
 #define SCRATCH_SIZE 21
 
-unsigned char
-btchip_convert_hex_amount_to_displayable(unsigned char *amount) {
+unsigned char btchip_convert_hex_amount_to_displayable(unsigned char *amount) {
     unsigned char LOOP1;
     unsigned char LOOP2;
 
@@ -45,8 +44,7 @@ btchip_convert_hex_amount_to_displayable(unsigned char *amount) {
         for (j = 0; j < 8; j++) {
             unsigned char k;
             unsigned short shifted_in =
-                (((amount[i] & 0xff) & ((1 << (7 - j)))) != 0) ? (short)1
-                                                               : (short)0;
+                (((amount[i] & 0xff) & ((1 << (7 - j)))) != 0) ? (short) 1 : (short) 0;
             for (k = smin; k < nscratch; k++) {
                 scratch[k] += ((scratch[k] >= 5) ? 3 : 0);
             }
@@ -54,11 +52,10 @@ btchip_convert_hex_amount_to_displayable(unsigned char *amount) {
                 smin -= 1;
             }
             for (k = smin; k < nscratch - 1; k++) {
-                scratch[k] =
-                    ((scratch[k] << 1) & 0xF) | ((scratch[k + 1] >= 8) ? 1 : 0);
+                scratch[k] = ((scratch[k] << 1) & 0xF) | ((scratch[k + 1] >= 8) ? 1 : 0);
             }
-            scratch[nscratch - 1] = ((scratch[nscratch - 1] << 1) & 0x0F) |
-                                    (shifted_in == 1 ? 1 : 0);
+            scratch[nscratch - 1] =
+                ((scratch[nscratch - 1] << 1) & 0x0F) | (shifted_in == 1 ? 1 : 0);
         }
     }
 

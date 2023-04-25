@@ -38,11 +38,11 @@
 #define BLAKE256_BLOCK_LENGTH  64
 
 typedef struct {
-  uint32_t h[8], s[4], t[2];
-  size_t buflen;
-  uint8_t nullt;
-  uint8_t buf[64];
-  uint8_t header;
+    uint32_t h[8], s[4], t[2];
+    size_t buflen;
+    uint8_t nullt;
+    uint8_t buf[64];
+    uint8_t header;
 } BLAKE256_CTX;
 
 void blake256_Init(BLAKE256_CTX *);
