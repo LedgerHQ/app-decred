@@ -51,13 +51,18 @@ const ux_menu_entry_t menu_about[] = {
     {menu_main, NULL, 1, &C_nanos_icon_back, "Back", NULL, 61, 40},
     UX_MENU_END};
 
+static void menu_exit_callback(unsigned int userid) {
+    UNUSED(userid);
+    os_sched_exit(0);
+}
+
 const ux_menu_entry_t menu_main[] = {
     //{NULL, NULL, 0, &NAME3(C_nanos_badge_, COINID, ), "Use wallet to", "view
     // accounts", 33, 12},
     {NULL, NULL, 0, NULL, "Use wallet to", "view accounts", 0, 0},
     {menu_settings, NULL, 0, NULL, "Settings", NULL, 0, 0},
     {menu_about, NULL, 0, NULL, "About", NULL, 0, 0},
-    {NULL, os_sched_exit, 0, &C_nanos_icon_dashboard, "Quit app", NULL, 50, 29},
+    {NULL, menu_exit_callback, 0, &C_nanos_icon_dashboard, "Quit app", NULL, 50, 29},
     UX_MENU_END};
 
 #endif  // #if defined(TARGET_NANOS)
