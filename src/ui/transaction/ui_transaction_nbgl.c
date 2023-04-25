@@ -1,19 +1,19 @@
 /*******************************************************************************
-*   Ledger App - Decred Wallet
-*   (c) 2022 Ledger
-*
-*  Licensed under the Apache License, Version 2.0 (the "License");
-*  you may not use this file except in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-*  Unless required by applicable law or agreed to in writing, software
-*  distributed under the License is distributed on an "AS IS" BASIS,
-*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*  See the License for the specific language governing permissions and
-*  limitations under the License.
-********************************************************************************/
+ *   Ledger App - Decred Wallet
+ *   (c) 2022 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
 #ifdef HAVE_NBGL
 #include <stdbool.h>  // bool
 #include <string.h>   // memset
@@ -60,40 +60,38 @@ static void displayTransaction(void);
 static void reviewStart(void);
 
 static void rejectChoice(bool confirm) {
-  if (confirm){
-    nbgl_useCaseStatus(msgs.finishCancel,true,ui_idle);
-    txType == TX_TYPE_SIGN_MESSAGE ? io_seproxyhal_touch_message_signature_verify_cancel(NULL) :
-        io_seproxyhal_touch_verify_cancel(NULL);
-  }
-  else{
-    if(reviewStarted)
-    {
-      displayTransaction();
+    if (confirm) {
+        nbgl_useCaseStatus(msgs.finishCancel, true, ui_idle);
+        txType == TX_TYPE_SIGN_MESSAGE ? io_seproxyhal_touch_message_signature_verify_cancel(NULL)
+                                       : io_seproxyhal_touch_verify_cancel(NULL);
+    } else {
+        if (reviewStarted) {
+            displayTransaction();
+        } else {
+            reviewStart();
+        }
     }
-    else
-    {
-      reviewStart();
-    }
-  }
-}
- 
-static void reviewChoice(bool confirm) {
-  if (confirm) {
-    if(txType != TX_TYPE_SINGLE_OUTPUT)
-    {
-        nbgl_useCaseStatus(msgs.finishOk,true,ui_idle);
-    }
-    txType == TX_TYPE_SIGN_MESSAGE ? io_seproxyhal_touch_message_signature_verify_ok(NULL) :
-        io_seproxyhal_touch_verify_ok(NULL);
-  }
-  else {
-    rejectUseCaseChoice();
-  }
 }
 
-static void rejectUseCaseChoice(void)
-{
-    nbgl_useCaseChoice(NULL,msgs.choiceCancel,NULL,"Yes, cancel",msgs.choiceGoBack,rejectChoice);
+static void reviewChoice(bool confirm) {
+    if (confirm) {
+        if (txType != TX_TYPE_SINGLE_OUTPUT) {
+            nbgl_useCaseStatus(msgs.finishOk, true, ui_idle);
+        }
+        txType == TX_TYPE_SIGN_MESSAGE ? io_seproxyhal_touch_message_signature_verify_ok(NULL)
+                                       : io_seproxyhal_touch_verify_ok(NULL);
+    } else {
+        rejectUseCaseChoice();
+    }
+}
+
+static void rejectUseCaseChoice(void) {
+    nbgl_useCaseChoice(NULL,
+                       msgs.choiceCancel,
+                       NULL,
+                       "Yes, cancel",
+                       msgs.choiceGoBack,
+                       rejectChoice);
 }
 
 static void displayTransaction(void) {
@@ -120,20 +118,20 @@ static void reviewStart(void) {
     pairs[0].value = vars.tmp.fullAmount;
     pairs[1].item = "To";
     pairs[1].value = vars.tmp.fullAddress;
-    pairs[2].item =  "Fees";
+    pairs[2].item = "Fees";
     pairs[2].value = vars.tmp.feesAmount;
     pairList.nbPairs = 3;
-    pairList.pairs = (nbgl_layoutTagValue_t*)pairs;
+    pairList.pairs = (nbgl_layoutTagValue_t*) pairs;
 
-    switch(txType){
+    switch (txType) {
         case TX_TYPE_SINGLE_OUTPUT:
             pairList.nbPairs = 2;
             explicit_bzero(genericText, sizeof(genericText));
             snprintf(genericText,
-                sizeof(genericText),
-                "Review output\n%d of %d",
-                btchip_context_D.totalOutputs - btchip_context_D.remainingOutputs + 1,
-                btchip_context_D.totalOutputs); 
+                     sizeof(genericText),
+                     "Review output\n%d of %d",
+                     btchip_context_D.totalOutputs - btchip_context_D.remainingOutputs + 1,
+                     btchip_context_D.totalOutputs);
             msgs.reviewStart = genericText;
             infoLongPress.text = "Approve output";
             infoLongPress.longPressText = "Hold to approve";
@@ -142,7 +140,7 @@ static void reviewStart(void) {
             pairs[0].item = "Fees";
             pairs[0].value = vars.tmp.feesAmount;
             pairList.nbPairs = 1;
-            msgs.reviewStart = "Finalize\n transaction";   
+            msgs.reviewStart = "Finalize\n transaction";
             break;
         case TX_TYPE_SIGN_MESSAGE:
             pairs[0].item = "Message Hash";
@@ -160,11 +158,15 @@ static void reviewStart(void) {
         case TX_TYPE_FULL_REVIEW:
         default:
             break;
-  }
-  
-  reviewStarted = false;
-  nbgl_useCaseReviewStart(&C_decred_icon_64px, msgs.reviewStart, NULL,
-                          msgs.reviewCancel, displayTransaction, rejectUseCaseChoice);
+    }
+
+    reviewStarted = false;
+    nbgl_useCaseReviewStart(&C_decred_icon_64px,
+                            msgs.reviewStart,
+                            NULL,
+                            msgs.reviewCancel,
+                            displayTransaction,
+                            rejectUseCaseChoice);
 }
 
 unsigned int ui_tx_confirm_full_output() {
@@ -188,7 +190,6 @@ unsigned int ui_tx_finalize() {
 void ui_tx_confirm_message_signature() {
     txType = TX_TYPE_SIGN_MESSAGE;
     if (!prepare_message_signature()) {
-        
         return;
     }
     reviewStart();
@@ -198,29 +199,32 @@ unsigned int ui_tx_confirm_single_output() {
     txType = TX_TYPE_SINGLE_OUTPUT;
     if (!prepare_single_output()) {
         return 0;
-    }   
+    }
     reviewStart();
     return 1;
 }
 
 static void changePathWarningChoice(bool reject) {
-  if (reject) {
-    io_seproxyhal_touch_display_cancel(NULL);
-    nbgl_useCaseStatus("Transaction rejected",false,ui_idle);
-  }
-  else {
-    io_seproxyhal_touch_display_ok(NULL);
-  }
+    if (reject) {
+        io_seproxyhal_touch_display_cancel(NULL);
+        nbgl_useCaseStatus("Transaction rejected", false, ui_idle);
+    } else {
+        io_seproxyhal_touch_display_ok(NULL);
+    }
 }
 
-void ui_tx_request_change_path_approval(unsigned char* change_path)
-{
+void ui_tx_request_change_path_approval(unsigned char* change_path) {
     bip32_print_path(change_path, vars.tmp_warning.derivation_path, MAX_DERIV_PATH_ASCII_LENGTH);
     explicit_bzero(genericText, sizeof(genericText));
     snprintf(genericText,
              sizeof(genericText),
              "WARNING !\nThe change path is\nunusual :\n%s",
-              vars.tmp_warning.derivation_path);
-    nbgl_useCaseChoice(NULL,genericText,"Reject if you're not sure","Reject","Continue",changePathWarningChoice);
+             vars.tmp_warning.derivation_path);
+    nbgl_useCaseChoice(NULL,
+                       genericText,
+                       "Reject if you're not sure",
+                       "Reject",
+                       "Continue",
+                       changePathWarningChoice);
 }
 #endif
