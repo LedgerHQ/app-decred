@@ -15,40 +15,51 @@
 #*  See the License for the specific language governing permissions and
 #*  limitations under the License.
 #********************************************************************************
-from ragger.backend import RaisePolicy
-from ragger.navigator import NavInsID, NavIns
-from binascii import hexlify
 import struct
+from pathlib import Path
+from inspect import currentframe
+from binascii import hexlify
+from ragger.backend import RaisePolicy
+from ragger.navigator import NavInsID
+
 
 ################# SIGN MESSAGE #########################
-def test_decred_sign_message(client, firmware, navigator):
-    client.raise_policy = RaisePolicy.RAISE_NOTHING
+def test_decred_sign_message(backend, firmware, navigator):
+    backend.raise_policy = RaisePolicy.RAISE_NOTHING
 
-    magic = "\x18Bitcoin Signed Message:\n"
+    # magic = "\x18 Signed Message:\n"
     message = "Message to be signed"
-    data = magic + chr(len(message)) + message
-    hex_str_data = hexlify(bytes(data,'ascii' ))
-    hex_str_sign_msg = b'058000002c8000002A800000000000000100000001' +  hexlify(struct.pack('>h', int(len(hex_str_data.decode('ascii'))/2))) + hex_str_data
+    data = chr(len(message)) + message
+    hex_str_data = hexlify(bytes(data, 'ascii'))
+    hex_str_sign_msg = b'058000002c8000002A800000000000000100000001' + hexlify(
+        struct.pack('>h', int(
+            len(hex_str_data.decode('ascii')) / 2))) + hex_str_data
     str_sign_msg = hex_str_sign_msg.decode('ascii')
 
-    packet = "e04e0001" + hexlify(bytes([int(len(str_sign_msg)/2)])).decode("utf-8") + str_sign_msg
-    result = client.exchange_raw(data=bytearray.fromhex(packet))
+    packet = "e04e0001" + hexlify(bytes([int(len(str_sign_msg) / 2)
+                                         ])).decode("utf-8") + str_sign_msg
+    backend.exchange_raw(data=bytearray.fromhex(packet))
 
     packet = "e04e80000100"
-    with client.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
-        if firmware.device == "fat":
-            navigator.navigate([NavIns(id=NavInsID.TAPPABLE_CENTER_TAP)])
-            navigator.navigate([NavIns(id=NavInsID.TAPPABLE_CENTER_TAP)])
-            navigator.navigate([NavIns(id=NavInsID.USE_CASE_REVIEW_CONFIRM)])
-        if firmware.device in ["nanox","nanosp"]:
-            navigator.navigate([NavIns(id=NavInsID.RIGHT_CLICK)])
-            navigator.navigate([NavIns(id=NavInsID.RIGHT_CLICK)])
-            navigator.navigate([NavIns(id=NavInsID.BOTH_CLICK)])
-        if firmware.device == "nanos":
-            navigator.navigate([NavIns(id=NavInsID.RIGHT_CLICK)])
-            
-    # expected = "9e18e3a7e7508bdd151104b4879b350565aac97f031ee6eea5b7bf84029a929d00000000ac211e0000000000"
-    # # expected = "7dfed275d5fb94c2b7fd0a0e92f0b62e8324829c40dba2b09231b7763ab43c5700000000ac211e0000000000"
-    # if expected not in hexlify(result.data).decode("utf-8"):
-    #     print("Error:\nExpected:%s\nGot:     %s\n" % (expected,hexlify(result.data[4:-8]).decode("utf-8")))
-    #     exit()
+    path = Path(currentframe().f_code.co_name)
+    with backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
+        if firmware.device == "stax":
+            navigator.navigate_until_text_and_compare(
+                NavInsID.TAPPABLE_CENTER_TAP, [
+                    NavInsID.USE_CASE_REVIEW_CONFIRM,
+                    NavInsID.WAIT_FOR_HOME_SCREEN
+                ], "Hold",
+                Path(__file__).parent.resolve(), path)
+        else:
+            navigator.navigate_until_text_and_compare(
+                NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Accept",
+                Path(__file__).parent.resolve(), path)
+
+    result = backend.last_async_response
+
+    expected = "3045022100e841839bef7147f0bb79e7e301a0bfdb2ff8b1c4a195d9a18c4f167c70dd63e6022061898f34c11561ccd1ad74d627195aa5f08d7fff8f78eb9de605e433d8532783"
+    assert result.status == 0x9000
+    if expected not in hexlify(result.data).decode("utf-8"):
+        print("Error:\nExpected:%s\nGot:%s\n" %
+              (expected, hexlify(result.data).decode("utf-8")))
+        exit()
