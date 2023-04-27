@@ -180,9 +180,9 @@ uint8_t prepare_single_output() {
     char tmp[80];
     unsigned int offset = 0;
     unsigned char versionSize;
-    int addressOffset;
+    int addressOffset = 0;
     unsigned char address[22];
-    unsigned short version;  // addr prefix, or net id
+    unsigned short version = 0;  // addr prefix, or net id
     unsigned short textSize;
     unsigned char script_version[2];  // Decred thing
 
@@ -224,7 +224,7 @@ uint8_t prepare_single_output() {
                                                        1);
         tmp[textSize] = '\0';
 
-        strcpy(vars.tmp.fullAddress, tmp);
+        strlcpy(vars.tmp.fullAddress, tmp, sizeof(vars.tmp.fullAddress));
     }
 
     // Prepare amount
@@ -362,7 +362,6 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
         // Format validation message
         currentPos = 0;
         offset = 1;
-        btchip_context_D.tmp = (unsigned char *) tmp;
         for (i = 0; i < numberOutputs; i++) {
             if (!btchip_output_script_is_op_return(btchip_context_D.currentOutput + offset + 8 +
                                                    2)) {
@@ -407,7 +406,7 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
                                                                    1);
                     tmp[textSize] = '\0';
 
-                    strcpy(vars.tmp.fullAddress, tmp);
+                    strlcpy(vars.tmp.fullAddress, tmp, sizeof(vars.tmp.fullAddress));
 
                     // Prepare amount
                     PRINTF("prepare amount\n");

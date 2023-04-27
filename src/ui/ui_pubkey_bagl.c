@@ -56,7 +56,7 @@ UX_STEP_NOCB(ux_display_public_flow_5_step,
              bnnn_paging,
              {
                  .title = "Address",
-                 .text = G_io_apdu_buffer + 200,
+                 .text = (const char *) G_io_apdu_buffer + 200,
              });
 UX_STEP_VALID(ux_display_public_flow_6_step,
               pb,
@@ -118,7 +118,7 @@ UX_STEP_VALID(ux_display_token_flow_1_step,
               {
                   &C_icon_validate_14,
                   "Confirm token",
-                  G_io_apdu_buffer + 200,
+                  (const char *) G_io_apdu_buffer + 200,
               });
 UX_STEP_VALID(ux_display_token_flow_2_step,
               pb,
@@ -130,9 +130,9 @@ UX_STEP_VALID(ux_display_token_flow_2_step,
 
 UX_FLOW(ux_display_token_flow, &ux_display_token_flow_1_step, &ux_display_token_flow_2_step);
 
-void ui_display_public_key(unsigned char* derivation_path) {
+void ui_display_public_key(unsigned char *derivation_path) {
     // append a white space at the end of the address to avoid glitch on nano S
-    strcat((char*) G_io_apdu_buffer + 200, " ");
+    strlcat((char *) G_io_apdu_buffer + 200, " ", sizeof(G_io_apdu_buffer) - 200);
 
     bip32_print_path(derivation_path,
                      vars.tmp_warning.derivation_path,
