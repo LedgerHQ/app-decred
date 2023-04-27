@@ -1,4 +1,4 @@
-name: Build and run functional tests using ragger through reusable workflow
+name: Ragger functional tests
 
 on:
   workflow_dispatch:

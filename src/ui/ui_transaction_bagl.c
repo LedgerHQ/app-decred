@@ -110,7 +110,9 @@ UX_FLOW(ux_confirm_full_flow,
 
 //////////////////////////////////////////////////////////////////////
 
-UX_STEP_NOCB(ux_confirm_single_flow_1_step, pnn, {&C_icon_eye, "Confirm output", vars.tmp.feesAmount});
+UX_STEP_NOCB(ux_confirm_single_flow_1_step,
+             pnn,
+             {&C_icon_eye, "Confirm output", vars.tmp.feesAmount});
 UX_STEP_NOCB(ux_confirm_single_flow_2_step,
              bnnn_paging,
              {
@@ -227,9 +229,7 @@ unsigned int ui_tx_confirm_single_output() {
              "#%d",
              btchip_context_D.totalOutputs - btchip_context_D.remainingOutputs + 1);
 
-#if defined(TARGET_NANOX) || defined(TARGET_NANOS2) || defined (TARGET_NANOS)
     ux_flow_init(0, ux_confirm_single_flow, NULL);
-#endif  // TARGET_NANOX || TARGET_NANOS2
     return 1;
 }
 

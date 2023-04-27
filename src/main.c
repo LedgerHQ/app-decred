@@ -257,7 +257,7 @@ __attribute__((section(".boot"))) int main(int arg0) {
 
 #ifdef HAVE_BLE
                 BLE_power(0, NULL);
-                BLE_power(1, "Nano X");
+                BLE_power(1, NULL);
 #endif  // HAVE_BLE
 
                 app_main();

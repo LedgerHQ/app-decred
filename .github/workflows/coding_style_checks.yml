@@ -1,4 +1,4 @@
-name: Run coding style check through reusable workflow
+name: Coding style checks
 
 on:
   workflow_dispatch:
@@ -11,9 +11,20 @@ on:
 
 jobs:
   check_linting:
-    name: Check linting
+    name: Check sources linting
     uses: LedgerHQ/ledger-app-workflows/.github/workflows/reusable_lint.yml@v1
     with:
       source: './src'
       extensions: 'h,c'
       version: 11
+
+  tests_lint_check:
+    name: Check tests linting
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone
+      uses: actions/checkout@v3
+    - run: pip install yapf toml
+    - name: Yapf source formatting
+      run: |
+        yapf test/ --recursive -d
