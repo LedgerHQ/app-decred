@@ -58,13 +58,9 @@ unsigned int io_seproxyhal_touch_exit(const bagl_element_t *e);
 #endif
 void ui_idle(void);
 
-#if defined(TARGET_NANOX) || defined(TARGET_NANOS2) || defined(TARGET_STAX)
 #include "ux.h"
 ux_state_t G_ux;
 bolos_ux_params_t G_ux_params;
-#else
-ux_state_t ux;
-#endif  // TARGET_NANOX || TARGET_NANOS2
 
 #ifndef TARGET_STAX
 // override point, but nothing more to do
