@@ -24,8 +24,6 @@
 
 #include "btchip_internal.h"
 
-// #include "btchip_bagl_extensions.h"
-
 const char* settings_submenu_getter(unsigned int idx);
 void settings_submenu_selector(unsigned int idx);
 
@@ -122,8 +120,6 @@ UX_FLOW(ux_idle_flow,
         &ux_idle_flow_4_step);
 
 void ui_idle(void) {
-    ux_step_count = 0;
-    ux_loop_over_curr_element = 0;
     // reserve a display stack slot if none yet
     if (G_ux.stack_count == 0) {
         ux_stack_push();

@@ -19,8 +19,6 @@
 #include "btchip_apdu_constants.h"
 #include "blake256.h"
 
-// #define DEBUG_LONG "%ld"
-
 #define DEBUG_LONG "%d"
 
 void check_transaction_available(unsigned char x) {
@@ -182,7 +180,6 @@ void transaction_parse(unsigned char parseMode) {
                         btchip_context_D.transactionContext.transactionState =
                             BTCHIP_TRANSACTION_DEFINED_WAIT_INPUT;
 
-                        // no break is intentional
                         __attribute__((fallthrough));
                     }
 
@@ -356,7 +353,6 @@ void transaction_parse(unsigned char parseMode) {
                         btchip_context_D.transactionContext.transactionState =
                             BTCHIP_TRANSACTION_INPUT_HASHING_IN_PROGRESS_INPUT_SCRIPT;
 
-                        // no break is intentional
                         __attribute__((fallthrough));
                     }
                     case BTCHIP_TRANSACTION_INPUT_HASHING_IN_PROGRESS_INPUT_SCRIPT: {
@@ -438,7 +434,6 @@ void transaction_parse(unsigned char parseMode) {
                         btchip_context_D.transactionContext.transactionState =
                             BTCHIP_TRANSACTION_DEFINED_WAIT_OUTPUT;
 
-                        // no break is intentional
                         __attribute__((fallthrough));
                     }
                     case BTCHIP_TRANSACTION_DEFINED_WAIT_OUTPUT: {
@@ -481,7 +476,6 @@ void transaction_parse(unsigned char parseMode) {
                         btchip_context_D.transactionContext.transactionState =
                             BTCHIP_TRANSACTION_OUTPUT_HASHING_IN_PROGRESS_OUTPUT_SCRIPT;
 
-                        // no break is intentional
                         __attribute__((fallthrough));
                     }
                     case BTCHIP_TRANSACTION_OUTPUT_HASHING_IN_PROGRESS_OUTPUT_SCRIPT: {

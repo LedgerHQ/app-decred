@@ -81,9 +81,6 @@ typedef union {
 } vars_u_t;
 
 extern vars_u_t vars;
-extern unsigned int ux_step;
-extern unsigned int ux_step_count;
-extern uint8_t ux_loop_over_curr_element;
 
 unsigned int io_seproxyhal_touch_display_cancel(const void *e);
 unsigned int io_seproxyhal_touch_display_ok(const void *e);

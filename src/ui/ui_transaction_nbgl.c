@@ -38,11 +38,7 @@ typedef enum {
 
 typedef struct {
     const char* reviewStart;
-    const char* reviewCancel;
     const char* finishOk;
-    const char* finishCancel;
-    const char* choiceCancel;
-    const char* choiceGoBack;
 } messages_t;
 
 static nbgl_layoutTagValueList_t pairList;
@@ -51,27 +47,11 @@ static nbgl_pageInfoLongPress_t infoLongPress;
 static transaction_type_t txType;
 static messages_t msgs;
 static char genericText[70];
-static bool reviewStarted;
 
 static void reviewChoice(bool confirm);
-static void rejectChoice(bool confirm);
-static void rejectUseCaseChoice(void);
+static void rejectChoice(void);
 static void displayTransaction(void);
 static void reviewStart(void);
-
-static void rejectChoice(bool confirm) {
-    if (confirm) {
-        nbgl_useCaseStatus(msgs.finishCancel, true, ui_idle);
-        txType == TX_TYPE_SIGN_MESSAGE ? io_seproxyhal_touch_message_signature_verify_cancel(NULL)
-                                       : io_seproxyhal_touch_verify_cancel(NULL);
-    } else {
-        if (reviewStarted) {
-            displayTransaction();
-        } else {
-            reviewStart();
-        }
-    }
-}
 
 static void reviewChoice(bool confirm) {
     if (confirm) {
@@ -81,22 +61,26 @@ static void reviewChoice(bool confirm) {
         txType == TX_TYPE_SIGN_MESSAGE ? io_seproxyhal_touch_message_signature_verify_ok(NULL)
                                        : io_seproxyhal_touch_verify_ok(NULL);
     } else {
-        rejectUseCaseChoice();
+        rejectChoice();
     }
 }
 
-static void rejectUseCaseChoice(void) {
-    nbgl_useCaseChoice(NULL,
-                       msgs.choiceCancel,
-                       NULL,
-                       "Yes, cancel",
-                       msgs.choiceGoBack,
-                       rejectChoice);
+static void rejectConfirmation(void) {
+    nbgl_useCaseStatus("Transaction rejected", false, ui_idle);
+    txType == TX_TYPE_SIGN_MESSAGE ? io_seproxyhal_touch_message_signature_verify_cancel(NULL)
+                                   : io_seproxyhal_touch_verify_cancel(NULL);
+}
+
+static void rejectChoice(void) {
+    nbgl_useCaseConfirm("Reject transaction ?",
+                        NULL,
+                        "Yes, Reject",
+                        "Go back to transaction",
+                        rejectConfirmation);
 }
 
 static void displayTransaction(void) {
-    reviewStarted = true;
-    nbgl_useCaseStaticReview(&pairList, &infoLongPress, msgs.reviewCancel, reviewChoice);
+    nbgl_useCaseStaticReview(&pairList, &infoLongPress, "Reject transaction", reviewChoice);
 }
 
 static void reviewStart(void) {
@@ -104,27 +88,20 @@ static void reviewStart(void) {
     explicit_bzero(&infoLongPress, sizeof(infoLongPress));
 
     msgs.reviewStart = "Review\ntransaction";
-    msgs.reviewCancel = "Cancel transaction";
-    msgs.choiceCancel = "Cancel transaction ?";
-    msgs.choiceGoBack = "Go back to transaction";
     msgs.finishOk = "TRANSACTION\nSIGNED";
-    msgs.finishCancel = "Transaction rejected";
 
-    infoLongPress.text = "Accept and send";
-    infoLongPress.longPressText = "Hold to accept";
+    infoLongPress.text = "Sign transaction";
+    infoLongPress.longPressText = "Hold to sign";
     infoLongPress.icon = &C_decred_icon_64px;
 
-    pairs[0].item = "Amount";
-    pairs[0].value = vars.tmp.fullAmount;
-    pairs[1].item = "To";
-    pairs[1].value = vars.tmp.fullAddress;
-    pairs[2].item = "Fees";
-    pairs[2].value = vars.tmp.feesAmount;
-    pairList.nbPairs = 3;
     pairList.pairs = (nbgl_layoutTagValue_t*) pairs;
 
     switch (txType) {
         case TX_TYPE_SINGLE_OUTPUT:
+            pairs[0].item = "Amount";
+            pairs[0].value = vars.tmp.fullAmount;
+            pairs[1].item = "To";
+            pairs[1].value = vars.tmp.fullAddress;
             pairList.nbPairs = 2;
             explicit_bzero(genericText, sizeof(genericText));
             snprintf(genericText,
@@ -147,26 +124,27 @@ static void reviewStart(void) {
             pairs[0].value = vars.tmp.fullAddress;
             pairList.nbPairs = 1;
             msgs.reviewStart = "Sign\nMessage";
-            msgs.reviewCancel = "Cancel signature";
-            msgs.choiceCancel = "Cancel signature ?";
-            msgs.choiceGoBack = "Go back to signature";
             msgs.finishOk = "MESSAGE SIGNED";
-            msgs.finishCancel = "SIGNATURE\nCANCELLED";
-            infoLongPress.text = "Sign message";
-            infoLongPress.longPressText = "Hold to sign";
             break;
         case TX_TYPE_FULL_REVIEW:
+            __attribute__((fallthrough));
         default:
+            pairs[0].item = "Amount";
+            pairs[0].value = vars.tmp.fullAmount;
+            pairs[1].item = "To";
+            pairs[1].value = vars.tmp.fullAddress;
+            pairs[2].item = "Fees";
+            pairs[2].value = vars.tmp.feesAmount;
+            pairList.nbPairs = 3;
             break;
     }
 
-    reviewStarted = false;
     nbgl_useCaseReviewStart(&C_decred_icon_64px,
                             msgs.reviewStart,
                             NULL,
-                            msgs.reviewCancel,
+                            "Reject transaction",
                             displayTransaction,
-                            rejectUseCaseChoice);
+                            rejectChoice);
 }
 
 unsigned int ui_tx_confirm_full_output() {

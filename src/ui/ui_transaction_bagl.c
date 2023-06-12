@@ -112,7 +112,7 @@ UX_FLOW(ux_confirm_full_flow,
 
 UX_STEP_NOCB(ux_confirm_single_flow_1_step,
              pnn,
-             {&C_icon_eye, "Confirm output", vars.tmp.feesAmount});
+             {&C_icon_eye, "Review output", vars.tmp.feesAmount});
 UX_STEP_NOCB(ux_confirm_single_flow_2_step,
              bnnn_paging,
              {
@@ -139,7 +139,7 @@ UX_STEP_VALID(ux_confirm_single_flow_5_step,
                   &C_icon_crossmark,
                   "Reject",
               });
-// confirm_single: confirm output #x(feesAmount) / Amount: fullAmount / Address: fullAddress
+// confirm_single: review output #x(feesAmount) / Amount: fullAmount / Address: fullAddress
 UX_FLOW(ux_confirm_single_flow,
         &ux_confirm_single_flow_1_step,
         &ux_confirm_single_flow_2_step,

@@ -22,9 +22,6 @@
 #include "btchip_bcd.h"
 #include "ui_main_menu.h"
 
-unsigned int ux_step;
-unsigned int ux_step_count;
-uint8_t ux_loop_over_curr_element;
 vars_u_t vars;
 
 unsigned int io_seproxyhal_touch_display_cancel(const void *e) {

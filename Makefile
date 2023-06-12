@@ -1,182 +1,110 @@
-#*******************************************************************************
-#   Ledger App
-#   (c) 2017 Ledger
+# ****************************************************************************
+#    Decred Ledger App
+#    (c) 2023 Ledger SAS.
 #
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#       http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-#*******************************************************************************
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+# ****************************************************************************
 
 ifeq ($(BOLOS_SDK),)
 $(error Environment variable BOLOS_SDK is not set)
 endif
+
 include $(BOLOS_SDK)/Makefile.defines
 
-APP_PATH = "44'/42'"
-# All but Decred app use dependency onto the decred app/lib
-DEFINES_LIB = USE_LIB_DECRED
+########################################
+#        Mandatory configuration       #
+########################################
 
-APP_LOAD_PARAMS= --curve secp256k1 $(COMMON_LOAD_PARAMS)
+# Enabling DEBUG flag will enable PRINTF and disable optimizations
+#DEBUG = 1
 
-APPVERSION_M=1
-APPVERSION_N=3
-APPVERSION_P=13
-APPVERSION=$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)
-APP_LOAD_FLAGS=--appFlags 0x250
+# Application version
+APPVERSION_M= 1
+APPVERSION_N= 3
+APPVERSION_P= 13
+APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
-# simplify for tests
+# Application source files
+APP_SOURCE_PATH += src
+
+# Application icons
+ICON_NANOS = nanos_app_$(COIN).gif
+ICON_STAX = stax_app_$(COIN).gif
+ICON_NANOX = nanox_app_$(COIN).gif
+ICON_NANOSP = nanox_app_$(COIN).gif
+
+# Application allowed derivation curves.
+CURVE_APP_LOAD_PARAMS = secp256k1
+
+# Application allowed derivation paths.
+PATH_APP_LOAD_PARAMS = "44'/42'"
+
+# Setting to allow building variant applications
+VARIANT_PARAM = COIN
+VARIANT_VALUES = decred decred_testnet
+
 ifndef COIN
 COIN=decred
 endif
 
+########################################
+#     Application custom permissions   #
+########################################
+# See SDK `include/appflags.h` for the purpose of each permission
+HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
+HAVE_APPLICATION_FLAG_DERIVE_MASTER = 1
+HAVE_APPLICATION_FLAG_GLOBAL_PIN = 1
+
 ifeq ($(COIN),decred)
 # Decred mainnet
-DEFINES   += COIN_P2PKH_VERSION=1855 COIN_P2SH_VERSION=1818 COIN_FAMILY=1 COIN_COINID=\"Decred\" COIN_COINID_HEADER=\"DECRED\" COIN_COLOR_HDR=0x5482ff COIN_COLOR_DB=0xB2E8CB COIN_COINID_NAME=\"Decred\" COIN_COINID_SHORT=\"DCR\" COIN_KIND=COIN_KIND_DECRED
-APPNAME ="Decred"
-APP_LOAD_PARAMS += --path $(APP_PATH)
-DEFINES_LIB =# Decred IS the lib
-APP_LOAD_FLAGS=--appFlags 0xa50
+DEFINES_LIB = # Decred IS the lib
+DEFINES += COIN_P2PKH_VERSION=1855 COIN_P2SH_VERSION=1818 COIN_FAMILY=1 COIN_COINID=\"Decred\" COIN_COINID_HEADER=\"DECRED\" COIN_COLOR_HDR=0x5482ff COIN_COLOR_DB=0xB2E8CB COIN_COINID_NAME=\"Decred\" COIN_COINID_SHORT=\"DCR\" COIN_KIND=COIN_KIND_DECRED
+APPNAME = "Decred"
+HAVE_APPLICATION_FLAG_LIBRARY = 1
 else ifeq ($(COIN),decred_testnet)
 # Decred testnet
-DEFINES   += COIN_P2PKH_VERSION=3873 COIN_P2SH_VERSION=3836 COIN_FAMILY=1 COIN_COINID=\"Decred\" COIN_COINID_HEADER=\"DECRED\" COIN_COLOR_HDR=0x5482ff COIN_COLOR_DB=0xB2E8CB COIN_COINID_NAME=\"Decred\" COIN_COINID_SHORT=\"TDCR\" COIN_KIND=COIN_KIND_DECRED_TESTNET
-APPNAME ="Decred Test"
-APP_LOAD_PARAMS += --path $(APP_PATH)
-
+# All but Decred app use dependency onto the decred app/lib
+DEFINES_LIB = USE_LIB_DECRED
+DEFINES += COIN_P2PKH_VERSION=3873 COIN_P2SH_VERSION=3836 COIN_FAMILY=1 COIN_COINID=\"Decred\" COIN_COINID_HEADER=\"DECRED\" COIN_COLOR_HDR=0x5482ff COIN_COLOR_DB=0xB2E8CB COIN_COINID_NAME=\"Decred\" COIN_COINID_SHORT=\"TDCR\" COIN_KIND=COIN_KIND_DECRED_TESTNET
+APPNAME = "Decred Test"
 else
 ifeq ($(filter clean,$(MAKECMDGOALS)),)
 $(error Unsupported COIN - use decred, decred_testnet)
 endif
 endif
 
-APP_LOAD_PARAMS += $(APP_LOAD_FLAGS)
-DEFINES += $(DEFINES_LIB)
+DEFINES += $(DEFINES_LIB) TCS_LOADER_PATCH_VERSION=0
 
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-ICONNAME=nanos_app_$(COIN).gif
-else ifeq ($(TARGET_NAME),TARGET_STAX)
-ICONNAME=stax_app_$(COIN).gif
-else
-ICONNAME=nanox_app_$(COIN).gif
-endif
-
-################
-# Default rule #
-################
-all: default
-
-############
-# Platform #
-############
-
-DEFINES   += OS_IO_SEPROXYHAL IO_SEPROXYHAL_BUFFER_SIZE_B=300
-DEFINES   += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
-DEFINES   += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=4 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
-DEFINES   += LEDGER_MAJOR_VERSION=$(APPVERSION_M) LEDGER_MINOR_VERSION=$(APPVERSION_N) LEDGER_PATCH_VERSION=$(APPVERSION_P) TCS_LOADER_PATCH_VERSION=0
+# Remove warning on custom snprintf implementation usage
+CFLAGS    += -Wno-format
 
 # U2F
-DEFINES   += HAVE_U2F HAVE_IO_U2F
-DEFINES   += U2F_PROXY_MAGIC=\"BTC\"
-DEFINES   += USB_SEGMENT_SIZE=64
-DEFINES   += BLE_SEGMENT_SIZE=32 #max MTU, min 20
-
-#WEBUSB_URL     = www.ledgerwallet.com
-#DEFINES       += HAVE_WEBUSB WEBUSB_URL_SIZE_B=$(shell echo -n $(WEBUSB_URL) | wc -c) WEBUSB_URL=$(shell echo -n $(WEBUSB_URL) | sed -e "s/./\\\'\0\\\',/g")
-DEFINES   += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
-
-DEFINES   += UNUSED\(x\)=\(void\)x
-DEFINES   += APPVERSION=\"$(APPVERSION)\"
-
-ifeq ($(TARGET_NAME),TARGET_STAX)
-	DEFINES   += IO_SEPROXYHAL_BUFFER_SIZE_B=300
-	DEFINES   += NBGL_QRCODE NBGL_USE_CASE NBGL_PAGE
-else
-    DEFINES   += HAVE_BAGL HAVE_UX_FLOW
-endif
-
-# BLE
-ifeq ($(TARGET_NAME),TARGET_NANOX)
-DEFINES   += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
-else ifeq ($(TARGET_NAME),TARGET_STAX)
-DEFINES   += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
-endif
-
-ifneq ($(TARGET_NAME),TARGET_NANOS)
-DEFINES       += HAVE_GLO096
-ifneq ($(TARGET_NAME),TARGET_STAX)
-DEFINES   	  += HAVE_BAGL BAGL_WIDTH=128 BAGL_HEIGHT=64
-endif
-DEFINES       += HAVE_BAGL_ELLIPSIS # long label truncation feature
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
-DEFINES       += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
-endif
-
-# Enabling debug PRINTF
-DEBUG = 0
-ifneq ($(DEBUG),0)
-
-        ifeq ($(TARGET_NAME),TARGET_NANOS)
-                DEFINES   += HAVE_PRINTF PRINTF=screen_printf
-        else
-                DEFINES   += HAVE_PRINTF PRINTF=mcu_usb_printf
-        endif
-else
-        DEFINES   += PRINTF\(...\)=
-endif
-
-
-
-##############
-# Compiler #
-##############
-
-CC       := $(CLANGPATH)clang
-
-#CFLAGS   += -O0
-CFLAGS   += -O3 -Os
-# Remove warning on custom snprintf implementation usage
-CFLAGS += -Wno-format
-
-AS     := $(GCCPATH)arm-none-eabi-gcc
-
-LD       := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS  += -O3 -Os
-LDLIBS   += -lm -lgcc -lc
-
-# import rules to compile glyphs(/pone)
-include $(BOLOS_SDK)/Makefile.glyphs
-
-### variables processed by the common makefile.rules of the SDK to grab source files and include dirs
-APP_SOURCE_PATH  += src
+DEFINES   += HAVE_IO_U2F U2F_PROXY_MAGIC=\"BTC\"
 SDK_SOURCE_PATH  += lib_stusb lib_stusb_impl lib_u2f 
 
-ifneq ($(TARGET_NAME),TARGET_STAX)
-SDK_SOURCE_PATH += lib_ux
-endif
+########################################
+# Application communication interfaces #
+########################################
+ENABLE_BLUETOOTH = 1
 
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
-SDK_SOURCE_PATH  += lib_blewbxx lib_blewbxx_impl
-endif
+########################################
+#         NBGL custom features         #
+########################################
+ENABLE_NBGL_QRCODE = 1
 
-load: all
-	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
+# Use only specific files from standard app
+DISABLE_STANDARD_APP_FILES = 1
+APP_SOURCE_FILES += ${BOLOS_SDK}/lib_standard_app/io.c
+INCLUDES_PATH += ${BOLOS_SDK}/lib_standard_app
 
-delete:
-	python -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
-
-# import generic rules from the sdk
-include $(BOLOS_SDK)/Makefile.rules
-
-#add dependency on custom makefile filename
-dep/%.d: %.c Makefile
-
-listvariants:
-	@echo VARIANTS COIN decred decred_testnet
+include $(BOLOS_SDK)/Makefile.standard_app

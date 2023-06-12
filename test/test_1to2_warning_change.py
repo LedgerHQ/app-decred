@@ -126,14 +126,18 @@ def test_1to2_warning_finalize(backend, firmware, navigator):
         if firmware.device == "stax":
             snap_idx = 1
             for _ in range(3):
+                instructions = [
+                    NavIns(id=NavInsID.TAPPABLE_CENTER_TAP),
+                    NavIns(id=NavInsID.TAPPABLE_CENTER_TAP),
+                    NavIns(id=NavInsID.USE_CASE_REVIEW_CONFIRM)
+                ]
+                if _ == 2:
+                    instructions.append(NavInsID.WAIT_FOR_HOME_SCREEN)
+
                 navigator.navigate_and_compare(
                     Path(__file__).parent.resolve(),
                     test_case_name=test_name,
-                    instructions=[
-                        NavIns(id=NavInsID.TAPPABLE_CENTER_TAP),
-                        NavIns(id=NavInsID.TAPPABLE_CENTER_TAP),
-                        NavIns(id=NavInsID.USE_CASE_REVIEW_CONFIRM)
-                    ],
+                    instructions=instructions,
                     screen_change_after_last_instruction=False,
                     snap_start_idx=snap_idx)
                 snap_idx += 3

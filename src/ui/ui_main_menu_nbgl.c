@@ -50,7 +50,7 @@ static bool settingsNavCallback(uint8_t page, nbgl_pageContent_t *content) {
         setting_switch.subText = "Enable automatic key export";
         setting_switch.token = SWITCH_KEY_EXPORT_TOKEN;
         setting_switch.tuneId = TUNE_TAP_CASUAL;
-
+        setting_switch.initState = (bool) !N_btchip.pubKeyRequestRestriction;
         content->type = SWITCHES_LIST;
         content->switchesList.nbSwitches = 1;
         content->switchesList.switches = (nbgl_layoutSwitch_t *) &setting_switch;
@@ -69,10 +69,8 @@ static void settingsControlsCallback(int token, uint8_t index) {
     UNUSED(index);
     switch (token) {
         case SWITCH_KEY_EXPORT_TOKEN:
-            setting_switch.initState = !setting_switch.initState;
             unsigned int setting_value = (unsigned int) !setting_switch.initState;
             nvm_write((void *) &N_btchip.pubKeyRequestRestriction, &setting_value, 1);
-            displaySettingsMenu();
             break;
         default:
             PRINTF("Should not happen !");
@@ -84,17 +82,16 @@ static void displaySettingsMenu(void) {
     nbgl_useCaseSettings("Stellar settings",
                          0,
                          2,
-                         true,
+                         false,
                          ui_idle,
                          settingsNavCallback,
                          settingsControlsCallback);
 }
 
 void ui_idle(void) {
-    setting_switch.initState = (bool) !N_btchip.pubKeyRequestRestriction;
     nbgl_useCaseHome("Decred",
                      &C_decred_icon_64px,
-                     "This app confirms actions on\nthe Decred network.",
+                     NULL,
                      true,
                      displaySettingsMenu,
                      onQuitCallback);
