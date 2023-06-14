@@ -21,7 +21,7 @@ void autosetup(void) {
     btchip_config_t config;
     unsigned char i;
     unsigned char tmp[32];
-    os_memset(&config, 0, sizeof(btchip_config_t));
+    explicit_bzero(&config, sizeof(btchip_config_t));
     config.options |= BTCHIP_OPTION_DETERMINISTIC_SIGNATURE;
     config.options |= BTCHIP_OPTION_SKIP_2FA_P2SH;  // TODO : remove when
                                                     // supporting multi output
@@ -38,12 +38,11 @@ void autosetup(void) {
  */
 void btchip_context_init() {
     PRINTF("Context init\n");
-    PRINTF(N_btchip.bkp);
-    os_memset(&btchip_context_D, 0, sizeof(btchip_context_D));
+    explicit_bzero(&btchip_context_D, sizeof(btchip_context_D));
     SB_SET(btchip_context_D.halted, 0);
     btchip_context_D.currentOutputOffset = 0;
     btchip_context_D.outputParsingState = BTCHIP_OUTPUT_PARSING_NUMBER_OUTPUTS;
-    os_memset(btchip_context_D.totalOutputAmount, 0, sizeof(btchip_context_D.totalOutputAmount));
+    explicit_bzero(btchip_context_D.totalOutputAmount, sizeof(btchip_context_D.totalOutputAmount));
     btchip_context_D.changeOutputFound = 0;
 
     if (N_btchip.config_valid != 0x01) {
@@ -51,22 +50,17 @@ void btchip_context_init() {
     }
 
     if (!N_btchip.config_valid) {
-        unsigned char defaultMode;
         PRINTF("No configuration found\n");
-        defaultMode = BTCHIP_MODE_WALLET;
-
     } else {
         btchip_context_D.payToAddressVersion = G_coin_config->p2pkh_version;
         btchip_context_D.payToScriptHashVersion = G_coin_config->p2sh_version;
         btchip_context_D.coinFamily = G_coin_config->family;
         btchip_context_D.coinIdLength = strlen(PIC(G_coin_config->coinid));
-        os_memmove(btchip_context_D.coinId,
-                   PIC(G_coin_config->coinid),
-                   btchip_context_D.coinIdLength);
+        memmove(btchip_context_D.coinId, PIC(G_coin_config->coinid), btchip_context_D.coinIdLength);
         btchip_context_D.shortCoinIdLength = strlen(PIC(G_coin_config->name_short));
-        os_memmove(btchip_context_D.shortCoinId,
-                   PIC(G_coin_config->name_short),
-                   btchip_context_D.shortCoinIdLength);
+        memmove(btchip_context_D.shortCoinId,
+                PIC(G_coin_config->name_short),
+                btchip_context_D.shortCoinIdLength);
     }
     if (!N_btchip.storageInitialized) {
         unsigned char initialized = 1, denied = 1;

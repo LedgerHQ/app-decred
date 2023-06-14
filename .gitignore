@@ -2,6 +2,7 @@ bin
 debug
 dep
 obj
-src/glyphs.c
-src/glyphs.h
-
+build
+test/__pycache__
+test/snapshots-tmp
+scan-build

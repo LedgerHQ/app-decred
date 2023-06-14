@@ -58,7 +58,7 @@ unsigned short btchip_apdu_hash_input_start() {
             btchip_context_D.transactionContext.relaxed = 0;
             btchip_set_check_internal_structure_integrity(1);
             // Initialize for screen pairing
-            os_memset(&btchip_context_D.tmpCtx.output, 0, sizeof(btchip_context_D.tmpCtx.output));
+            explicit_bzero(&btchip_context_D.tmpCtx.output, sizeof(btchip_context_D.tmpCtx.output));
             btchip_context_D.tmpCtx.output.changeAccepted = 1;
         }
     } else if (G_io_apdu_buffer[ISO_OFFSET_P2] != P2_CONTINUE) {

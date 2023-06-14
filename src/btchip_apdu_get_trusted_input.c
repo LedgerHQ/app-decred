@@ -27,7 +27,6 @@ unsigned short btchip_apdu_get_trusted_input() {
     unsigned char apduLength;
     unsigned char dataOffset = 0;
     unsigned char trustedInputSignature[32];
-    cx_sha256_t hash;
     apduLength = G_io_apdu_buffer[ISO_OFFSET_LC];
 
     if (G_io_apdu_buffer[ISO_OFFSET_P1] == GET_TRUSTED_INPUT_P1_FIRST) {
@@ -75,17 +74,17 @@ unsigned short btchip_apdu_get_trusted_input() {
         // G_io_apdu_buffer + 4);
 
         btchip_write_u32_le(G_io_apdu_buffer + 4 + 32, btchip_context_D.transactionTargetInput);
-        os_memmove(G_io_apdu_buffer + 4 + 32 + 4,
-                   btchip_context_D.transactionContext.transactionAmount,
-                   8);
+        memmove(G_io_apdu_buffer + 4 + 32 + 4,
+                btchip_context_D.transactionContext.transactionAmount,
+                8);
 
-        cx_hmac_sha256(N_btchip.bkp.trustedinput_key,
+        cx_hmac_sha256((const uint8_t*) N_btchip.bkp.trustedinput_key,
                        sizeof(N_btchip.bkp.trustedinput_key),
                        G_io_apdu_buffer,
                        TRUSTEDINPUT_SIZE,
                        trustedInputSignature,
                        32);
-        os_memmove(G_io_apdu_buffer + TRUSTEDINPUT_SIZE, trustedInputSignature, 8);
+        memmove(G_io_apdu_buffer + TRUSTEDINPUT_SIZE, trustedInputSignature, 8);
 
         btchip_context_D.outLength = 0x38;
     }

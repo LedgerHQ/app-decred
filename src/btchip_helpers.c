@@ -36,11 +36,11 @@ const unsigned char TRANSACTION_OUTPUT_SCRIPT_P2WPKH_PRE[] = {0x16, 0x00, 0x14};
 const unsigned char TRANSACTION_OUTPUT_SCRIPT_P2WSH_PRE[] = {0x22, 0x00, 0x20};
 
 unsigned char btchip_output_script_is_regular(unsigned char *buffer) {
-    if ((os_memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_PRE, sizeof(TRANSACTION_OUTPUT_SCRIPT_PRE)) ==
+    if ((memcmp(buffer, TRANSACTION_OUTPUT_SCRIPT_PRE, sizeof(TRANSACTION_OUTPUT_SCRIPT_PRE)) ==
          0) &&
-        (os_memcmp(buffer + sizeof(TRANSACTION_OUTPUT_SCRIPT_PRE) + 20,
-                   TRANSACTION_OUTPUT_SCRIPT_POST,
-                   sizeof(TRANSACTION_OUTPUT_SCRIPT_POST)) == 0)) {
+        (memcmp(buffer + sizeof(TRANSACTION_OUTPUT_SCRIPT_PRE) + 20,
+                TRANSACTION_OUTPUT_SCRIPT_POST,
+                sizeof(TRANSACTION_OUTPUT_SCRIPT_POST)) == 0)) {
         return 1;
     }
     PRINTF("Irregular script: %.*H\n", 10, buffer);
@@ -48,12 +48,12 @@ unsigned char btchip_output_script_is_regular(unsigned char *buffer) {
 }
 
 unsigned char btchip_output_script_is_p2sh(unsigned char *buffer) {
-    if ((os_memcmp(buffer,
-                   TRANSACTION_OUTPUT_SCRIPT_P2SH_PRE,
-                   sizeof(TRANSACTION_OUTPUT_SCRIPT_P2SH_PRE)) == 0) &&
-        (os_memcmp(buffer + sizeof(TRANSACTION_OUTPUT_SCRIPT_P2SH_PRE) + 20,
-                   TRANSACTION_OUTPUT_SCRIPT_P2SH_POST,
-                   sizeof(TRANSACTION_OUTPUT_SCRIPT_P2SH_POST)) == 0)) {
+    if ((memcmp(buffer,
+                TRANSACTION_OUTPUT_SCRIPT_P2SH_PRE,
+                sizeof(TRANSACTION_OUTPUT_SCRIPT_P2SH_PRE)) == 0) &&
+        (memcmp(buffer + sizeof(TRANSACTION_OUTPUT_SCRIPT_P2SH_PRE) + 20,
+                TRANSACTION_OUTPUT_SCRIPT_P2SH_POST,
+                sizeof(TRANSACTION_OUTPUT_SCRIPT_P2SH_POST)) == 0)) {
         return 1;
     }
     return 0;
@@ -183,7 +183,7 @@ unsigned short btchip_public_key_to_encoded_base58(unsigned char *in,
             tmpBuffer[0] = version;
         }
     } else {
-        os_memmove(tmpBuffer, in, 20 + versionSize);
+        memmove(tmpBuffer, in, 20 + versionSize);
     }
 
     blake256_Init(&hash);
@@ -194,7 +194,7 @@ unsigned short btchip_public_key_to_encoded_base58(unsigned char *in,
     blake256_Final(&hash, checksumBuffer);
 
     PRINTF("Checksum\n%.*H\n", 4, checksumBuffer);
-    os_memmove(tmpBuffer + 20 + versionSize, checksumBuffer, 4);
+    memmove(tmpBuffer + 20 + versionSize, checksumBuffer, 4);
 
     outputLen = outlen;
     if (btchip_encode_base58(tmpBuffer, 24 + versionSize, out, &outputLen) < 0) {
@@ -228,7 +228,7 @@ unsigned short btchip_decode_base58_address(unsigned char *in,
     cx_sha256_init(&hash);
     cx_hash(&hash.header, CX_LAST, hashBuffer, 32, hashBuffer, 32);
 
-    if (os_memcmp(out + outlen - 4, hashBuffer, 4)) {
+    if (memcmp(out + outlen - 4, hashBuffer, 4)) {
         PRINTF("Hash checksum mismatch\n%.*H\n", sizeof(hashBuffer), hashBuffer);
         THROW(INVALID_CHECKSUM);
     }
@@ -259,7 +259,7 @@ void btchip_private_derive_keypair(unsigned char *bip32Path,
                                privateComponent,
                                out_chainCode);
     btchip_retrieve_keypair_discard(privateComponent, derivePublic);
-    os_memset(privateComponent, 0, sizeof(privateComponent));
+    explicit_bzero(privateComponent, sizeof(privateComponent));
 }
 
 /*
@@ -301,8 +301,6 @@ unsigned char bip44_derivation_guard(unsigned char *bip32Path, bool is_change_pa
 }
 
 // Print a BIP32 path as an ascii string to display on the device screen
-// On the Ledger Blue, if the string is longer than 30 char, the string will be split in multiple
-// lines
 unsigned char bip32_print_path(unsigned char *bip32Path, char *out, unsigned char max_out_len) {
     unsigned char bip32PathLength;
     unsigned char i, offset;
@@ -335,17 +333,6 @@ unsigned char bip32_print_path(unsigned char *bip32Path, char *out, unsigned cha
     // remove last '/'
     out[offset - 1] = '\0';
 
-#if defined(TARGET_BLUE)
-    // if the path is longer than 30 char, split the string in multiple strings of length 30
-    uint8_t len = strnlen(out, MAX_DERIV_PATH_ASCII_LENGTH);
-    uint8_t num_split = len / 30;
-
-    for (i = 1; i <= num_split; i++) {
-        os_memmove(out + 30 * i, out + (30 * i - 1), len - 29 * i);
-        out[30 * i - 1] = '\0';
-    }
-#endif
-
     return offset - 1;
 }
 
@@ -364,11 +351,11 @@ void btchip_transaction_add_output(unsigned char *hash160Address,
         btchip_swap_bytes(btchip_context_D.tmp, amount, 8);
         btchip_context_D.tmp += 8;
     }
-    os_memmove(btchip_context_D.tmp, (void *) pre, sizePre);
+    memmove(btchip_context_D.tmp, (void *) pre, sizePre);
     btchip_context_D.tmp += sizePre;
-    os_memmove(btchip_context_D.tmp, hash160Address, 20);
+    memmove(btchip_context_D.tmp, hash160Address, 20);
     btchip_context_D.tmp += 20;
-    os_memmove(btchip_context_D.tmp, (void *) post, sizePost);
+    memmove(btchip_context_D.tmp, (void *) post, sizePost);
     btchip_context_D.tmp += sizePost;
 }
 

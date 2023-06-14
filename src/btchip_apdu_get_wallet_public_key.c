@@ -19,6 +19,7 @@
 #include "btchip_apdu_constants.h"
 
 #include "btchip_bagl_extensions.h"
+#include "ui_pubkey.h"
 
 #define P1_NO_DISPLAY    0x00
 #define P1_DISPLAY       0x01
@@ -60,7 +61,7 @@ unsigned short btchip_apdu_get_wallet_public_key() {
     if (G_io_apdu_buffer[ISO_OFFSET_LC] < 0x01) {
         return BTCHIP_SW_INCORRECT_LENGTH;
     }
-    os_memmove(keyPath, G_io_apdu_buffer + ISO_OFFSET_CDATA, MAX_BIP32_PATH_LENGTH);
+    memmove(keyPath, G_io_apdu_buffer + ISO_OFFSET_CDATA, MAX_BIP32_PATH_LENGTH);
 
     if (display_request_token) {
         uint8_t request_token_offset =
@@ -83,7 +84,7 @@ unsigned short btchip_apdu_get_wallet_public_key() {
         keyLength = 33;
     }
 
-    os_memmove(G_io_apdu_buffer + 1, btchip_public_key_D.W, sizeof(btchip_public_key_D.W));
+    memmove(G_io_apdu_buffer + 1, btchip_public_key_D.W, sizeof(btchip_public_key_D.W));
 
     keyLength = btchip_public_key_to_encoded_base58(G_io_apdu_buffer + 1,   // IN
                                                     keyLength,              // INLEN
@@ -100,7 +101,7 @@ unsigned short btchip_apdu_get_wallet_public_key() {
     }
 
     // output chain code
-    os_memmove(G_io_apdu_buffer + 1 + 65 + 1 + keyLength, chainCode, sizeof(chainCode));
+    memmove(G_io_apdu_buffer + 1 + 65 + 1 + keyLength, chainCode, sizeof(chainCode));
     btchip_context_D.outLength = 1 + 65 + 1 + keyLength + sizeof(chainCode);
 
     if (display) {
@@ -108,26 +109,26 @@ unsigned short btchip_apdu_get_wallet_public_key() {
             return BTCHIP_SW_INCORRECT_DATA;
         }
         // Hax, avoid wasting space
-        os_memmove(G_io_apdu_buffer + 200, G_io_apdu_buffer + 67, keyLength);
+        memmove(G_io_apdu_buffer + 200, G_io_apdu_buffer + 67, keyLength);
         G_io_apdu_buffer[200 + keyLength] = '\0';
         btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
-        btchip_bagl_display_public_key(keyPath);
+        ui_display_public_key(keyPath);
     }
     // If the token requested has already been approved in a previous call, the source is trusted so
     // don't ask for approval again
     else if (display_request_token && (!btchip_context_D.has_valid_token ||
-                                       os_memcmp(&request_token, btchip_context_D.last_token, 4))) {
+                                       memcmp(&request_token, btchip_context_D.last_token, 4))) {
         // disable the has_valid_token flag and store the new token
         btchip_context_D.has_valid_token = false;
-        os_memcpy(btchip_context_D.last_token, &request_token, 4);
+        memcpy(btchip_context_D.last_token, &request_token, 4);
         // Hax, avoid wasting space
-        snprintf(G_io_apdu_buffer + 200, 9, "%08X", request_token);
+        snprintf((char*) G_io_apdu_buffer + 200, 9, "%08X", request_token);
         G_io_apdu_buffer[200 + 8] = '\0';
         btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
-        btchip_bagl_display_token();
+        ui_display_token();
     } else if (require_user_approval) {
         btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
-        btchip_bagl_request_pubkey_approval();
+        ui_display_request_pubkey_approval();
     }
 
     return BTCHIP_SW_OK;

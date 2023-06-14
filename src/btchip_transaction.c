@@ -19,8 +19,6 @@
 #include "btchip_apdu_constants.h"
 #include "blake256.h"
 
-#define DEBUG_LONG "%ld"
-
 #define DEBUG_LONG "%d"
 
 void check_transaction_available(unsigned char x) {
@@ -140,9 +138,9 @@ void transaction_parse(unsigned char parseMode) {
                         btchip_context_D.transactionContext.transactionRemainingInputsOutputs = 0;
                         btchip_context_D.transactionContext.transactionCurrentInputOutput = 0;
                         btchip_context_D.transactionContext.scriptRemaining = 0;
-                        os_memset(btchip_context_D.transactionContext.transactionAmount,
-                                  0,
-                                  sizeof(btchip_context_D.transactionContext.transactionAmount));
+                        explicit_bzero(
+                            btchip_context_D.transactionContext.transactionAmount,
+                            sizeof(btchip_context_D.transactionContext.transactionAmount));
                         // TODO : transactionControlFid
                         // Reset hashes
                         blake256_Init(&btchip_context_D.transactionHashPrefix);
@@ -154,9 +152,9 @@ void transaction_parse(unsigned char parseMode) {
                         // Parse the beginning of the transaction
                         // Version
                         check_transaction_available(4);
-                        os_memmove(btchip_context_D.transactionVersion,
-                                   btchip_context_D.transactionBufferPointer,
-                                   4);
+                        memmove(btchip_context_D.transactionVersion,
+                                btchip_context_D.transactionBufferPointer,
+                                4);
                         // decred "no witness" serialization type ORing
                         btchip_context_D.transactionBufferPointer[2] |= 1;
                         btchip_context_D.transactionHashOption =
@@ -182,7 +180,7 @@ void transaction_parse(unsigned char parseMode) {
                         btchip_context_D.transactionContext.transactionState =
                             BTCHIP_TRANSACTION_DEFINED_WAIT_INPUT;
 
-                        // no break is intentional
+                        __attribute__((fallthrough));
                     }
 
                     case BTCHIP_TRANSACTION_DEFINED_WAIT_INPUT: {
@@ -264,7 +262,7 @@ void transaction_parse(unsigned char parseMode) {
                                 }
 
                                 check_transaction_available(2 + trustedInputLength);
-                                cx_hmac_sha256(N_btchip.bkp.trustedinput_key,
+                                cx_hmac_sha256((const uint8_t *) N_btchip.bkp.trustedinput_key,
                                                sizeof(N_btchip.bkp.trustedinput_key),
                                                btchip_context_D.transactionBufferPointer + 2,
                                                trustedInputLength - 8,
@@ -277,9 +275,9 @@ void transaction_parse(unsigned char parseMode) {
                                     PRINTF("Invalid signature\n");
                                     goto fail;
                                 }
-                                os_memmove(trustedInput,
-                                           btchip_context_D.transactionBufferPointer + 2,
-                                           trustedInputLength - 8);
+                                memmove(trustedInput,
+                                        btchip_context_D.transactionBufferPointer + 2,
+                                        trustedInputLength - 8);
                                 if (trustedInput[0] != MAGIC_TRUSTED_INPUT) {
                                     PRINTF("Failed to verify trusted input signature\n");
                                     goto fail;
@@ -355,7 +353,7 @@ void transaction_parse(unsigned char parseMode) {
                         btchip_context_D.transactionContext.transactionState =
                             BTCHIP_TRANSACTION_INPUT_HASHING_IN_PROGRESS_INPUT_SCRIPT;
 
-                        // no break is intentional
+                        __attribute__((fallthrough));
                     }
                     case BTCHIP_TRANSACTION_INPUT_HASHING_IN_PROGRESS_INPUT_SCRIPT: {
                         unsigned char dataAvailable;
@@ -436,7 +434,7 @@ void transaction_parse(unsigned char parseMode) {
                         btchip_context_D.transactionContext.transactionState =
                             BTCHIP_TRANSACTION_DEFINED_WAIT_OUTPUT;
 
-                        // no break is intentional
+                        __attribute__((fallthrough));
                     }
                     case BTCHIP_TRANSACTION_DEFINED_WAIT_OUTPUT: {
                         if (btchip_context_D.transactionContext.transactionRemainingInputsOutputs ==
@@ -456,9 +454,9 @@ void transaction_parse(unsigned char parseMode) {
                             (btchip_context_D.transactionContext.transactionCurrentInputOutput ==
                              btchip_context_D.transactionTargetInput)) {
                             // Save the amount
-                            os_memmove(btchip_context_D.transactionContext.transactionAmount,
-                                       btchip_context_D.transactionBufferPointer,
-                                       8);
+                            memmove(btchip_context_D.transactionContext.transactionAmount,
+                                    btchip_context_D.transactionBufferPointer,
+                                    8);
                             btchip_context_D.trustedInputProcessed = 1;
                             PRINTF("Input processed\n");
                         }
@@ -478,7 +476,7 @@ void transaction_parse(unsigned char parseMode) {
                         btchip_context_D.transactionContext.transactionState =
                             BTCHIP_TRANSACTION_OUTPUT_HASHING_IN_PROGRESS_OUTPUT_SCRIPT;
 
-                        // no break is intentional
+                        __attribute__((fallthrough));
                     }
                     case BTCHIP_TRANSACTION_OUTPUT_HASHING_IN_PROGRESS_OUTPUT_SCRIPT: {
                         unsigned char dataAvailable;
