@@ -19,6 +19,7 @@ from binascii import hexlify
 from pathlib import Path
 from inspect import currentframe
 from ragger.navigator import NavInsID, NavIns
+from conftest import ROOT_SCREENSHOT_PATH
 
 trusted_input_1 = None
 trusted_input_2 = None
@@ -161,12 +162,13 @@ def test_2to2_finalize_1(backend, firmware, navigator):
                 NavInsID.TAPPABLE_CENTER_TAP, [
                     NavInsID.USE_CASE_REVIEW_CONFIRM,
                     NavInsID.WAIT_FOR_HOME_SCREEN
-                ], "Hold",
-                Path(__file__).parent.resolve(), path)
+                ], "Hold", ROOT_SCREENSHOT_PATH, path)
         else:
-            navigator.navigate_until_text_and_compare(
-                NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Accept",
-                Path(__file__).parent.resolve(), path)
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Accept",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      path)
 
 
 ################# HASH SIGN N°1 #########################

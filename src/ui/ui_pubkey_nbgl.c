@@ -34,7 +34,7 @@ typedef enum {
     DISPLAY_TOKEN,
 } pubkey_display_usecase_t;
 
-static char confirm_text[20];
+static char confirm_text[40];
 static char choice_text[70];
 static pubkey_display_usecase_t display_type;
 
@@ -43,9 +43,9 @@ static void confirmationChoiceClbk(bool confirm) {
     switch (display_type) {
         case DISPLAY_ADDRESS:
             if (confirm) {
-                strncpy(confirm_text, "ADDRESS\nAPPROVED", sizeof(confirm_text));
+                strncpy(confirm_text, "ADDRESS\nVERIFIED", sizeof(confirm_text));
             } else {
-                strncpy(confirm_text, "Address rejected", sizeof(confirm_text));
+                strncpy(confirm_text, "Address verification\ncancelled", sizeof(confirm_text));
             }
             break;
         case EXPORT_REQUEST:
@@ -70,12 +70,26 @@ static void confirmationChoiceClbk(bool confirm) {
     nbgl_useCaseStatus(confirm_text, confirm, ui_idle);
 }
 
+static void address_verification_cancelled(void) {
+    io_seproxyhal_touch_display_cancel(NULL);
+    nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
+}
+
+static void ui_display_addr(void) {
+    nbgl_useCaseAddressConfirmation((char*) G_io_apdu_buffer + 200, &confirmationChoiceClbk);
+}
+
 static void warningChoiceClbk(bool reject) {
     if (reject) {
         io_seproxyhal_touch_display_cancel(NULL);
-        nbgl_useCaseStatus("Address rejected", false, ui_idle);
+        nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
     } else {
-        nbgl_useCaseAddressConfirmation((char*) G_io_apdu_buffer + 200, confirmationChoiceClbk);
+        nbgl_useCaseReviewStart(&C_decred_icon_64px,
+                                "Verify Decred\naddress",
+                                NULL,
+                                "Cancel",
+                                ui_display_addr,
+                                address_verification_cancelled);
     }
 }
 
@@ -98,7 +112,12 @@ void ui_display_public_key(unsigned char* derivation_path) {
                            "Continue",
                            warningChoiceClbk);
     } else {
-        nbgl_useCaseAddressConfirmation((char*) G_io_apdu_buffer + 200, confirmationChoiceClbk);
+        nbgl_useCaseReviewStart(&C_decred_icon_64px,
+                                "Verify Decred\naddress",
+                                NULL,
+                                "Cancel",
+                                ui_display_addr,
+                                address_verification_cancelled);
     }
 }
 
@@ -114,12 +133,12 @@ void ui_display_request_pubkey_approval(void) {
 
 void ui_display_token(void) {
     display_type = DISPLAY_TOKEN;
-    explicit_bzero(choice_text, sizeof(choice_text));
-    snprintf(choice_text,
-             sizeof(choice_text),
-             "Approve token :\n%s",
-             (char*) G_io_apdu_buffer + 200);
-    nbgl_useCaseChoice(NULL, choice_text, NULL, "Approve", "Reject", confirmationChoiceClbk);
+    nbgl_useCaseChoice(&C_decred_icon_64px,
+                       "Approve Token",
+                       (char*) G_io_apdu_buffer + 200,
+                       "Approve",
+                       "Reject",
+                       confirmationChoiceClbk);
 }
 
 #endif  // HAVE_NBGL

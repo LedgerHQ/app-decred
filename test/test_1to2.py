@@ -19,6 +19,7 @@ from ragger.navigator import NavInsID
 from binascii import hexlify
 from pathlib import Path
 from inspect import currentframe
+from conftest import ROOT_SCREENSHOT_PATH
 
 trusted_input = None
 
@@ -43,12 +44,13 @@ def test_1to2_get_pubkey(backend, firmware, navigator):
                 NavInsID.TAPPABLE_CENTER_TAP, [
                     NavInsID.USE_CASE_ADDRESS_CONFIRMATION_TAP,
                     NavInsID.WAIT_FOR_HOME_SCREEN
-                ], "Show",
-                Path(__file__).parent.resolve(), path)
+                ], "Show", ROOT_SCREENSHOT_PATH, path)
         else:
-            navigator.navigate_until_text_and_compare(
-                NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Approve",
-                Path(__file__).parent.resolve(), path)
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Approve",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      path)
 
 
 # ################# GET TRUSTED INPUT #########################
@@ -137,12 +139,13 @@ def test_1to2_hash_input_finalize(backend, firmware, navigator):
                 NavInsID.TAPPABLE_CENTER_TAP, [
                     NavInsID.USE_CASE_REVIEW_CONFIRM,
                     NavInsID.WAIT_FOR_HOME_SCREEN
-                ], "Hold",
-                Path(__file__).parent.resolve(), path)
+                ], "Hold", ROOT_SCREENSHOT_PATH, path)
         else:
-            navigator.navigate_until_text_and_compare(
-                NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Accept",
-                Path(__file__).parent.resolve(), path)
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Accept",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      path)
 
 
 # ################# HASH SIGN #########################

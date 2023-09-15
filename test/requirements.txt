@@ -1,3 +1,3 @@
 pytest
-ragger[speculos]>=1.6.0
-ragger[ledgerwallet]>=1.6.0
+ragger[speculos]>=1.9.2
+ragger[ledgerwallet]>=1.9.2
