@@ -21,6 +21,7 @@ from inspect import currentframe
 from binascii import hexlify
 from ragger.backend import RaisePolicy
 from ragger.navigator import NavInsID
+from conftest import ROOT_SCREENSHOT_PATH
 
 
 ################# SIGN MESSAGE #########################
@@ -48,12 +49,13 @@ def test_decred_sign_message(backend, firmware, navigator):
                 NavInsID.TAPPABLE_CENTER_TAP, [
                     NavInsID.USE_CASE_REVIEW_CONFIRM,
                     NavInsID.WAIT_FOR_HOME_SCREEN
-                ], "Hold",
-                Path(__file__).parent.resolve(), path)
+                ], "Hold", ROOT_SCREENSHOT_PATH, path)
         else:
-            navigator.navigate_until_text_and_compare(
-                NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Accept",
-                Path(__file__).parent.resolve(), path)
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Accept",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      path)
 
     result = backend.last_async_response
 

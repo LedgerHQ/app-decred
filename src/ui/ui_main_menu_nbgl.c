@@ -35,8 +35,8 @@ static bool settingsNavCallback(uint8_t page, nbgl_pageContent_t *content);
 #define SWITCH_KEY_EXPORT_TOKEN FIRST_USER_TOKEN
 
 #define NB_INFO_FIELDS 2
-static const char *const infoTypes[] = {"Version", "Decred App"};
-static const char *const infoContents[] = {APPVERSION, "(c) 2023 Ledger"};
+static const char *const infoTypes[] = {"Version", "Developer"};
+static const char *const infoContents[] = {APPVERSION, "Ledger"};
 
 static nbgl_layoutSwitch_t setting_switch;
 
@@ -51,11 +51,11 @@ static bool settingsNavCallback(uint8_t page, nbgl_pageContent_t *content) {
         content->infosList.infoTypes = (const char **) infoTypes;
         content->infosList.infoContents = (const char **) infoContents;
     } else if (page == 1) {
-        setting_switch.text = "Public keys export";
-        setting_switch.subText = "Enable automatic key export";
+        setting_switch.text = "U2F public keys export";
+        setting_switch.subText = "Enable manual approval";
         setting_switch.token = SWITCH_KEY_EXPORT_TOKEN;
         setting_switch.tuneId = TUNE_TAP_CASUAL;
-        setting_switch.initState = (bool) !N_btchip.pubKeyRequestRestriction;
+        setting_switch.initState = (bool) N_btchip.pubKeyRequestRestriction;
         content->type = SWITCHES_LIST;
         content->switchesList.nbSwitches = 1;
         content->switchesList.switches = (nbgl_layoutSwitch_t *) &setting_switch;
@@ -69,7 +69,7 @@ static void settingsControlsCallback(int token, uint8_t index) {
     UNUSED(index);
     switch (token) {
         case SWITCH_KEY_EXPORT_TOKEN: {
-            unsigned int setting_value = (unsigned int) !setting_switch.initState;
+            unsigned int setting_value = (unsigned int) !N_btchip.pubKeyRequestRestriction;
             nvm_write((void *) &N_btchip.pubKeyRequestRestriction, &setting_value, 1);
             break;
         }

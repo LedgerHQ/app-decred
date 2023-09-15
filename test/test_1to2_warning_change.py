@@ -25,6 +25,7 @@ from time import sleep
 from pathlib import Path
 from inspect import currentframe
 from binascii import hexlify
+from conftest import ROOT_SCREENSHOT_PATH
 
 trusted_input = None
 
@@ -101,7 +102,7 @@ def test_1to2_warning_finalize(backend, firmware, navigator):
     with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
         if firmware.device == "stax":
             navigator.navigate_and_compare(
-                Path(__file__).parent.resolve(),
+                ROOT_SCREENSHOT_PATH,
                 test_case_name=test_name,
                 instructions=[NavInsID.USE_CASE_CHOICE_REJECT],
                 screen_change_after_last_instruction=False)
@@ -109,7 +110,7 @@ def test_1to2_warning_finalize(backend, firmware, navigator):
             navigator.navigate_until_text_and_compare(
                 NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK],
                 "Approve",
-                Path(__file__).parent.resolve(),
+                ROOT_SCREENSHOT_PATH,
                 test_name,
                 screen_change_after_last_instruction=False)
 
@@ -135,7 +136,7 @@ def test_1to2_warning_finalize(backend, firmware, navigator):
                     instructions.append(NavInsID.WAIT_FOR_HOME_SCREEN)
 
                 navigator.navigate_and_compare(
-                    Path(__file__).parent.resolve(),
+                    ROOT_SCREENSHOT_PATH,
                     test_case_name=test_name,
                     instructions=instructions,
                     screen_change_after_last_instruction=False,
@@ -148,7 +149,7 @@ def test_1to2_warning_finalize(backend, firmware, navigator):
                 navigator.navigate_until_text_and_compare(
                     NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK],
                     "Accept",
-                    Path(__file__).parent.resolve(),
+                    ROOT_SCREENSHOT_PATH,
                     test,
                     screen_change_after_last_instruction=False)
                 idx += 1

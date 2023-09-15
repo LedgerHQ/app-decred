@@ -1,9 +1,13 @@
 # This final fixture will return the properly configured backend client, to be used in tests
 from ragger.conftest import configuration
+from pathlib import Path
 
 ###########################
 ### CONFIGURATION START ###
 ###########################
+
+ROOT_SCREENSHOT_PATH = Path(__file__).parent.resolve()
+
 MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
 configuration.OPTIONAL.BACKEND_SCOPE = "session"

@@ -34,7 +34,7 @@ typedef enum {
     DISPLAY_TOKEN,
 } pubkey_display_usecase_t;
 
-static char confirm_text[20];
+static char confirm_text[40];
 static char choice_text[70];
 static pubkey_display_usecase_t display_type;
 
@@ -45,7 +45,7 @@ static void confirmationChoiceClbk(bool confirm) {
             if (confirm) {
                 strncpy(confirm_text, "ADDRESS\nVERIFIED", sizeof(confirm_text));
             } else {
-                strncpy(confirm_text, "Address rejected", sizeof(confirm_text));
+                strncpy(confirm_text, "Address verification\ncancelled", sizeof(confirm_text));
             }
             break;
         case EXPORT_REQUEST:
@@ -72,7 +72,7 @@ static void confirmationChoiceClbk(bool confirm) {
 
 static void address_verification_cancelled(void) {
     io_seproxyhal_touch_display_cancel(NULL);
-    nbgl_useCaseStatus("Address rejected", false, ui_idle);
+    nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
 }
 
 static void ui_display_addr(void) {
@@ -82,7 +82,7 @@ static void ui_display_addr(void) {
 static void warningChoiceClbk(bool reject) {
     if (reject) {
         io_seproxyhal_touch_display_cancel(NULL);
-        nbgl_useCaseStatus("Address rejected", false, ui_idle);
+        nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
     } else {
         nbgl_useCaseReviewStart(&C_decred_icon_64px,
                                 "Verify Decred\naddress",
