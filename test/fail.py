@@ -16,16 +16,12 @@
 #*  limitations under the License.
 #********************************************************************************
 
-
 from ledgerblue.comm import getDongle
 from ledgerblue.commException import CommException
 from binascii import hexlify
 from time import sleep
 
-
 dongle = getDongle(True)
-
-
 '''
 
 ################# GET PUBKEY #########################
@@ -43,8 +39,6 @@ result = dongle.exchange(bytearray.fromhex(packets[0]))
 # c191668478d204284390538897117f8c66ef8dafd2f3e67c0d83ce4fe4f09e53  chaincode
 
 '''
-
-
 '''
 FAIL:
 
@@ -72,26 +66,27 @@ HID <= 320099322f0067c760720ed3ba067b36454533d1aaa5c3d7460b968b04139fc369fbd3f10
 
 ################# GET TRUSTED INPUT #########################
 
-
 packets = [
-"000000010100000002",  #input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
-"b85175d43ddb3916230953ecd19db78be5a5054cb86acf34283ae06e3ab7bd8201000000006b", #wrong endian txid + outpout index + tree + witness size (could be deleted for decred)
-"483045022100f508399521615aa61999a8ad25a3fee56565f0f760476d2699b86c93350c821d022010a2262fc46111eeb961a910e138ae1cdf2993bf37afea10c1dd45f0fa24dbfa01210355d934ca47cf6b34a73e5bcf128ee3322164f0ce494eccece2a8dbe1dedace76ffffff00", #witness + sequence
-"f8a59eef9e5dbdbfafd235276fe585366728a2e96e716e77a9431698683e1ac600000000006b", #wrong endian txid + outpout index + tree + witness size (could be deleted for decred)
-"4830450221008f43f80bb9b37908d4bfdb27aa1c0fddea616a9c04862de541ad33eaffb766c9022010c5989bb665cd17257c375a1ac22e09978ab50fa334f8232d526f98b1d589ce012102c4a3667333cbbdaf0c16d13cf18af81a2faea52d1f855819115bd028680c1ad3ffffff00", #witness + sequence
-"02", # outputs
-"f9dd1a000000000000001976a914977c43a6d5c17f7ec34ef2108ec54b773f009c4d88ac", #amount + script version + script
-"5f310e000000000000001976a914e1a5c4a61d89d11f8a2f3c4204ad5c58024df60188ac", #amount + script version + script
-"0000000000000000" #locktime + expiry 
+    "000000010100000002",  #input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
+    "b85175d43ddb3916230953ecd19db78be5a5054cb86acf34283ae06e3ab7bd8201000000006b",  #wrong endian txid + outpout index + tree + witness size (could be deleted for decred)
+    "483045022100f508399521615aa61999a8ad25a3fee56565f0f760476d2699b86c93350c821d022010a2262fc46111eeb961a910e138ae1cdf2993bf37afea10c1dd45f0fa24dbfa01210355d934ca47cf6b34a73e5bcf128ee3322164f0ce494eccece2a8dbe1dedace76ffffff00",  #witness + sequence
+    "f8a59eef9e5dbdbfafd235276fe585366728a2e96e716e77a9431698683e1ac600000000006b",  #wrong endian txid + outpout index + tree + witness size (could be deleted for decred)
+    "4830450221008f43f80bb9b37908d4bfdb27aa1c0fddea616a9c04862de541ad33eaffb766c9022010c5989bb665cd17257c375a1ac22e09978ab50fa334f8232d526f98b1d589ce012102c4a3667333cbbdaf0c16d13cf18af81a2faea52d1f855819115bd028680c1ad3ffffff00",  #witness + sequence
+    "02",  # outputs
+    "f9dd1a000000000000001976a914977c43a6d5c17f7ec34ef2108ec54b773f009c4d88ac",  #amount + script version + script
+    "5f310e000000000000001976a914e1a5c4a61d89d11f8a2f3c4204ad5c58024df60188ac",  #amount + script version + script
+    "0000000000000000"  #locktime + expiry 
 ]
 
-packets[0] = "e0420000" + hexlify(bytes([int(len(packets[0])/2)])).decode("utf-8") + packets[0] 
+packets[0] = "e0420000" + hexlify(bytes([int(len(packets[0]) / 2)
+                                         ])).decode("utf-8") + packets[0]
 result = dongle.exchange(bytearray.fromhex(packets[0]))
 
 for packet in packets[1:]:
 
-	packet = "e0428000" + hexlify(bytes([int(len(packet)/2)])).decode("utf-8") + packet 
-	result = dongle.exchange(bytearray.fromhex(packet))
+    packet = "e0428000" + hexlify(bytes([int(len(packet) / 2)
+                                         ])).decode("utf-8") + packet
+    result = dongle.exchange(bytearray.fromhex(packet))
 
 trusted_input = result
 
@@ -102,78 +97,76 @@ exit()
 expected = "334462e04608ca0441afe495cc5760c23914e553e0f0996c50095e39e13b1804010000004054890000000000"
 
 if expected not in hexlify(result).decode("utf-8"):
-	print("Error:\nExpected:%s\nGot:     %s\n" % (hexlify(result[4:-8]).decode("utf-8"), expected))
-	exit()
-
+    print("Error:\nExpected:%s\nGot:     %s\n" %
+          (hexlify(result[4:-8]).decode("utf-8"), expected))
+    exit()
 
 ################# HASH INPUT START #########################
 
 packets = [
-"0100000001",#version + number of input
-#"0138320006a640c65057afdd582f4f086c6e6e8c160092e4c0d32b9faa9fa91b8feb1048379c020000002ac503f20100000085bdec7eae8ace3a01",
-"01" + "%0.2X" % len(trusted_input) + hexlify(trusted_input).decode("utf-8") + "00" + "19",  # trusted input flag + [magic + 00 + rand(2) + input txid + input index + amount + HMAC] + tree + script len
-"76a914b0809bbfc9c10ed4d70a0efe932e589ca11239d188acffffffff" # spend output script + sequence
+    "0100000001",  #version + number of input
+    #"0138320006a640c65057afdd582f4f086c6e6e8c160092e4c0d32b9faa9fa91b8feb1048379c020000002ac503f20100000085bdec7eae8ace3a01",
+    "01" + "%0.2X" % len(trusted_input) +
+    hexlify(trusted_input).decode("utf-8") + "00" +
+    "19",  # trusted input flag + [magic + 00 + rand(2) + input txid + input index + amount + HMAC] + tree + script len
+    "76a914b0809bbfc9c10ed4d70a0efe932e589ca11239d188acffffffff"  # spend output script + sequence
 ]
- 
 
-
-packets[0] = "e0440000" + hexlify(bytes([int(len(packets[0])/2)])).decode("utf-8") + packets[0] 
+packets[0] = "e0440000" + hexlify(bytes([int(len(packets[0]) / 2)
+                                         ])).decode("utf-8") + packets[0]
 result = dongle.exchange(bytearray.fromhex(packets[0]))
 
 for packet in packets[1:]:
 
-	packet = "e0448000" + hexlify(bytes([int(len(packet)/2)])).decode("utf-8") + packet 
-	result = dongle.exchange(bytearray.fromhex(packet))
-
+    packet = "e0448000" + hexlify(bytes([int(len(packet) / 2)
+                                         ])).decode("utf-8") + packet
+    result = dongle.exchange(bytearray.fromhex(packet))
 
 ################# HASH INPUT FINALIZE WITH CHANGE #########################
 
 packets = [
-"058000002c8000002A800000000000000100000001", # change address bip44 path
-"02ac211e000000000000001976a914fdeea9711e6c81027d677b2ceddf5c14d84977d288acc0cf6a000000000000001976a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888ac" #num output + amount + script version + new lock script + same for change addr
+    "058000002c8000002A800000000000000100000001",  # change address bip44 path
+    "02ac211e000000000000001976a914fdeea9711e6c81027d677b2ceddf5c14d84977d288acc0cf6a000000000000001976a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888ac"  #num output + amount + script version + new lock script + same for change addr
 ]
 
-
-packets[0] = "e04aFF00" + hexlify(bytes([int(len(packets[0])/2)])).decode("utf-8") + packets[0] 
+packets[0] = "e04aFF00" + hexlify(bytes([int(len(packets[0]) / 2)
+                                         ])).decode("utf-8") + packets[0]
 result = dongle.exchange(bytearray.fromhex(packets[0]))
 
 for packet in packets[1:-1]:
 
-	packet = "e04a0000" + hexlify(bytes([int(len(packet)/2)])).decode("utf-8") + packet 
-	result = dongle.exchange(bytearray.fromhex(packet))
+    packet = "e04a0000" + hexlify(bytes([int(len(packet) / 2)
+                                         ])).decode("utf-8") + packet
+    result = dongle.exchange(bytearray.fromhex(packet))
 
-
-packet = "e04a8000" + hexlify(bytes([int(len(packets[-1])/2)])).decode("utf-8") + packets[-1]
+packet = "e04a8000" + hexlify(bytes([int(len(packets[-1]) / 2)
+                                     ])).decode("utf-8") + packets[-1]
 result = dongle.exchange(bytearray.fromhex(packet))
-
-
 
 ################# HASH SIGN #########################
 
 packets = [
-"058000002c8000002A800000000000000000000001000000000000000001" #signing key path len + path + lock time + expiry + sighash type
+    "058000002c8000002A800000000000000000000001000000000000000001"  #signing key path len + path + lock time + expiry + sighash type
 ]
 
-
-packets[0] = "e0480000" + hexlify(bytes([int(len(packets[0])/2)])).decode("utf-8") + packets[0] 
+packets[0] = "e0480000" + hexlify(bytes([int(len(packets[0]) / 2)
+                                         ])).decode("utf-8") + packets[0]
 result = dongle.exchange(bytearray.fromhex(packets[0]))
 
 for packet in packets[1:]:
 
-	packet = "e0480000" + hexlify(bytes([int(len(packet)/2)])).decode("utf-8") + packet 
-	result = dongle.exchange(bytearray.fromhex(packet))
+    packet = "e0480000" + hexlify(bytes([int(len(packet) / 2)
+                                         ])).decode("utf-8") + packet
+    result = dongle.exchange(bytearray.fromhex(packet))
 
 # 31450221008a38ca160729e7c381d50126eec970b5c82cb8ba0625498dd414681710da250a0220409b1c2fe867261d1624ad695be464c8a4c37a9e931d8687183697302221c9ce 01 witness signature + sighash flag
 
 expected = "31450221008a38ca160729e7c381d50126eec970b5c82cb8ba0625498dd414681710da250a0220409b1c2fe867261d1624ad695be464c8a4c37a9e931d8687183697302221c9ce01"
 
 if expected not in hexlify(result).decode("utf-8"):
-	print("Error:\nExpected:%s\nGot:     %s\n" % (hexlify(result).decode("utf-8"), expected))
-	exit()
-
-
-
-
+    print("Error:\nExpected:%s\nGot:     %s\n" %
+          (hexlify(result).decode("utf-8"), expected))
+    exit()
 ''' 
 APDU EXCHANGE RECAP:
 

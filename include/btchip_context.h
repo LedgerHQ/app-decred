@@ -20,6 +20,7 @@
 #define BTCHIP_CONTEXT_H
 
 #include "os.h"
+#include "cx.h"
 #include "btchip_secure_value.h"
 #include "btchip_filesystem_tx.h"
 #include "blake256.h"
@@ -159,6 +160,11 @@ struct btchip_context_s {
     unsigned char last_token[4];
     unsigned char has_valid_token;
 
+    /** Sign message prefix hash context */
+    cx_sha256_t messageHashPrefix;
+    /** Sign message witness hash context */
+    cx_sha256_t messageHashWitness;
+    
     /** Transaction Prefix hash context */
     BLAKE256_CTX transactionHashPrefix;
     /** Transaction Witness hash context */
@@ -236,11 +242,6 @@ typedef struct btchip_altcoin_config_s {
     unsigned short p2sh_version;
     unsigned char family;
     //unsigned char* iconsuffix;// will use the icon provided on the stack (maybe)
-    #ifdef TARGET_BLUE
-        const char* header_text;
-        unsigned int color_header;
-        unsigned int color_dashboard;
-    #endif // TARGET_BLUE
     const char* coinid; // used coind id for message signature prefix
     const char* name; // for ux displays
     const char* name_short; // for unit in ux displays
