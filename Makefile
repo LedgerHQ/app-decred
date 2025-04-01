@@ -31,7 +31,7 @@ include $(BOLOS_SDK)/Makefile.defines
 # Application version
 APPVERSION_M= 1
 APPVERSION_N= 3
-APPVERSION_P= 14
+APPVERSION_P= 15
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
@@ -62,8 +62,6 @@ endif
 ########################################
 # See SDK `include/appflags.h` for the purpose of each permission
 HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
-HAVE_APPLICATION_FLAG_DERIVE_MASTER = 1
-HAVE_APPLICATION_FLAG_GLOBAL_PIN = 1
 
 ifeq ($(COIN),decred)
 # Decred mainnet
