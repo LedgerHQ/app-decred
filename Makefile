@@ -43,7 +43,7 @@ ICON_STAX = stax_app_$(COIN).gif
 ICON_NANOX = nanox_app_$(COIN).gif
 ICON_NANOSP = nanox_app_$(COIN).gif
 ICON_FLEX = flex_app_$(COIN).gif
-ICON_APEX = apex_app_$(COIN).gif
+ICON_APEX_P = apex_p_app_$(COIN).gif
 
 # Application allowed derivation curves.
 CURVE_APP_LOAD_PARAMS = secp256k1
