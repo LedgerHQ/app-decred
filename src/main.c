@@ -36,11 +36,11 @@
 #define __NAME3(a, b, c) a##b##c
 #define NAME3(a, b, c)   __NAME3(a, b, c)
 
-#ifndef TARGET_STAX
+#if !defined(TARGET_STAX) && !defined(TARGET_FLEX)
 bagl_element_t tmp_element;
 #endif
 
-#ifndef TARGET_STAX
+#if !defined(TARGET_STAX) && !defined(TARGET_FLEX)
 unsigned int io_seproxyhal_touch_settings(const bagl_element_t *e);
 unsigned int io_seproxyhal_touch_exit(const bagl_element_t *e);
 #endif
@@ -49,7 +49,7 @@ void ui_idle(void);
 ux_state_t G_ux;
 bolos_ux_params_t G_ux_params;
 
-#ifndef TARGET_STAX
+#if !defined(TARGET_STAX) && !defined(TARGET_FLEX)
 // override point, but nothing more to do
 void io_seproxyhal_display(const bagl_element_t *element) {
     if ((element->component.type & (~BAGL_TYPE_FLAGS_MASK)) != BAGL_NONE) {
