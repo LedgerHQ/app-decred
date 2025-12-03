@@ -38,12 +38,12 @@ APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 APP_SOURCE_PATH += src
 
 # Application icons
-ICON_NANOS = nanos_app_$(COIN).gif
-ICON_STAX = stax_app_$(COIN).gif
-ICON_NANOX = nanox_app_$(COIN).gif
-ICON_NANOSP = nanox_app_$(COIN).gif
-ICON_FLEX = flex_app_$(COIN).gif
-ICON_APEX_P = apex_app_$(COIN).png
+ICON_NANOS = icons/nanos_app_$(COIN).gif
+ICON_STAX = icons/stax_app_$(COIN).gif
+ICON_NANOX = icons/nanox_app_$(COIN).gif
+ICON_NANOSP = icons/nanox_app_$(COIN).gif
+ICON_FLEX = icons/flex_app_$(COIN).gif
+ICON_APEX_P = icons/apex_app_$(COIN).png
 
 # Application allowed derivation curves.
 CURVE_APP_LOAD_PARAMS = secp256k1
