@@ -92,7 +92,11 @@ static void displaySettingsMenu(void) {
 
 void ui_idle(void) {
     nbgl_useCaseHome("Decred",
+#ifdef TARGET_APEX_P
+                     &C_decred_icon_48px,
+#else
                      &C_decred_icon_64px,
+#endif
                      NULL,
                      true,
                      displaySettingsMenu,
