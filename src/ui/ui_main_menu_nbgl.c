@@ -38,6 +38,12 @@ static bool settingsNavCallback(uint8_t page, nbgl_pageContent_t *content);
 static const char *const infoTypes[] = {"Version", "Developer"};
 static const char *const infoContents[] = {APPVERSION, "Ledger"};
 
+static const nbgl_contentInfoList_t infoList = {
+    .nbInfos = NB_INFO_FIELDS,
+    .infoTypes = infoTypes,
+    .infoContents = infoContents,
+};
+
 static nbgl_layoutSwitch_t setting_switch;
 
 void onQuitCallback(void) {
@@ -91,13 +97,14 @@ static void displaySettingsMenu(void) {
 }
 
 void ui_idle(void) {
-    nbgl_useCaseHome("Decred",
-                     &ICON_APP,
-                     NULL,
-                     true,
-                     displaySettingsMenu,
-                     onQuitCallback);
+    nbgl_useCaseHomeAndSettings(APPNAME,
+                                &ICON_APP,
+                                NULL,
+                                INIT_HOME_PAGE,
+                                NULL,
+                                &infoList,
+                                NULL,
+                                onQuitCallback);
 }
-
 
 #endif  // HAVE_NBGL
