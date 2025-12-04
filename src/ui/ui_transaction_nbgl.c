@@ -92,7 +92,7 @@ static void reviewStart(void) {
 
     infoLongPress.text = "Sign transaction";
     infoLongPress.longPressText = "Hold to sign";
-    infoLongPress.icon = &C_decred_icon_64px;
+    infoLongPress.icon = &ICON_APP;
 
     pairList.pairs = (nbgl_layoutTagValue_t*) pairs;
 
@@ -139,7 +139,7 @@ static void reviewStart(void) {
             break;
     }
 
-    nbgl_useCaseReviewStart(&C_decred_icon_64px,
+    nbgl_useCaseReviewStart(&ICON_APP,
                             msgs.reviewStart,
                             NULL,
                             "Reject transaction",
