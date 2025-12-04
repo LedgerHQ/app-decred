@@ -93,13 +93,6 @@ def test_addr_display_unusual_path(backend, firmware, navigator):
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_TAP,
                 NavInsID.WAIT_FOR_HOME_SCREEN
             ])
-        elif firmware.device == "nanos":
-            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
-                NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK,
-                NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK,
-                NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK,
-                NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK
-            ])
         else:
             navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
                 NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK,
@@ -155,13 +148,6 @@ def test_addr_display_unusual_path_reject_address(backend, firmware,
                 NavInsID.USE_CASE_CHOICE_REJECT, NavInsID.USE_CASE_REVIEW_TAP,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
                 NavInsID.WAIT_FOR_HOME_SCREEN
-            ])
-        elif firmware.device == "nanos":
-            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
-                NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK,
-                NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK,
-                NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK,
-                NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK
             ])
         else:
             navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
