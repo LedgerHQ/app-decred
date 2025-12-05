@@ -76,7 +76,12 @@ static void address_verification_cancelled(void) {
 }
 
 static void ui_display_addr(void) {
-    nbgl_useCaseAddressConfirmation((char*) G_io_apdu_buffer + 200, &confirmationChoiceClbk);
+    nbgl_useCaseAddressReview((char*) G_io_apdu_buffer + 200, 
+                              NULL,
+                              &ICON_APP,
+                              "Verify Decred address",
+                              NULL,
+                              &confirmationChoiceClbk);
 }
 
 static void warningChoiceClbk(bool reject) {
