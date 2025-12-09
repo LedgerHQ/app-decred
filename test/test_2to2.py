@@ -15,11 +15,14 @@
 #*  See the License for the specific language governing permissions and
 #*  limitations under the License.
 #********************************************************************************
+from ragger.navigator import NavInsID, NavIns
+from ragger.navigator.navigation_scenario import NavigateWithScenario
+from ledgered.devices import Device, DeviceType
 from binascii import hexlify
 from pathlib import Path
 from inspect import currentframe
-from ragger.navigator import NavInsID, NavIns
 from conftest import ROOT_SCREENSHOT_PATH
+import pytest
 
 trusted_input_1 = None
 trusted_input_2 = None
@@ -76,6 +79,7 @@ def test_2to2_get_trusted_input_1(backend):
 
 
 ################# GET TRUSTED INPUT 2 #########################
+@pytest.mark.order(after='test_2to2_get_trusted_input_1')
 def test_2to2_get_trusted_input_2(backend):
     packets = [
         "000000010100000001",  #input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
@@ -111,6 +115,7 @@ def test_2to2_get_trusted_input_2(backend):
 
 
 ################# HASH INPUT START #########################
+@pytest.mark.order(after='test_2to2_get_trusted_input_2')
 def test_2to2_input_start_1(backend):
     packets = [
         "0100000002",  #version + number of input
@@ -135,7 +140,8 @@ def test_2to2_input_start_1(backend):
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE #########################
-def test_2to2_finalize_1(backend, firmware, navigator):
+@pytest.mark.order(after='test_2to2_input_start_1')
+def test_2to2_finalize_1(backend, device, firmware, navigator, scenario_navigator):
     packets = [
         "058000002c8000002A800000000000000100000002",  # change address bip44 path (size + path)
         # "02c03b0e000000000000001976a914a6b939449096f2595113b659e55df41bbd236b5e88ac00127a000000000000001976a91498d35df43b654993f16e3f9979678b0eb941ea8d88ac", #num output + amount + script version + new lock script + same for change addr
@@ -157,21 +163,18 @@ def test_2to2_finalize_1(backend, firmware, navigator):
 
     path = Path(currentframe().f_code.co_name)
     with backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
-        if firmware.device == "stax":
-            navigator.navigate_until_text_and_compare(
-                NavInsID.TAPPABLE_CENTER_TAP, [
-                    NavInsID.USE_CASE_REVIEW_CONFIRM,
-                    NavInsID.WAIT_FOR_HOME_SCREEN
-                ], "Hold", ROOT_SCREENSHOT_PATH, path)
-        else:
+        if device.is_nano:
             navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
                                                       [NavInsID.BOTH_CLICK],
                                                       "Accept",
                                                       ROOT_SCREENSHOT_PATH,
                                                       path)
+        else:
+            scenario_navigator.review_approve()
 
 
 ################# HASH SIGN N°1 #########################
+@pytest.mark.order(after='test_2to2_finalize_1')
 def test_2to2_sign_1(backend):
     packets = [
         "058000002c8000002A800000000000000100000001000000000000000001"  #signing key path len + path + lock time + expiry + sighash type
@@ -200,6 +203,7 @@ def test_2to2_sign_1(backend):
 
 
 ################# HASH INPUT START N°2 #########################
+@pytest.mark.order(after='test_2to2_sign_1')
 def test_2to2_input_start_2(backend):
     packets = [
         "0100000002",  #version + number of input
@@ -225,6 +229,7 @@ def test_2to2_input_start_2(backend):
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE N°2 #########################
+@pytest.mark.order(after='test_2to2_input_start_2')
 def test_2to2_finalize_2(backend):
     packets = [
         # "058000002c8000002A800000000000000100000002", # change address bip44 path (size + path)
@@ -245,6 +250,7 @@ def test_2to2_finalize_2(backend):
 
 
 ################# HASH SIGN N°2 #########################
+@pytest.mark.order(after='test_2to2_finalize_2')
 def test_2to2_sign_2(backend):
     packets = [
         "058000002c8000002A800000000000000000000002000000000000000001"  #signing key path len + path + lock time + expiry + sighash type

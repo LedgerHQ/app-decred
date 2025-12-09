@@ -1,12 +1,14 @@
 from ragger.navigator import NavInsID
 from ragger.backend import RaisePolicy
+from ragger.navigator.navigation_scenario import NavigateWithScenario
+from ledgered.devices import Device, DeviceType
 from binascii import hexlify
 from pathlib import Path
 from inspect import currentframe
 from conftest import ROOT_SCREENSHOT_PATH
 
 
-def test_addr_display(backend, firmware, navigator):
+def test_addr_display(backend, device : Device, firmware, navigator, scenario_navigator):
     packets = [
         "058000002c8000002a800000000000000000000001"  # BIP32 path len, BIP32 path
     ]
@@ -20,26 +22,17 @@ def test_addr_display(backend, firmware, navigator):
 
     test_name = Path(currentframe().f_code.co_name)
     with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
-        if firmware.device == "stax":
-            navigator.navigate_and_compare(
-                ROOT_SCREENSHOT_PATH,
-                test_name,
-                [
-                    NavInsID.TAPPABLE_CENTER_TAP, NavInsID.TAPPABLE_CENTER_TAP,
-                    NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
-                    NavInsID.USE_CASE_ADDRESS_CONFIRMATION_TAP,
-                    NavInsID.WAIT_FOR_HOME_SCREEN
-                ],
-            )
-        else:
+        if device.is_nano:
             navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
                                                       [NavInsID.BOTH_CLICK],
                                                       "Approve",
                                                       ROOT_SCREENSHOT_PATH,
                                                       test_name)
+        else:
+            scenario_navigator.address_review_approve()
 
 
-def test_addr_display_reject(backend, firmware, navigator):
+def test_addr_display_reject(backend, device, firmware, navigator, scenario_navigator):
     packets = [
         "058000002c8000002a800000000000000000000001"  # BIP32 path len, BIP32 path
     ]
@@ -54,26 +47,18 @@ def test_addr_display_reject(backend, firmware, navigator):
     test_name = Path(currentframe().f_code.co_name)
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
     with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
-        if firmware.device == "stax":
-            navigator.navigate_and_compare(
-                ROOT_SCREENSHOT_PATH,
-                test_name,
-                [
-                    NavInsID.TAPPABLE_CENTER_TAP,
-                    NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
-                    NavInsID.WAIT_FOR_HOME_SCREEN
-                ],
-            )
-        else:
+        if device.is_nano:
             navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
                                                       [NavInsID.BOTH_CLICK],
                                                       "Reject",
                                                       ROOT_SCREENSHOT_PATH,
                                                       test_name)
+        else:
+            scenario_navigator.address_review_reject()
     assert (backend.last_async_response.status == 0x6985)
 
 
-def test_addr_display_unusual_path(backend, firmware, navigator):
+def test_addr_display_unusual_path(backend, device, firmware, navigator, scenario_navigator):
     packets = [
         "058000002b8000002a800000000000000000000001"  # BIP32 path len, BIP32 path
     ]
@@ -87,21 +72,22 @@ def test_addr_display_unusual_path(backend, firmware, navigator):
 
     test_name = Path(currentframe().f_code.co_name)
     with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
-        if firmware.device == "stax":
-            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
-                NavInsID.USE_CASE_CHOICE_REJECT, NavInsID.USE_CASE_REVIEW_TAP,
-                NavInsID.USE_CASE_ADDRESS_CONFIRMATION_TAP,
-                NavInsID.WAIT_FOR_HOME_SCREEN
-            ])
-        else:
+        if device.is_nano:
             navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
                 NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK,
                 NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK,
                 NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK
             ])
+        else:
+            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
+                NavInsID.USE_CASE_CHOICE_REJECT,
+                NavInsID.USE_CASE_REVIEW_NEXT,
+                NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
+                NavInsID.WAIT_FOR_HOME_SCREEN
+            ])
 
 
-def test_addr_display_unusual_path_reject_path(backend, firmware, navigator):
+def test_addr_display_unusual_path_reject_path(backend, device, firmware, navigator):
     packets = [
         "058000002b8000002a800000000000000000000001"  # BIP32 path len, BIP32 path
     ]
@@ -116,19 +102,19 @@ def test_addr_display_unusual_path_reject_path(backend, firmware, navigator):
     test_name = Path(currentframe().f_code.co_name)
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
     with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
-        if firmware.device == "stax":
+        if device.is_nano:
             navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
-                NavInsID.USE_CASE_CHOICE_CONFIRM, NavInsID.WAIT_FOR_HOME_SCREEN
+                NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK
             ])
         else:
             navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
-                NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK
+                NavInsID.USE_CASE_CHOICE_CONFIRM, NavInsID.WAIT_FOR_HOME_SCREEN
             ])
     assert (backend.last_async_response.status == 0x6985)
 
 
-def test_addr_display_unusual_path_reject_address(backend, firmware,
-                                                  navigator):
+def test_addr_display_unusual_path_reject_address(backend, device, firmware,
+                                                  navigator, scenario_navigator):
     packets = [
         "058000002b8000002a800000000000000000000001"  # BIP32 path len, BIP32 path
     ]
@@ -143,16 +129,18 @@ def test_addr_display_unusual_path_reject_address(backend, firmware,
     test_name = Path(currentframe().f_code.co_name)
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
     with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
-        if firmware.device == "stax":
-            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
-                NavInsID.USE_CASE_CHOICE_REJECT, NavInsID.USE_CASE_REVIEW_TAP,
-                NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
-                NavInsID.WAIT_FOR_HOME_SCREEN
-            ])
-        else:
+        if device.is_nano:
             navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
                 NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK,
                 NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK,
                 NavInsID.RIGHT_CLICK, NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK
             ])
+        else:
+            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, [
+                NavInsID.USE_CASE_CHOICE_REJECT,
+                NavInsID.USE_CASE_REVIEW_NEXT,
+                NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
+                NavInsID.WAIT_FOR_HOME_SCREEN
+            ])
+
     assert (backend.last_async_response.status == 0x6985)

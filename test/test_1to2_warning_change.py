@@ -21,6 +21,8 @@
 # from pathlib import Path
 from ragger.backend import RaisePolicy
 from ragger.navigator import NavInsID, NavIns
+from ragger.navigator.navigation_scenario import NavigateWithScenario
+from ledgered.devices import Device, DeviceType
 from time import sleep
 from pathlib import Path
 from inspect import currentframe
@@ -89,7 +91,7 @@ def test_1to2_warning_hash_input_start(backend, firmware, navigator):
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE #########################
-def test_1to2_warning_finalize(backend, firmware, navigator):
+def test_1to2_warning_finalize(backend, device, firmware, navigator, scenario_navigator):
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
     packets = [
         "058000002c8000002A800000000000000110000001",  # change address bip44 path (very high index) (should update next line to be valid, this is just to display the warning)
@@ -100,18 +102,18 @@ def test_1to2_warning_finalize(backend, firmware, navigator):
     packets[0] = "e04aFF00" + hexlify(bytes([int(len(packets[0]) / 2)
                                              ])).decode("utf-8") + packets[0]
     with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
-        if firmware.device == "stax":
-            navigator.navigate_and_compare(
-                ROOT_SCREENSHOT_PATH,
-                test_case_name=test_name,
-                instructions=[NavInsID.USE_CASE_CHOICE_REJECT],
-                screen_change_after_last_instruction=False)
-        else:
+        if device.is_nano:
             navigator.navigate_until_text_and_compare(
                 NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK],
                 "Approve",
                 ROOT_SCREENSHOT_PATH,
                 test_name,
+                screen_change_after_last_instruction=False)
+        else:
+            navigator.navigate_and_compare(
+                ROOT_SCREENSHOT_PATH,
+                test_case_name=test_name,
+                instructions=[NavInsID.USE_CASE_CHOICE_REJECT],
                 screen_change_after_last_instruction=False)
 
     for packet in packets[1:-1]:
@@ -124,12 +126,23 @@ def test_1to2_warning_finalize(backend, firmware, navigator):
                                          ])).decode("utf-8") + packets[-1]
 
     with backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
-        if firmware.device == "stax":
+        if device.is_nano:
+            idx = 1
+            for _ in range(3):
+                test = Path(str(test_name) + f"_{idx}")
+                navigator.navigate_until_text_and_compare(
+                    NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK],
+                    "Accept",
+                    ROOT_SCREENSHOT_PATH,
+                    test,
+                    screen_change_after_last_instruction=False)
+                idx += 1
+        else:
             snap_idx = 1
             for _ in range(3):
                 instructions = [
-                    NavIns(id=NavInsID.TAPPABLE_CENTER_TAP),
-                    NavIns(id=NavInsID.TAPPABLE_CENTER_TAP),
+                    NavIns(id=NavInsID.USE_CASE_REVIEW_NEXT),
+                    NavIns(id=NavInsID.USE_CASE_REVIEW_NEXT),
                     NavIns(id=NavInsID.USE_CASE_REVIEW_CONFIRM)
                 ]
                 if _ == 2:
@@ -142,17 +155,6 @@ def test_1to2_warning_finalize(backend, firmware, navigator):
                     screen_change_after_last_instruction=False,
                     snap_start_idx=snap_idx)
                 snap_idx += 3
-        else:
-            idx = 1
-            for _ in range(3):
-                test = Path(str(test_name) + f"_{idx}")
-                navigator.navigate_until_text_and_compare(
-                    NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK],
-                    "Accept",
-                    ROOT_SCREENSHOT_PATH,
-                    test,
-                    screen_change_after_last_instruction=False)
-                idx += 1
 
 
 ################# HASH SIGN #########################

@@ -16,16 +16,22 @@
 #*  limitations under the License.
 #********************************************************************************
 from ragger.navigator import NavInsID
+from ragger.backend.interface import BackendInterface
+from ragger.navigator.navigation_scenario import NavigateWithScenario
+from ledgered.devices import Device, DeviceType
 from binascii import hexlify
 from pathlib import Path
 from inspect import currentframe
 from conftest import ROOT_SCREENSHOT_PATH
+import pytest
+
 
 trusted_input = None
 
 
 ################ GET PUBKEY ######################### (only for testing sake)
-def test_1to2_get_pubkey(backend, firmware, navigator):
+@pytest.mark.order(1)
+def test_1to2_get_pubkey(backend, device, navigator, scenario_navigator):
     packets = [
         "058000002c8000002a800000000000000000000001"  # BIP32 path len, BIP32 path
     ]
@@ -39,21 +45,18 @@ def test_1to2_get_pubkey(backend, firmware, navigator):
 
     path = Path(currentframe().f_code.co_name)
     with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
-        if firmware.device == "stax":
-            navigator.navigate_until_text_and_compare(
-                NavInsID.TAPPABLE_CENTER_TAP, [
-                    NavInsID.USE_CASE_ADDRESS_CONFIRMATION_TAP,
-                    NavInsID.WAIT_FOR_HOME_SCREEN
-                ], "Show", ROOT_SCREENSHOT_PATH, path)
-        else:
+        if device.is_nano:
             navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
                                                       [NavInsID.BOTH_CLICK],
                                                       "Approve",
                                                       ROOT_SCREENSHOT_PATH,
                                                       path)
+        else:
+            scenario_navigator.address_review_approve()
 
 
 # ################# GET TRUSTED INPUT #########################
+@pytest.mark.order(2)
 def test_1to2_get_trusted_input(backend):
     packets = [
         "000000010100000001",  #input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
@@ -92,6 +95,7 @@ def test_1to2_get_trusted_input(backend):
 
 
 # ################# HASH INPUT START #########################
+@pytest.mark.order(3)
 def test_1to2_hash_input_start(backend):
     packets = [
         "0100000001",  #version + number of input
@@ -113,7 +117,8 @@ def test_1to2_hash_input_start(backend):
 
 
 # ################# HASH INPUT FINALIZE WITH CHANGE #########################
-def test_1to2_hash_input_finalize(backend, firmware, navigator):
+@pytest.mark.order(4)
+def test_1to2_hash_input_finalize(backend, device, firmware, navigator, scenario_navigator):
     packets = [
         "058000002c8000002A800000000000000100000001",  # change address bip44 path
         "02ac211e000000000000001976a914fdeea9711e6c81027d677b2ceddf5c14d84977d288acc0cf6a000000000000001976a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888ac"  #num output + amount + script version + new lock script + same for change addr
@@ -134,21 +139,18 @@ def test_1to2_hash_input_finalize(backend, firmware, navigator):
 
     path = Path(currentframe().f_code.co_name)
     with backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
-        if firmware.device == "stax":
-            navigator.navigate_until_text_and_compare(
-                NavInsID.TAPPABLE_CENTER_TAP, [
-                    NavInsID.USE_CASE_REVIEW_CONFIRM,
-                    NavInsID.WAIT_FOR_HOME_SCREEN
-                ], "Hold", ROOT_SCREENSHOT_PATH, path)
-        else:
+        if device.is_nano:
             navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
                                                       [NavInsID.BOTH_CLICK],
                                                       "Accept",
                                                       ROOT_SCREENSHOT_PATH,
                                                       path)
+        else:
+            scenario_navigator.review_approve()
 
 
 # ################# HASH SIGN #########################
+@pytest.mark.order(5)
 def test_1to2_sign(backend):
     packets = [
         "058000002c8000002A800000000000000000000001000000000000000001"  #signing key path len + path + lock time + expiry + sighash type
