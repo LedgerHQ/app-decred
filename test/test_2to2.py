@@ -163,14 +163,7 @@ def test_2to2_finalize_1(backend, device, firmware, navigator, scenario_navigato
 
     path = Path(currentframe().f_code.co_name)
     with backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
-        if device.is_nano:
-            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
-                                                      [NavInsID.BOTH_CLICK],
-                                                      "Accept",
-                                                      ROOT_SCREENSHOT_PATH,
-                                                      path)
-        else:
-            scenario_navigator.review_approve()
+        scenario_navigator.review_approve()
 
 
 ################# HASH SIGN N°1 #########################

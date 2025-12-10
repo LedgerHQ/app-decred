@@ -45,14 +45,7 @@ def test_1to2_get_pubkey(backend, device, navigator, scenario_navigator):
 
     path = Path(currentframe().f_code.co_name)
     with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
-        if device.is_nano:
-            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
-                                                      [NavInsID.BOTH_CLICK],
-                                                      "Approve",
-                                                      ROOT_SCREENSHOT_PATH,
-                                                      path)
-        else:
-            scenario_navigator.address_review_approve()
+        scenario_navigator.address_review_approve()
 
 
 # ################# GET TRUSTED INPUT #########################
@@ -139,14 +132,7 @@ def test_1to2_hash_input_finalize(backend, device, firmware, navigator, scenario
 
     path = Path(currentframe().f_code.co_name)
     with backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
-        if device.is_nano:
-            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
-                                                      [NavInsID.BOTH_CLICK],
-                                                      "Accept",
-                                                      ROOT_SCREENSHOT_PATH,
-                                                      path)
-        else:
-            scenario_navigator.review_approve()
+        scenario_navigator.review_approve()
 
 
 # ################# HASH SIGN #########################
