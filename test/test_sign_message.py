@@ -17,7 +17,7 @@
 #********************************************************************************
 from ragger.backend import RaisePolicy
 from ragger.navigator import NavInsID
-from ledgered.devices import Device, DeviceType
+from ragger.navigator.navigation_scenario import NavigateWithScenario
 import struct
 from pathlib import Path
 from inspect import currentframe
@@ -26,8 +26,8 @@ from conftest import ROOT_SCREENSHOT_PATH
 
 
 ################# SIGN MESSAGE #########################
-def test_decred_sign_message(backend, device, firmware, navigator, scenario_navigator):
-    backend.raise_policy = RaisePolicy.RAISE_NOTHING
+def test_decred_sign_message(scenario_navigator : NavigateWithScenario):
+    scenario_navigator.backend.raise_policy = RaisePolicy.RAISE_NOTHING
 
     # magic = "\x18 Signed Message:\n"
     message = "Message to be signed"
@@ -40,13 +40,13 @@ def test_decred_sign_message(backend, device, firmware, navigator, scenario_navi
 
     packet = "e04e0001" + hexlify(bytes([int(len(str_sign_msg) / 2)
                                          ])).decode("utf-8") + str_sign_msg
-    backend.exchange_raw(data=bytearray.fromhex(packet))
+    scenario_navigator.backend.exchange_raw(data=bytearray.fromhex(packet))
 
     packet = "e04e80000100"
     path = Path(currentframe().f_code.co_name)
-    with backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
-        if device.is_nano:
-            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+    with scenario_navigator.backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
+        if scenario_navigator.device.is_nano:
+            scenario_navigator.navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
                                                       [NavInsID.BOTH_CLICK],
                                                       "Accept",
                                                       ROOT_SCREENSHOT_PATH,
@@ -54,7 +54,7 @@ def test_decred_sign_message(backend, device, firmware, navigator, scenario_navi
         else:
             scenario_navigator.review_approve()
 
-    result = backend.last_async_response
+    result = scenario_navigator.backend.last_async_response
 
     expected = "3045022100e841839bef7147f0bb79e7e301a0bfdb2ff8b1c4a195d9a18c4f167c70dd63e6022061898f34c11561ccd1ad74d627195aa5f08d7fff8f78eb9de605e433d8532783"
     assert result.status == 0x9000
