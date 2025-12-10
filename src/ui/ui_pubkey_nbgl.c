@@ -71,7 +71,7 @@ static void confirmationChoiceClbk(bool confirm) {
 }
 
 static void ui_display_addr(void) {
-    nbgl_useCaseAddressReview((char*) G_io_apdu_buffer + 200, 
+    nbgl_useCaseAddressReview((char*) G_io_apdu_buffer + 200,
                               NULL,
                               &ICON_APP,
                               "Verify Decred address",
