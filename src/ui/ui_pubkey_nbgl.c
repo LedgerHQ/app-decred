@@ -70,11 +70,6 @@ static void confirmationChoiceClbk(bool confirm) {
     nbgl_useCaseStatus(confirm_text, confirm, ui_idle);
 }
 
-static void address_verification_cancelled(void) {
-    io_seproxyhal_touch_display_cancel(NULL);
-    nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
-}
-
 static void ui_display_addr(void) {
     nbgl_useCaseAddressReview((char*) G_io_apdu_buffer + 200, 
                               NULL,
@@ -89,12 +84,7 @@ static void warningChoiceClbk(bool reject) {
         io_seproxyhal_touch_display_cancel(NULL);
         nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
     } else {
-        nbgl_useCaseReviewStart(&ICON_APP,
-                                "Verify Decred\naddress",
-                                NULL,
-                                "Cancel",
-                                ui_display_addr,
-                                address_verification_cancelled);
+        ui_display_addr();
     }
 }
 
@@ -117,12 +107,7 @@ void ui_display_public_key(unsigned char* derivation_path) {
                            "Continue",
                            warningChoiceClbk);
     } else {
-        nbgl_useCaseReviewStart(&ICON_APP,
-                                "Verify Decred\naddress",
-                                NULL,
-                                "Cancel",
-                                ui_display_addr,
-                                address_verification_cancelled);
+        ui_display_addr();
     }
 }
 
