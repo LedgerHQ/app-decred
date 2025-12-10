@@ -24,7 +24,6 @@ from ragger.navigator import Navigator, NavInsID, NavIns
 from ragger.backend.interface import BackendInterface
 from ledgered.devices import Device
 
-
 from time import sleep
 from pathlib import Path
 from inspect import currentframe
@@ -35,7 +34,7 @@ trusted_input = None
 
 
 ################# GET TRUSTED INPUT #########################
-def test_1to2_warning_get_trusted_input(backend : BackendInterface):
+def test_1to2_warning_get_trusted_input(backend: BackendInterface):
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
     packets = [
         "000000010100000001",  #input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
@@ -71,7 +70,7 @@ def test_1to2_warning_get_trusted_input(backend : BackendInterface):
 
 
 ################# HASH INPUT START #########################
-def test_1to2_warning_hash_input_start(backend : BackendInterface):
+def test_1to2_warning_hash_input_start(backend: BackendInterface):
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
     packets = [
         "0100000001",  #version + number of input
@@ -93,7 +92,8 @@ def test_1to2_warning_hash_input_start(backend : BackendInterface):
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE #########################
-def test_1to2_warning_finalize(backend : BackendInterface, device : Device, navigator : Navigator):
+def test_1to2_warning_finalize(backend: BackendInterface, device: Device,
+                               navigator: Navigator):
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
     packets = [
         "058000002c8000002A800000000000000110000001",  # change address bip44 path (very high index) (should update next line to be valid, this is just to display the warning)
@@ -160,7 +160,7 @@ def test_1to2_warning_finalize(backend : BackendInterface, device : Device, navi
 
 
 ################# HASH SIGN #########################
-def test_1to2_warning_sign(backend : BackendInterface):
+def test_1to2_warning_sign(backend: BackendInterface):
     backend.raise_policy = RaisePolicy.RAISE_NOTHING
     packets = [
         "058000002c8000002A800000000000000000000001000000000000000001"  #signing key path len + path + lock time + expiry + sighash type

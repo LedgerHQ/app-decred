@@ -26,7 +26,7 @@ from conftest import ROOT_SCREENSHOT_PATH
 
 
 ################# SIGN MESSAGE #########################
-def test_decred_sign_message(scenario_navigator : NavigateWithScenario):
+def test_decred_sign_message(scenario_navigator: NavigateWithScenario):
     scenario_navigator.backend.raise_policy = RaisePolicy.RAISE_NOTHING
 
     # magic = "\x18 Signed Message:\n"
@@ -44,13 +44,12 @@ def test_decred_sign_message(scenario_navigator : NavigateWithScenario):
 
     packet = "e04e80000100"
     path = Path(currentframe().f_code.co_name)
-    with scenario_navigator.backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
+    with scenario_navigator.backend.exchange_async_raw(
+            data=bytearray.fromhex(packet)) as r:
         if scenario_navigator.device.is_nano:
-            scenario_navigator.navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
-                                                      [NavInsID.BOTH_CLICK],
-                                                      "Accept",
-                                                      ROOT_SCREENSHOT_PATH,
-                                                      path)
+            scenario_navigator.navigator.navigate_until_text_and_compare(
+                NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Accept",
+                ROOT_SCREENSHOT_PATH, path)
         else:
             scenario_navigator.review_approve()
 

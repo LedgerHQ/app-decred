@@ -23,13 +23,12 @@ from inspect import currentframe
 from conftest import ROOT_SCREENSHOT_PATH
 import pytest
 
-
 trusted_input = None
 
 
 ################ GET PUBKEY ######################### (only for testing sake)
 @pytest.mark.order(1)
-def test_1to2_get_pubkey(scenario_navigator : NavigateWithScenario):
+def test_1to2_get_pubkey(scenario_navigator: NavigateWithScenario):
     packets = [
         "058000002c8000002a800000000000000000000001"  # BIP32 path len, BIP32 path
     ]
@@ -42,13 +41,14 @@ def test_1to2_get_pubkey(scenario_navigator : NavigateWithScenario):
     # c191668478d204284390538897117f8c66ef8dafd2f3e67c0d83ce4fe4f09e53  chaincode
 
     path = Path(currentframe().f_code.co_name)
-    with scenario_navigator.backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
+    with scenario_navigator.backend.exchange_async_raw(
+            data=bytearray.fromhex(packets[0])) as r:
         scenario_navigator.address_review_approve()
 
 
 # ################# GET TRUSTED INPUT #########################
 @pytest.mark.order(2)
-def test_1to2_get_trusted_input(backend : BackendInterface):
+def test_1to2_get_trusted_input(backend: BackendInterface):
     packets = [
         "000000010100000001",  #input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
         "60fe7d21bfbd946b5bc96e7819b531d42961300ecf451d428d6ea866f02e98e901000000006b",  #wrong endian txid + outpout index + tree + witness size (could be deleted for decred)
@@ -87,7 +87,7 @@ def test_1to2_get_trusted_input(backend : BackendInterface):
 
 # ################# HASH INPUT START #########################
 @pytest.mark.order(3)
-def test_1to2_hash_input_start(backend : BackendInterface):
+def test_1to2_hash_input_start(backend: BackendInterface):
     packets = [
         "0100000001",  #version + number of input
         #"0138320006a640c65057afdd582f4f086c6e6e8c160092e4c0d32b9faa9fa91b8feb1048379c020000002ac503f20100000085bdec7eae8ace3a01",
@@ -109,7 +109,7 @@ def test_1to2_hash_input_start(backend : BackendInterface):
 
 # ################# HASH INPUT FINALIZE WITH CHANGE #########################
 @pytest.mark.order(4)
-def test_1to2_hash_input_finalize(scenario_navigator : NavigateWithScenario):
+def test_1to2_hash_input_finalize(scenario_navigator: NavigateWithScenario):
     packets = [
         "058000002c8000002A800000000000000100000001",  # change address bip44 path
         "02ac211e000000000000001976a914fdeea9711e6c81027d677b2ceddf5c14d84977d288acc0cf6a000000000000001976a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888ac"  #num output + amount + script version + new lock script + same for change addr
@@ -117,25 +117,28 @@ def test_1to2_hash_input_finalize(scenario_navigator : NavigateWithScenario):
 
     packets[0] = "e04aFF00" + hexlify(bytes([int(len(packets[0]) / 2)
                                              ])).decode("utf-8") + packets[0]
-    result = scenario_navigator.backend.exchange_raw(data=bytearray.fromhex(packets[0]))
+    result = scenario_navigator.backend.exchange_raw(
+        data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:-1]:
 
         packet = "e04a0000" + hexlify(bytes([int(len(packet) / 2)
                                              ])).decode("utf-8") + packet
-        result = scenario_navigator.backend.exchange_raw(data=bytearray.fromhex(packet))
+        result = scenario_navigator.backend.exchange_raw(
+            data=bytearray.fromhex(packet))
 
     packet = "e04a8000" + hexlify(bytes([int(len(packets[-1]) / 2)
                                          ])).decode("utf-8") + packets[-1]
 
     path = Path(currentframe().f_code.co_name)
-    with scenario_navigator.backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
+    with scenario_navigator.backend.exchange_async_raw(
+            data=bytearray.fromhex(packet)) as r:
         scenario_navigator.review_approve()
 
 
 # ################# HASH SIGN #########################
 @pytest.mark.order(5)
-def test_1to2_sign(backend : BackendInterface):
+def test_1to2_sign(backend: BackendInterface):
     packets = [
         "058000002c8000002A800000000000000000000001000000000000000001"  #signing key path len + path + lock time + expiry + sighash type
     ]
