@@ -82,7 +82,7 @@ static void ui_display_addr(void) {
 static void warningChoiceClbk(bool reject) {
     if (reject) {
         io_seproxyhal_touch_display_cancel(NULL);
-        nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_idle);
     } else {
         ui_display_addr();
     }

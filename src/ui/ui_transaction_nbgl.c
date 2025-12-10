@@ -66,7 +66,7 @@ static void reviewChoice(bool confirm) {
 }
 
 static void rejectConfirmation(void) {
-    nbgl_useCaseStatus("Transaction rejected", false, ui_idle);
+    nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_idle);
     txType == TX_TYPE_SIGN_MESSAGE ? io_seproxyhal_touch_message_signature_verify_cancel(NULL)
                                    : io_seproxyhal_touch_verify_cancel(NULL);
 }
@@ -185,7 +185,7 @@ unsigned int ui_tx_confirm_single_output() {
 static void changePathWarningChoice(bool reject) {
     if (reject) {
         io_seproxyhal_touch_display_cancel(NULL);
-        nbgl_useCaseStatus("Transaction rejected", false, ui_idle);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_idle);
     } else {
         io_seproxyhal_touch_display_ok(NULL);
     }
