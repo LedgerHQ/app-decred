@@ -131,7 +131,10 @@ void btchip_write_u32_le(unsigned char *buffer, unsigned long int value) {
 void btchip_retrieve_keypair_discard(unsigned char *privateComponent, unsigned char derivePublic) {
     BEGIN_TRY {
         TRY {
-            cx_ecdsa_init_private_key(BTCHIP_CURVE, privateComponent, 32, &btchip_private_key_D);
+            (void) cx_ecdsa_init_private_key(BTCHIP_CURVE,
+                                             privateComponent,
+                                             32,
+                                             &btchip_private_key_D);
 
             PRINTF("Using private component\n%.*H\n", 32, privateComponent);
 

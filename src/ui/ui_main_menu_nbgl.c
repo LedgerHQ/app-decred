@@ -28,74 +28,31 @@
 
 #include "btchip_internal.h"
 
-static void displaySettingsMenu(void);
-static void settingsControlsCallback(int token, uint8_t index);
-static bool settingsNavCallback(uint8_t page, nbgl_pageContent_t *content);
-
 #define SWITCH_KEY_EXPORT_TOKEN FIRST_USER_TOKEN
 
-#define NB_INFO_FIELDS 2
-static const char *const infoTypes[] = {"Version", "Developer"};
-static const char *const infoContents[] = {APPVERSION, "Ledger"};
+#define SETTING_INFO_NB 3
+static const char *const infoTypes[SETTING_INFO_NB] = {"Version", "Developer", "Copyright"};
+static const char *const infoContents[SETTING_INFO_NB] = {APPVERSION, "Ledger", "Ledger (c) 2025"};
 
-static nbgl_layoutSwitch_t setting_switch;
+static const nbgl_contentInfoList_t infoList = {
+    .nbInfos = SETTING_INFO_NB,
+    .infoTypes = infoTypes,
+    .infoContents = infoContents,
+};
 
 void onQuitCallback(void) {
     os_sched_exit(-1);
 }
 
-static bool settingsNavCallback(uint8_t page, nbgl_pageContent_t *content) {
-    if (page == 0) {
-        content->type = INFOS_LIST;
-        content->infosList.nbInfos = NB_INFO_FIELDS;
-        content->infosList.infoTypes = (const char **) infoTypes;
-        content->infosList.infoContents = (const char **) infoContents;
-    } else if (page == 1) {
-        setting_switch.text = "U2F public keys export";
-        setting_switch.subText = "Enable manual approval";
-        setting_switch.token = SWITCH_KEY_EXPORT_TOKEN;
-        setting_switch.tuneId = TUNE_TAP_CASUAL;
-        setting_switch.initState = (bool) N_btchip.pubKeyRequestRestriction;
-        content->type = SWITCHES_LIST;
-        content->switchesList.nbSwitches = 1;
-        content->switchesList.switches = (nbgl_layoutSwitch_t *) &setting_switch;
-    } else {
-        return false;
-    }
-    return true;
-}
-
-static void settingsControlsCallback(int token, uint8_t index) {
-    UNUSED(index);
-    switch (token) {
-        case SWITCH_KEY_EXPORT_TOKEN: {
-            unsigned int setting_value = (unsigned int) !N_btchip.pubKeyRequestRestriction;
-            nvm_write((void *) &N_btchip.pubKeyRequestRestriction, &setting_value, 1);
-            break;
-        }
-        default: {
-            PRINTF("Should not happen !");
-            break;
-        }
-    }
-}
-
-static void displaySettingsMenu(void) {
-    nbgl_useCaseSettings("Decred settings",
-                         0,
-                         2,
-                         false,
-                         ui_idle,
-                         settingsNavCallback,
-                         settingsControlsCallback);
-}
-
 void ui_idle(void) {
-    nbgl_useCaseHome("Decred",
-                     &C_decred_icon_64px,
-                     NULL,
-                     true,
-                     displaySettingsMenu,
-                     onQuitCallback);
+    nbgl_useCaseHomeAndSettings(APPNAME,
+                                &ICON_APP,
+                                NULL,
+                                INIT_HOME_PAGE,
+                                NULL,
+                                &infoList,
+                                NULL,
+                                onQuitCallback);
 }
+
 #endif  // HAVE_NBGL

@@ -70,26 +70,21 @@ static void confirmationChoiceClbk(bool confirm) {
     nbgl_useCaseStatus(confirm_text, confirm, ui_idle);
 }
 
-static void address_verification_cancelled(void) {
-    io_seproxyhal_touch_display_cancel(NULL);
-    nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
-}
-
 static void ui_display_addr(void) {
-    nbgl_useCaseAddressConfirmation((char*) G_io_apdu_buffer + 200, &confirmationChoiceClbk);
+    nbgl_useCaseAddressReview((char*) G_io_apdu_buffer + 200,
+                              NULL,
+                              &ICON_APP,
+                              "Verify Decred address",
+                              NULL,
+                              &confirmationChoiceClbk);
 }
 
 static void warningChoiceClbk(bool reject) {
     if (reject) {
         io_seproxyhal_touch_display_cancel(NULL);
-        nbgl_useCaseStatus("Address verification\ncancelled", false, ui_idle);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_idle);
     } else {
-        nbgl_useCaseReviewStart(&C_decred_icon_64px,
-                                "Verify Decred\naddress",
-                                NULL,
-                                "Cancel",
-                                ui_display_addr,
-                                address_verification_cancelled);
+        ui_display_addr();
     }
 }
 
@@ -112,12 +107,7 @@ void ui_display_public_key(unsigned char* derivation_path) {
                            "Continue",
                            warningChoiceClbk);
     } else {
-        nbgl_useCaseReviewStart(&C_decred_icon_64px,
-                                "Verify Decred\naddress",
-                                NULL,
-                                "Cancel",
-                                ui_display_addr,
-                                address_verification_cancelled);
+        ui_display_addr();
     }
 }
 
@@ -133,7 +123,7 @@ void ui_display_request_pubkey_approval(void) {
 
 void ui_display_token(void) {
     display_type = DISPLAY_TOKEN;
-    nbgl_useCaseChoice(&C_decred_icon_64px,
+    nbgl_useCaseChoice(&ICON_APP,
                        "Approve Token",
                        (char*) G_io_apdu_buffer + 200,
                        "Approve",

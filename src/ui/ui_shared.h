@@ -21,6 +21,14 @@
 #include "btchip_filesystem_tx.h"
 #include "ux.h"
 
+#ifdef SCREEN_SIZE_WALLET
+#ifdef TARGET_APEX_P
+#define ICON_APP C_decred_icon_48px
+#else
+#define ICON_APP C_decred_icon_64px
+#endif
+#endif
+
 #define COLOR_WHITE 0xFFFFFF
 #define UI_NANOS_BACKGROUND() \
     { {BAGL_RECTANGLE, 0, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0, COLOR_WHITE, 0, 0}, NULL }

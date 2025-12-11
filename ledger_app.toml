@@ -1,4 +1,7 @@
 [app]
 build_directory = "./"
 sdk = "C"
-devices = ["nanos", "nanox", "nanos+"]
+devices = ["nanox", "nanos+", "stax", "flex", "apex_p"]
+
+[pytest.standalone]
+directory = "./test/"

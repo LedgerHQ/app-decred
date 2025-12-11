@@ -15,18 +15,19 @@
 #*  See the License for the specific language governing permissions and
 #*  limitations under the License.
 #********************************************************************************
+from ragger.backend import RaisePolicy
+from ragger.navigator import NavInsID
+from ragger.navigator.navigation_scenario import NavigateWithScenario
 import struct
 from pathlib import Path
 from inspect import currentframe
 from binascii import hexlify
-from ragger.backend import RaisePolicy
-from ragger.navigator import NavInsID
 from conftest import ROOT_SCREENSHOT_PATH
 
 
 ################# SIGN MESSAGE #########################
-def test_decred_sign_message(backend, firmware, navigator):
-    backend.raise_policy = RaisePolicy.RAISE_NOTHING
+def test_decred_sign_message(scenario_navigator: NavigateWithScenario):
+    scenario_navigator.backend.raise_policy = RaisePolicy.RAISE_NOTHING
 
     # magic = "\x18 Signed Message:\n"
     message = "Message to be signed"
@@ -39,25 +40,20 @@ def test_decred_sign_message(backend, firmware, navigator):
 
     packet = "e04e0001" + hexlify(bytes([int(len(str_sign_msg) / 2)
                                          ])).decode("utf-8") + str_sign_msg
-    backend.exchange_raw(data=bytearray.fromhex(packet))
+    scenario_navigator.backend.exchange_raw(data=bytearray.fromhex(packet))
 
     packet = "e04e80000100"
     path = Path(currentframe().f_code.co_name)
-    with backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
-        if firmware.device == "stax":
-            navigator.navigate_until_text_and_compare(
-                NavInsID.TAPPABLE_CENTER_TAP, [
-                    NavInsID.USE_CASE_REVIEW_CONFIRM,
-                    NavInsID.WAIT_FOR_HOME_SCREEN
-                ], "Hold", ROOT_SCREENSHOT_PATH, path)
+    with scenario_navigator.backend.exchange_async_raw(
+            data=bytearray.fromhex(packet)) as r:
+        if scenario_navigator.device.is_nano:
+            scenario_navigator.navigator.navigate_until_text_and_compare(
+                NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Accept",
+                ROOT_SCREENSHOT_PATH, path)
         else:
-            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
-                                                      [NavInsID.BOTH_CLICK],
-                                                      "Accept",
-                                                      ROOT_SCREENSHOT_PATH,
-                                                      path)
+            scenario_navigator.review_approve()
 
-    result = backend.last_async_response
+    result = scenario_navigator.backend.last_async_response
 
     expected = "3045022100e841839bef7147f0bb79e7e301a0bfdb2ff8b1c4a195d9a18c4f167c70dd63e6022061898f34c11561ccd1ad74d627195aa5f08d7fff8f78eb9de605e433d8532783"
     assert result.status == 0x9000

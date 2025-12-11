@@ -30,18 +30,19 @@ include $(BOLOS_SDK)/Makefile.defines
 
 # Application version
 APPVERSION_M= 1
-APPVERSION_N= 3
-APPVERSION_P= 15
+APPVERSION_N= 4
+APPVERSION_P= 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
 APP_SOURCE_PATH += src
 
 # Application icons
-ICON_NANOS = nanos_app_$(COIN).gif
-ICON_STAX = stax_app_$(COIN).gif
-ICON_NANOX = nanox_app_$(COIN).gif
-ICON_NANOSP = nanox_app_$(COIN).gif
+ICON_STAX = icons/stax_app_$(COIN).gif
+ICON_NANOX = icons/nanox_app_$(COIN).gif
+ICON_NANOSP = icons/nanox_app_$(COIN).gif
+ICON_FLEX = icons/flex_app_$(COIN).gif
+ICON_APEX_P = icons/apex_app_$(COIN).png
 
 # Application allowed derivation curves.
 CURVE_APP_LOAD_PARAMS = secp256k1
