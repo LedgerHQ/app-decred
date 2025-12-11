@@ -15,11 +15,13 @@
 #*  See the License for the specific language governing permissions and
 #*  limitations under the License.
 #********************************************************************************
+from ragger.navigator.navigation_scenario import NavigateWithScenario
+from ragger.backend.interface import BackendInterface
 from binascii import hexlify
 from pathlib import Path
 from inspect import currentframe
-from ragger.navigator import NavInsID, NavIns
 from conftest import ROOT_SCREENSHOT_PATH
+import pytest
 
 trusted_input_1 = None
 trusted_input_2 = None
@@ -43,7 +45,7 @@ result = dongle.exchange(bytearray.fromhex(packets[0]))
 
 
 ################# GET TRUSTED INPUT 1 #########################
-def test_2to2_get_trusted_input_1(backend):
+def test_2to2_get_trusted_input_1(backend: BackendInterface):
     packets = [
         "000000000100000001",  #input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
         "334462e04608ca0441afe495cc5760c23914e553e0f0996c50095e39e13b1804010000000000",  #wrong endian txid + outpout index + tree + witness size (0 for decred)
@@ -76,7 +78,8 @@ def test_2to2_get_trusted_input_1(backend):
 
 
 ################# GET TRUSTED INPUT 2 #########################
-def test_2to2_get_trusted_input_2(backend):
+@pytest.mark.order(after='test_2to2_get_trusted_input_1')
+def test_2to2_get_trusted_input_2(backend: BackendInterface):
     packets = [
         "000000010100000001",  #input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
         "334462e04608ca0441afe495cc5760c23914e553e0f0996c50095e39e13b1804010000000000",  #wrong endian txid + outpout index + tree + witness size (0 for decred)
@@ -111,7 +114,8 @@ def test_2to2_get_trusted_input_2(backend):
 
 
 ################# HASH INPUT START #########################
-def test_2to2_input_start_1(backend):
+@pytest.mark.order(after='test_2to2_get_trusted_input_2')
+def test_2to2_input_start_1(backend: BackendInterface):
     packets = [
         "0100000002",  #version + number of input
         "01" + "%0.2X" % len(trusted_input_1.data) +
@@ -135,7 +139,8 @@ def test_2to2_input_start_1(backend):
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE #########################
-def test_2to2_finalize_1(backend, firmware, navigator):
+@pytest.mark.order(after='test_2to2_input_start_1')
+def test_2to2_finalize_1(scenario_navigator: NavigateWithScenario):
     packets = [
         "058000002c8000002A800000000000000100000002",  # change address bip44 path (size + path)
         # "02c03b0e000000000000001976a914a6b939449096f2595113b659e55df41bbd236b5e88ac00127a000000000000001976a91498d35df43b654993f16e3f9979678b0eb941ea8d88ac", #num output + amount + script version + new lock script + same for change addr
@@ -145,34 +150,27 @@ def test_2to2_finalize_1(backend, firmware, navigator):
 
     packets[0] = "e04aFF00" + hexlify(bytes([int(len(packets[0]) / 2)
                                              ])).decode("utf-8") + packets[0]
-    result = backend.exchange_raw(data=bytearray.fromhex(packets[0]))
+    result = scenario_navigator.backend.exchange_raw(
+        data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:-1]:
         packet = "e04a0000" + hexlify(bytes([int(len(packet) / 2)
                                              ])).decode("utf-8") + packet
-        result = backend.exchange_raw(data=bytearray.fromhex(packet))
+        result = scenario_navigator.backend.exchange_raw(
+            data=bytearray.fromhex(packet))
 
     packet = "e04a8000" + hexlify(bytes([int(len(packets[-1]) / 2)
                                          ])).decode("utf-8") + packets[-1]
 
     path = Path(currentframe().f_code.co_name)
-    with backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
-        if firmware.device == "stax":
-            navigator.navigate_until_text_and_compare(
-                NavInsID.TAPPABLE_CENTER_TAP, [
-                    NavInsID.USE_CASE_REVIEW_CONFIRM,
-                    NavInsID.WAIT_FOR_HOME_SCREEN
-                ], "Hold", ROOT_SCREENSHOT_PATH, path)
-        else:
-            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
-                                                      [NavInsID.BOTH_CLICK],
-                                                      "Accept",
-                                                      ROOT_SCREENSHOT_PATH,
-                                                      path)
+    with scenario_navigator.backend.exchange_async_raw(
+            data=bytearray.fromhex(packet)) as r:
+        scenario_navigator.review_approve()
 
 
 ################# HASH SIGN N°1 #########################
-def test_2to2_sign_1(backend):
+@pytest.mark.order(after='test_2to2_finalize_1')
+def test_2to2_sign_1(backend: BackendInterface):
     packets = [
         "058000002c8000002A800000000000000100000001000000000000000001"  #signing key path len + path + lock time + expiry + sighash type
     ]
@@ -200,7 +198,8 @@ def test_2to2_sign_1(backend):
 
 
 ################# HASH INPUT START N°2 #########################
-def test_2to2_input_start_2(backend):
+@pytest.mark.order(after='test_2to2_sign_1')
+def test_2to2_input_start_2(backend: BackendInterface):
     packets = [
         "0100000002",  #version + number of input
         "01" + "%0.2X" % len(trusted_input_1.data) +
@@ -225,7 +224,8 @@ def test_2to2_input_start_2(backend):
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE N°2 #########################
-def test_2to2_finalize_2(backend):
+@pytest.mark.order(after='test_2to2_input_start_2')
+def test_2to2_finalize_2(backend: BackendInterface):
     packets = [
         # "058000002c8000002A800000000000000100000002", # change address bip44 path (size + path)
         "02c03b0e000000000000001976a914a6b939449096f2595113b659e55df41bbd236b5e88ac00127a000000000000001976a91498d35df43b654993f16e3f9979678b0eb941ea8d88ac"  #num output + amount + script version + new lock script + same for change addr
@@ -245,7 +245,8 @@ def test_2to2_finalize_2(backend):
 
 
 ################# HASH SIGN N°2 #########################
-def test_2to2_sign_2(backend):
+@pytest.mark.order(after='test_2to2_finalize_2')
+def test_2to2_sign_2(backend: BackendInterface):
     packets = [
         "058000002c8000002A800000000000000000000002000000000000000001"  #signing key path len + path + lock time + expiry + sighash type
     ]
