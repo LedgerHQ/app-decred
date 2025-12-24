@@ -82,7 +82,7 @@ $(error Unsupported COIN - use decred, decred_testnet)
 endif
 endif
 
-DEFINES += $(DEFINES_LIB) TCS_LOADER_PATCH_VERSION=0
+DEFINES += $(DEFINES_LIB) TCS_LOADER_PATCH_VERSION=0 DEBUG=1
 
 # Remove warning on custom snprintf implementation usage
 CFLAGS    += -Wno-format
