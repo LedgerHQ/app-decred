@@ -24,7 +24,6 @@ from ragger.navigator import Navigator, NavInsID, NavIns
 from ragger.backend.interface import BackendInterface
 from ledgered.devices import Device
 
-from time import sleep
 from pathlib import Path
 from inspect import currentframe
 from binascii import hexlify
@@ -83,12 +82,12 @@ def test_1to2_warning_hash_input_start(backend: BackendInterface):
 
     packets[0] = "e0440000" + hexlify(bytes([int(len(packets[0]) / 2)
                                              ])).decode("utf-8") + packets[0]
-    result = backend.exchange_raw(data=bytearray.fromhex(packets[0]))
+    backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:]:
         packet = "e0448000" + hexlify(bytes([int(len(packet) / 2)
                                              ])).decode("utf-8") + packet
-        result = backend.exchange_raw(data=bytearray.fromhex(packet))
+        backend.exchange_raw(data=bytearray.fromhex(packet))
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE #########################
@@ -103,7 +102,7 @@ def test_1to2_warning_finalize(backend: BackendInterface, device: Device,
     test_name = Path(currentframe().f_code.co_name)
     packets[0] = "e04aFF00" + hexlify(bytes([int(len(packets[0]) / 2)
                                              ])).decode("utf-8") + packets[0]
-    with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])) as r:
+    with backend.exchange_async_raw(data=bytearray.fromhex(packets[0])):
         if device.is_nano:
             navigator.navigate_until_text_and_compare(
                 NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK],
@@ -127,7 +126,7 @@ def test_1to2_warning_finalize(backend: BackendInterface, device: Device,
     packet = "e04a8000" + hexlify(bytes([int(len(packets[-1]) / 2)
                                          ])).decode("utf-8") + packets[-1]
 
-    with backend.exchange_async_raw(data=bytearray.fromhex(packet)) as r:
+    with backend.exchange_async_raw(data=bytearray.fromhex(packet)):
         if device.is_nano:
             idx = 1
             for _ in range(3):

@@ -20,7 +20,6 @@ from ragger.backend.interface import BackendInterface
 from binascii import hexlify
 from pathlib import Path
 from inspect import currentframe
-from conftest import ROOT_SCREENSHOT_PATH
 import pytest
 
 trusted_input_1 = None
@@ -130,12 +129,12 @@ def test_2to2_input_start_1(backend: BackendInterface):
 
     packets[0] = "e0440000" + hexlify(bytes([int(len(packets[0]) / 2)
                                              ])).decode("utf-8") + packets[0]
-    result = backend.exchange_raw(data=bytearray.fromhex(packets[0]))
+    backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:]:
         packet = "e0448000" + hexlify(bytes([int(len(packet) / 2)
                                              ])).decode("utf-8") + packet
-        result = backend.exchange_raw(data=bytearray.fromhex(packet))
+        backend.exchange_raw(data=bytearray.fromhex(packet))
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE #########################
@@ -150,21 +149,21 @@ def test_2to2_finalize_1(scenario_navigator: NavigateWithScenario):
 
     packets[0] = "e04aFF00" + hexlify(bytes([int(len(packets[0]) / 2)
                                              ])).decode("utf-8") + packets[0]
-    result = scenario_navigator.backend.exchange_raw(
+    scenario_navigator.backend.exchange_raw(
         data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:-1]:
         packet = "e04a0000" + hexlify(bytes([int(len(packet) / 2)
                                              ])).decode("utf-8") + packet
-        result = scenario_navigator.backend.exchange_raw(
+        scenario_navigator.backend.exchange_raw(
             data=bytearray.fromhex(packet))
 
     packet = "e04a8000" + hexlify(bytes([int(len(packets[-1]) / 2)
                                          ])).decode("utf-8") + packets[-1]
 
-    path = Path(currentframe().f_code.co_name)
+    Path(currentframe().f_code.co_name)
     with scenario_navigator.backend.exchange_async_raw(
-            data=bytearray.fromhex(packet)) as r:
+            data=bytearray.fromhex(packet)):
         scenario_navigator.review_approve()
 
 
@@ -214,13 +213,13 @@ def test_2to2_input_start_2(backend: BackendInterface):
 
     packets[0] = "e0440080" + hexlify(bytes([int(len(packets[0]) / 2)
                                              ])).decode("utf-8") + packets[0]
-    result = backend.exchange_raw(data=bytearray.fromhex(packets[0]))
+    backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:]:
 
         packet = "e0448080" + hexlify(bytes([int(len(packet) / 2)
                                              ])).decode("utf-8") + packet
-        result = backend.exchange_raw(data=bytearray.fromhex(packet))
+        backend.exchange_raw(data=bytearray.fromhex(packet))
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE N°2 #########################
@@ -237,11 +236,11 @@ def test_2to2_finalize_2(backend: BackendInterface):
     for packet in packets[1:-1]:
         packet = "e04a0000" + hexlify(bytes([int(len(packet) / 2)
                                              ])).decode("utf-8") + packet
-        result = backend.exchange_raw(data=bytearray.fromhex(packet))
+        backend.exchange_raw(data=bytearray.fromhex(packet))
 
     packet = "e04a8000" + hexlify(bytes([int(len(packets[-1]) / 2)
                                          ])).decode("utf-8") + packets[-1]
-    result = backend.exchange_raw(data=bytearray.fromhex(packet))
+    backend.exchange_raw(data=bytearray.fromhex(packet))
 
 
 ################# HASH SIGN N°2 #########################

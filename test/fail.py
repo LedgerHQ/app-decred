@@ -17,9 +17,7 @@
 #********************************************************************************
 
 from ledgerblue.comm import getDongle
-from ledgerblue.commException import CommException
 from binascii import hexlify
-from time import sleep
 
 dongle = getDongle(True)
 '''
