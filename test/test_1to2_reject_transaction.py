@@ -17,6 +17,7 @@
 # ********************************************************************************
 from ragger.backend.interface import BackendInterface
 from ragger.navigator.navigation_scenario import NavigateWithScenario
+from ragger.error import ExceptionRAPDU
 from binascii import hexlify
 from pathlib import Path
 from inspect import currentframe
@@ -156,15 +157,18 @@ def test_1to2_reject_hash_input_finalize(scenario_navigator: NavigateWithScenari
     )
 
     Path(currentframe().f_code.co_name)
+    rapdu = None
     try:
         with scenario_navigator.backend.exchange_async_raw(
             data=bytearray.fromhex(packet)
         ):
             scenario_navigator.review_reject()
-    except Exception as e:
-        print("Error while rejecting transaction: %s" % str(e))
+    except ExceptionRAPDU as e:
+        rapdu = e
 
-    assert scenario_navigator.backend.last_async_response.status == 0x9000
+    # Rejecting the transaction must make the app answer with SW_DENY (0x6985)
+    assert rapdu is not None, "Transaction was not rejected"
+    assert rapdu.status == 0x6985
 
 
 """ 
