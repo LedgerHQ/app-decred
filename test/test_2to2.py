@@ -1,20 +1,20 @@
 #!/usr/bin/env python
-#*******************************************************************************
-#*   Ledger App
-#*   (c) 2016-2019 Ledger
-#*
-#*  Licensed under the Apache License, Version 2.0 (the "License");
-#*  you may not use this file except in compliance with the License.
-#*  You may obtain a copy of the License at
-#*
-#*      http://www.apache.org/licenses/LICENSE-2.0
-#*
-#*  Unless required by applicable law or agreed to in writing, software
-#*  distributed under the License is distributed on an "AS IS" BASIS,
-#*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#*  See the License for the specific language governing permissions and
-#*  limitations under the License.
-#********************************************************************************
+# *******************************************************************************
+# *   Ledger App
+# *   (c) 2016-2019 Ledger
+# *
+# *  Licensed under the Apache License, Version 2.0 (the "License");
+# *  you may not use this file except in compliance with the License.
+# *  You may obtain a copy of the License at
+# *
+# *      http://www.apache.org/licenses/LICENSE-2.0
+# *
+# *  Unless required by applicable law or agreed to in writing, software
+# *  distributed under the License is distributed on an "AS IS" BASIS,
+# *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# *  See the License for the specific language governing permissions and
+# *  limitations under the License.
+# ********************************************************************************
 from ragger.navigator.navigation_scenario import NavigateWithScenario
 from ragger.backend.interface import BackendInterface
 from binascii import hexlify
@@ -24,7 +24,7 @@ import pytest
 
 trusted_input_1 = None
 trusted_input_2 = None
-'''
+"""
 
 ################# GET PUBKEY #########################
 
@@ -40,105 +40,125 @@ result = dongle.exchange(bytearray.fromhex(packets[0]))
 # 23 5473636f46366d566741416b664e78776e716f5a553936654e3534355247594c376135 addr base58
 # c191668478d204284390538897117f8c66ef8dafd2f3e67c0d83ce4fe4f09e53  chaincode
 
-'''
+"""
 
 
 ################# GET TRUSTED INPUT 1 #########################
 def test_2to2_get_trusted_input_1(backend: BackendInterface):
     packets = [
-        "000000000100000001",  #input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
-        "334462e04608ca0441afe495cc5760c23914e553e0f0996c50095e39e13b1804010000000000",  #wrong endian txid + outpout index + tree + witness size (0 for decred)
-        "ffffffff",  #witness (0 in decred) + sequence
+        "000000000100000001",  # input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
+        "334462e04608ca0441afe495cc5760c23914e553e0f0996c50095e39e13b1804010000000000",  # wrong endian txid + outpout index + tree + witness size (0 for decred)
+        "ffffffff",  # witness (0 in decred) + sequence
         "02",  # outputs
-        "ac211e000000000000001976a914fdeea9711e6c81027d677b2ceddf5c14d84977d288ac",  #amount + script version + script
-        "c0cf6a000000000000001976a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888ac",  #amount + script version + script
-        "0000000000000000"  #locktime + expiry 
+        "ac211e000000000000001976a914fdeea9711e6c81027d677b2ceddf5c14d84977d288ac",  # amount + script version + script
+        "c0cf6a000000000000001976a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888ac",  # amount + script version + script
+        "0000000000000000",  # locktime + expiry
     ]
 
-    packets[0] = "e0420000" + hexlify(bytes([int(len(packets[0]) / 2)
-                                             ])).decode("utf-8") + packets[0]
+    packets[0] = (
+        "e0420000"
+        + hexlify(bytes([int(len(packets[0]) / 2)])).decode("utf-8")
+        + packets[0]
+    )
     result = backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:]:
-        packet = "e0428000" + hexlify(bytes([int(len(packet) / 2)
-                                             ])).decode("utf-8") + packet
+        packet = (
+            "e0428000" + hexlify(bytes([int(len(packet) / 2)])).decode("utf-8") + packet
+        )
         result = backend.exchange_raw(data=bytearray.fromhex(packet))
     global trusted_input_1
     trusted_input_1 = result
 
     # [magic + 00 + rand(2) + input txid (LE) + input index + amount + HMAC]
-    #<= 32 00 16c5 9e18e3a7e7508bdd151104b4879b350565aac97f031ee6eea5b7bf84029a929d 00000000 ac211e0000000000 598355bee9a1e576 9000
+    # <= 32 00 16c5 9e18e3a7e7508bdd151104b4879b350565aac97f031ee6eea5b7bf84029a929d 00000000 ac211e0000000000 598355bee9a1e576 9000
 
     expected = "9e18e3a7e7508bdd151104b4879b350565aac97f031ee6eea5b7bf84029a929d00000000ac211e0000000000"
     if expected not in hexlify(result.data).decode("utf-8"):
-        print("Error:\nExpected:%s\nGot:     %s\n" %
-              (expected, hexlify(result.data[4:-8]).decode("utf-8")))
+        print(
+            "Error:\nExpected:%s\nGot:     %s\n"
+            % (expected, hexlify(result.data[4:-8]).decode("utf-8"))
+        )
         exit()
 
 
 ################# GET TRUSTED INPUT 2 #########################
-@pytest.mark.order(after='test_2to2_get_trusted_input_1')
+@pytest.mark.order(after="test_2to2_get_trusted_input_1")
 def test_2to2_get_trusted_input_2(backend: BackendInterface):
     packets = [
-        "000000010100000001",  #input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
-        "334462e04608ca0441afe495cc5760c23914e553e0f0996c50095e39e13b1804010000000000",  #wrong endian txid + outpout index + tree + witness size (0 for decred)
-        "ffffffff",  #witness (0 in decred) + sequence
+        "000000010100000001",  # input index (UTXO) (from 0, normal endian) + (begin tx streaming) version + number of inputs
+        "334462e04608ca0441afe495cc5760c23914e553e0f0996c50095e39e13b1804010000000000",  # wrong endian txid + outpout index + tree + witness size (0 for decred)
+        "ffffffff",  # witness (0 in decred) + sequence
         "02",  # outputs
-        "ac211e000000000000001976a914fdeea9711e6c81027d677b2ceddf5c14d84977d288ac",  #amount + script version + script
-        "c0cf6a000000000000001976a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888ac",  #amount + script version + script
-        "0000000000000000"  #locktime + expiry 
+        "ac211e000000000000001976a914fdeea9711e6c81027d677b2ceddf5c14d84977d288ac",  # amount + script version + script
+        "c0cf6a000000000000001976a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888ac",  # amount + script version + script
+        "0000000000000000",  # locktime + expiry
     ]
 
-    packets[0] = "e0420000" + hexlify(bytes([int(len(packets[0]) / 2)
-                                             ])).decode("utf-8") + packets[0]
+    packets[0] = (
+        "e0420000"
+        + hexlify(bytes([int(len(packets[0]) / 2)])).decode("utf-8")
+        + packets[0]
+    )
     result = backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:]:
-        packet = "e0428000" + hexlify(bytes([int(len(packet) / 2)
-                                             ])).decode("utf-8") + packet
+        packet = (
+            "e0428000" + hexlify(bytes([int(len(packet) / 2)])).decode("utf-8") + packet
+        )
         result = backend.exchange_raw(data=bytearray.fromhex(packet))
 
     global trusted_input_2
     trusted_input_2 = result
 
     # [magic + 00 + rand(2) + input txid (LE) + input index + amount + HMAC]
-    #<= 32 00 dcac 9e18e3a7e7508bdd151104b4879b350565aac97f031ee6eea5b7bf84029a929d 01000000 c0cf6a0000000000 f0d368a53f42bdcd 9000
+    # <= 32 00 dcac 9e18e3a7e7508bdd151104b4879b350565aac97f031ee6eea5b7bf84029a929d 01000000 c0cf6a0000000000 f0d368a53f42bdcd 9000
 
     expected = "9e18e3a7e7508bdd151104b4879b350565aac97f031ee6eea5b7bf84029a929d01000000c0cf6a0000000000"
 
     if expected not in hexlify(result.data).decode("utf-8"):
-        print("Error:\nExpected:%s\nGot:     %s\n" %
-              (expected, hexlify(result.data[4:-8]).decode("utf-8")))
+        print(
+            "Error:\nExpected:%s\nGot:     %s\n"
+            % (expected, hexlify(result.data[4:-8]).decode("utf-8"))
+        )
         exit()
 
 
 ################# HASH INPUT START #########################
-@pytest.mark.order(after='test_2to2_get_trusted_input_2')
+@pytest.mark.order(after="test_2to2_get_trusted_input_2")
 def test_2to2_input_start_1(backend: BackendInterface):
     packets = [
-        "0100000002",  #version + number of input
-        "01" + "%0.2X" % len(trusted_input_1.data) +
-        hexlify(trusted_input_1.data).decode("utf-8") + "00" +
-        "19",  # trusted input flag + [magic + 00 + rand(2) + input txid + input index + amount + HMAC] + tree + script len
+        "0100000002",  # version + number of input
+        "01"
+        + "%0.2X" % len(trusted_input_1.data)
+        + hexlify(trusted_input_1.data).decode("utf-8")
+        + "00"
+        + "19",  # trusted input flag + [magic + 00 + rand(2) + input txid + input index + amount + HMAC] + tree + script len
         "76a914fdeea9711e6c81027d677b2ceddf5c14d84977d288acffffffff",  # spend output script + sequence
-        "01" + "%0.2X" % len(trusted_input_2.data) +
-        hexlify(trusted_input_2.data).decode("utf-8") + "00" +
-        "00",  # trusted input flag + [magic + 00 + rand(2) + input txid + input index + amount + HMAC] + tree + script len
-        "ffffffff"  # spend output script + sequence
+        "01"
+        + "%0.2X" % len(trusted_input_2.data)
+        + hexlify(trusted_input_2.data).decode("utf-8")
+        + "00"
+        + "00",  # trusted input flag + [magic + 00 + rand(2) + input txid + input index + amount + HMAC] + tree + script len
+        "ffffffff",  # spend output script + sequence
     ]
 
-    packets[0] = "e0440000" + hexlify(bytes([int(len(packets[0]) / 2)
-                                             ])).decode("utf-8") + packets[0]
+    packets[0] = (
+        "e0440000"
+        + hexlify(bytes([int(len(packets[0]) / 2)])).decode("utf-8")
+        + packets[0]
+    )
     backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:]:
-        packet = "e0448000" + hexlify(bytes([int(len(packet) / 2)
-                                             ])).decode("utf-8") + packet
+        packet = (
+            "e0448000" + hexlify(bytes([int(len(packet) / 2)])).decode("utf-8") + packet
+        )
         backend.exchange_raw(data=bytearray.fromhex(packet))
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE #########################
-@pytest.mark.order(after='test_2to2_input_start_1')
+@pytest.mark.order(after="test_2to2_input_start_1")
 def test_2to2_finalize_1(scenario_navigator: NavigateWithScenario):
     packets = [
         "058000002c8000002A800000000000000100000002",  # change address bip44 path (size + path)
@@ -147,47 +167,57 @@ def test_2to2_finalize_1(scenario_navigator: NavigateWithScenario):
         # "00127a000000000000001976a91498d35df43b654993f16e3f9979678b0eb941ea8d88ac" #num output + amount + script version + new lock script + same for change addr
     ]
 
-    packets[0] = "e04aFF00" + hexlify(bytes([int(len(packets[0]) / 2)
-                                             ])).decode("utf-8") + packets[0]
-    scenario_navigator.backend.exchange_raw(
-        data=bytearray.fromhex(packets[0]))
+    packets[0] = (
+        "e04aFF00"
+        + hexlify(bytes([int(len(packets[0]) / 2)])).decode("utf-8")
+        + packets[0]
+    )
+    scenario_navigator.backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:-1]:
-        packet = "e04a0000" + hexlify(bytes([int(len(packet) / 2)
-                                             ])).decode("utf-8") + packet
-        scenario_navigator.backend.exchange_raw(
-            data=bytearray.fromhex(packet))
+        packet = (
+            "e04a0000" + hexlify(bytes([int(len(packet) / 2)])).decode("utf-8") + packet
+        )
+        scenario_navigator.backend.exchange_raw(data=bytearray.fromhex(packet))
 
-    packet = "e04a8000" + hexlify(bytes([int(len(packets[-1]) / 2)
-                                         ])).decode("utf-8") + packets[-1]
+    packet = (
+        "e04a8000"
+        + hexlify(bytes([int(len(packets[-1]) / 2)])).decode("utf-8")
+        + packets[-1]
+    )
 
     Path(currentframe().f_code.co_name)
-    with scenario_navigator.backend.exchange_async_raw(
-            data=bytearray.fromhex(packet)):
+    with scenario_navigator.backend.exchange_async_raw(data=bytearray.fromhex(packet)):
         scenario_navigator.review_approve()
 
 
 ################# HASH SIGN N°1 #########################
-@pytest.mark.order(after='test_2to2_finalize_1')
+@pytest.mark.order(after="test_2to2_finalize_1")
 def test_2to2_sign_1(backend: BackendInterface):
     packets = [
-        "058000002c8000002A800000000000000100000001000000000000000001"  #signing key path len + path + lock time + expiry + sighash type
+        "058000002c8000002A800000000000000100000001000000000000000001"  # signing key path len + path + lock time + expiry + sighash type
     ]
 
-    packets[0] = "e0480000" + hexlify(bytes([int(len(packets[0]) / 2)
-                                             ])).decode("utf-8") + packets[0]
+    packets[0] = (
+        "e0480000"
+        + hexlify(bytes([int(len(packets[0]) / 2)])).decode("utf-8")
+        + packets[0]
+    )
     result = backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:]:
-        packet = "e0480000" + hexlify(bytes([int(len(packet) / 2)
-                                             ])).decode("utf-8") + packet
+        packet = (
+            "e0480000" + hexlify(bytes([int(len(packet) / 2)])).decode("utf-8") + packet
+        )
         result = backend.exchange_raw(data=bytearray.fromhex(packet))
 
     expected = "3045022100ce8f37f615e60bd604b5c2e78a64068e0fc00a2fd06932060f27bc1e804ba90b02204f72ae4161f8935504d04242a5841b45e8f2776c22655aa3ac7f430f196af03801"
 
     if expected not in hexlify(result.data).decode("utf-8"):
-        print("Error:\nExpected:%s\nGot:     %s\n" %
-              (expected, hexlify(result.data).decode("utf-8")))
+        print(
+            "Error:\nExpected:%s\nGot:     %s\n"
+            % (expected, hexlify(result.data).decode("utf-8"))
+        )
         exit()
 
 
@@ -197,77 +227,94 @@ def test_2to2_sign_1(backend: BackendInterface):
 
 
 ################# HASH INPUT START N°2 #########################
-@pytest.mark.order(after='test_2to2_sign_1')
+@pytest.mark.order(after="test_2to2_sign_1")
 def test_2to2_input_start_2(backend: BackendInterface):
     packets = [
-        "0100000002",  #version + number of input
-        "01" + "%0.2X" % len(trusted_input_1.data) +
-        hexlify(trusted_input_1.data).decode("utf-8") + "00" +
-        "00",  # trusted input flag + [magic + 00 + rand(2) + input txid + input index + amount + HMAC] + tree + script len
+        "0100000002",  # version + number of input
+        "01"
+        + "%0.2X" % len(trusted_input_1.data)
+        + hexlify(trusted_input_1.data).decode("utf-8")
+        + "00"
+        + "00",  # trusted input flag + [magic + 00 + rand(2) + input txid + input index + amount + HMAC] + tree + script len
         "ffffffff",  # spend output script + sequence
-        "01" + "%0.2X" % len(trusted_input_2.data) +
-        hexlify(trusted_input_2.data).decode("utf-8") + "00" +
-        "19",  # trusted input flag + [magic + 00 + rand(2) + input txid + input index + amount + HMAC] + tree + script len
-        "76a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888acffffffff"  # spend output script + sequence
+        "01"
+        + "%0.2X" % len(trusted_input_2.data)
+        + hexlify(trusted_input_2.data).decode("utf-8")
+        + "00"
+        + "19",  # trusted input flag + [magic + 00 + rand(2) + input txid + input index + amount + HMAC] + tree + script len
+        "76a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888acffffffff",  # spend output script + sequence
     ]
 
-    packets[0] = "e0440080" + hexlify(bytes([int(len(packets[0]) / 2)
-                                             ])).decode("utf-8") + packets[0]
+    packets[0] = (
+        "e0440080"
+        + hexlify(bytes([int(len(packets[0]) / 2)])).decode("utf-8")
+        + packets[0]
+    )
     backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:]:
-
-        packet = "e0448080" + hexlify(bytes([int(len(packet) / 2)
-                                             ])).decode("utf-8") + packet
+        packet = (
+            "e0448080" + hexlify(bytes([int(len(packet) / 2)])).decode("utf-8") + packet
+        )
         backend.exchange_raw(data=bytearray.fromhex(packet))
 
 
 ################# HASH INPUT FINALIZE WITH CHANGE N°2 #########################
-@pytest.mark.order(after='test_2to2_input_start_2')
+@pytest.mark.order(after="test_2to2_input_start_2")
 def test_2to2_finalize_2(backend: BackendInterface):
     packets = [
         # "058000002c8000002A800000000000000100000002", # change address bip44 path (size + path)
-        "02c03b0e000000000000001976a914a6b939449096f2595113b659e55df41bbd236b5e88ac00127a000000000000001976a91498d35df43b654993f16e3f9979678b0eb941ea8d88ac"  #num output + amount + script version + new lock script + same for change addr
+        "02c03b0e000000000000001976a914a6b939449096f2595113b659e55df41bbd236b5e88ac00127a000000000000001976a91498d35df43b654993f16e3f9979678b0eb941ea8d88ac"  # num output + amount + script version + new lock script + same for change addr
     ]
 
     # packets[0] = "e04aFF00" + hexlify(bytes([int(len(packets[0])/2)])).decode("utf-8") + packets[0]
 
     # unused in this case, but useful when packet is splitted in smaller ones
     for packet in packets[1:-1]:
-        packet = "e04a0000" + hexlify(bytes([int(len(packet) / 2)
-                                             ])).decode("utf-8") + packet
+        packet = (
+            "e04a0000" + hexlify(bytes([int(len(packet) / 2)])).decode("utf-8") + packet
+        )
         backend.exchange_raw(data=bytearray.fromhex(packet))
 
-    packet = "e04a8000" + hexlify(bytes([int(len(packets[-1]) / 2)
-                                         ])).decode("utf-8") + packets[-1]
+    packet = (
+        "e04a8000"
+        + hexlify(bytes([int(len(packets[-1]) / 2)])).decode("utf-8")
+        + packets[-1]
+    )
     backend.exchange_raw(data=bytearray.fromhex(packet))
 
 
 ################# HASH SIGN N°2 #########################
-@pytest.mark.order(after='test_2to2_finalize_2')
+@pytest.mark.order(after="test_2to2_finalize_2")
 def test_2to2_sign_2(backend: BackendInterface):
     packets = [
-        "058000002c8000002A800000000000000000000002000000000000000001"  #signing key path len + path + lock time + expiry + sighash type
+        "058000002c8000002A800000000000000000000002000000000000000001"  # signing key path len + path + lock time + expiry + sighash type
     ]
 
-    packets[0] = "e0480000" + hexlify(bytes([int(len(packets[0]) / 2)
-                                             ])).decode("utf-8") + packets[0]
+    packets[0] = (
+        "e0480000"
+        + hexlify(bytes([int(len(packets[0]) / 2)])).decode("utf-8")
+        + packets[0]
+    )
     result = backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:]:
-        packet = "e0480000" + hexlify(bytes([int(len(packet) / 2)
-                                             ])).decode("utf-8") + packet
+        packet = (
+            "e0480000" + hexlify(bytes([int(len(packet) / 2)])).decode("utf-8") + packet
+        )
         result = backend.exchange_raw(data=bytearray.fromhex(packet))
 
     expected = "3144022041b371311dc2f2dc72b83e8249d3fc0f53f6bfc9ccdb214eeea7b35914ba187602200de4313f2dca0aa2ca857afb65e06d693128e6e4b9b127eff018ddcfe98c462e01"
 
     if expected not in hexlify(result.data).decode("utf-8"):
-        print("Error:\nExpected:%s\nGot:     %s\n" %
-              (expected, hexlify(result.data).decode("utf-8")))
+        print(
+            "Error:\nExpected:%s\nGot:     %s\n"
+            % (expected, hexlify(result.data).decode("utf-8"))
+        )
         exit()
 
 
-''' 
+""" 
 APDU EXCHANGE RECAP:
 
 HID => e042000009000000000100000001
@@ -328,4 +375,4 @@ HID => e04a80004902c03b0e000000000000001976a914a6b939449096f2595113b659e55df41bb
 HID <= 00009000
 HID => e04800001e058000002c8000002a800000000000000000000002000000000000000001
 HID <= 3144022041b371311dc2f2dc72b83e8249d3fc0f53f6bfc9ccdb214eeea7b35914ba187602200de4313f2dca0aa2ca857afb65e06d693128e6e4b9b127eff018ddcfe98c462e019000
-'''
+"""
