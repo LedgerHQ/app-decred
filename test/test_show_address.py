@@ -3,7 +3,6 @@ from ragger.navigator.navigation_scenario import NavigateWithScenario
 from binascii import hexlify
 from pathlib import Path
 from inspect import currentframe
-from conftest import ROOT_SCREENSHOT_PATH
 
 
 def test_addr_display(scenario_navigator: NavigateWithScenario):
@@ -18,9 +17,9 @@ def test_addr_display(scenario_navigator: NavigateWithScenario):
     # 23 5473636f46366d566741416b664e78776e716f5a553936654e3534355247594c376135 addr base58
     # c191668478d204284390538897117f8c66ef8dafd2f3e67c0d83ce4fe4f09e53  chaincode
 
-    test_name = Path(currentframe().f_code.co_name)
+    Path(currentframe().f_code.co_name)
     with scenario_navigator.backend.exchange_async_raw(
-            data=bytearray.fromhex(packets[0])) as r:
+            data=bytearray.fromhex(packets[0])):
         scenario_navigator.address_review_approve()
 
 
@@ -36,9 +35,9 @@ def test_addr_display_reject(scenario_navigator):
     # 23 5473636f46366d566741416b664e78776e716f5a553936654e3534355247594c376135 addr base58
     # c191668478d204284390538897117f8c66ef8dafd2f3e67c0d83ce4fe4f09e53  chaincode
 
-    test_name = Path(currentframe().f_code.co_name)
+    Path(currentframe().f_code.co_name)
     scenario_navigator.backend.raise_policy = RaisePolicy.RAISE_NOTHING
     with scenario_navigator.backend.exchange_async_raw(
-            data=bytearray.fromhex(packets[0])) as r:
+            data=bytearray.fromhex(packets[0])):
         scenario_navigator.address_review_reject()
     assert (scenario_navigator.backend.last_async_response.status == 0x6985)

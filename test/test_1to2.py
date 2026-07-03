@@ -20,7 +20,6 @@ from ragger.navigator.navigation_scenario import NavigateWithScenario
 from binascii import hexlify
 from pathlib import Path
 from inspect import currentframe
-from conftest import ROOT_SCREENSHOT_PATH
 import pytest
 
 trusted_input = None
@@ -40,9 +39,9 @@ def test_1to2_get_pubkey(scenario_navigator: NavigateWithScenario):
     # 23 5473636f46366d566741416b664e78776e716f5a553936654e3534355247594c376135 addr base58
     # c191668478d204284390538897117f8c66ef8dafd2f3e67c0d83ce4fe4f09e53  chaincode
 
-    path = Path(currentframe().f_code.co_name)
+    Path(currentframe().f_code.co_name)
     with scenario_navigator.backend.exchange_async_raw(
-            data=bytearray.fromhex(packets[0])) as r:
+            data=bytearray.fromhex(packets[0])):
         scenario_navigator.address_review_approve()
 
 
@@ -99,12 +98,12 @@ def test_1to2_hash_input_start(backend: BackendInterface):
 
     packets[0] = "e0440000" + hexlify(bytes([int(len(packets[0]) / 2)
                                              ])).decode("utf-8") + packets[0]
-    result = backend.exchange_raw(data=bytearray.fromhex(packets[0]))
+    backend.exchange_raw(data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:]:
         packet = "e0448000" + hexlify(bytes([int(len(packet) / 2)
                                              ])).decode("utf-8") + packet
-        result = backend.exchange_raw(data=bytearray.fromhex(packet))
+        backend.exchange_raw(data=bytearray.fromhex(packet))
 
 
 # ################# HASH INPUT FINALIZE WITH CHANGE #########################
@@ -117,22 +116,22 @@ def test_1to2_hash_input_finalize(scenario_navigator: NavigateWithScenario):
 
     packets[0] = "e04aFF00" + hexlify(bytes([int(len(packets[0]) / 2)
                                              ])).decode("utf-8") + packets[0]
-    result = scenario_navigator.backend.exchange_raw(
+    scenario_navigator.backend.exchange_raw(
         data=bytearray.fromhex(packets[0]))
 
     for packet in packets[1:-1]:
 
         packet = "e04a0000" + hexlify(bytes([int(len(packet) / 2)
                                              ])).decode("utf-8") + packet
-        result = scenario_navigator.backend.exchange_raw(
+        scenario_navigator.backend.exchange_raw(
             data=bytearray.fromhex(packet))
 
     packet = "e04a8000" + hexlify(bytes([int(len(packets[-1]) / 2)
                                          ])).decode("utf-8") + packets[-1]
 
-    path = Path(currentframe().f_code.co_name)
+    Path(currentframe().f_code.co_name)
     with scenario_navigator.backend.exchange_async_raw(
-            data=bytearray.fromhex(packet)) as r:
+            data=bytearray.fromhex(packet)):
         scenario_navigator.review_approve()
 
 

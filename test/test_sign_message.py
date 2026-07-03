@@ -45,7 +45,7 @@ def test_decred_sign_message(scenario_navigator: NavigateWithScenario):
     packet = "e04e80000100"
     path = Path(currentframe().f_code.co_name)
     with scenario_navigator.backend.exchange_async_raw(
-            data=bytearray.fromhex(packet)) as r:
+            data=bytearray.fromhex(packet)):
         if scenario_navigator.device.is_nano:
             scenario_navigator.navigator.navigate_until_text_and_compare(
                 NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Accept",
