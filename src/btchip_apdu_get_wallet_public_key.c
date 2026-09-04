@@ -74,6 +74,7 @@ unsigned short btchip_apdu_get_wallet_public_key() {
     }
 
     btchip_private_derive_keypair(keyPath, 1, chainCode);
+    explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
     G_io_apdu_buffer[0] = 65;
 
     // Then encode it

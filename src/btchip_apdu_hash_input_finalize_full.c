@@ -243,6 +243,7 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
                         G_io_apdu_buffer + ISO_OFFSET_CDATA,
                         MAX_BIP32_PATH_LENGTH);
                 btchip_private_derive_keypair(transactionSummary->summarydata.keyPath, 1, NULL);
+                explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
                 if (((N_btchip.bkp.config.options & BTCHIP_OPTION_UNCOMPRESSED_KEYS) != 0)) {
                     keyLength = 65;
                 } else {
