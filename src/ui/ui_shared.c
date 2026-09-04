@@ -244,7 +244,7 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
     unsigned int currentPos = 0;
     unsigned char amount[8], totalOutputAmount[8], fees[8];
     char tmp[80];
-    unsigned char outputPos = 0, changeFound = 0;
+    unsigned char outputPos = 0, changeFound = 0, recipientCount = 0;
     unsigned char script_version[2];  // Decred thing
 
     if (btchip_context_D.transactionContext.relaxed &&
@@ -318,12 +318,17 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
             }
             goto error;
         }
-        if (btchip_context_D.tmpCtx.output.changeInitialized && !isOpReturn) {
-            unsigned char addressOffset =
-                (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH : OUTPUT_SCRIPT_REGULAR_PRE_LENGTH);
-            if (memcmp(btchip_context_D.currentOutput + offset + addressOffset,
-                       btchip_context_D.tmpCtx.output.changeAddress + 1,
-                       20) == 0) {
+        if (!isOpReturn) {
+            unsigned char isChangeOutput = 0;
+            if (btchip_context_D.tmpCtx.output.changeInitialized) {
+                unsigned char addressOffset =
+                    (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH : OUTPUT_SCRIPT_REGULAR_PRE_LENGTH);
+                isChangeOutput =
+                    (memcmp(btchip_context_D.currentOutput + offset + addressOffset,
+                            btchip_context_D.tmpCtx.output.changeAddress + 1,
+                            20) == 0);
+            }
+            if (isChangeOutput) {
                 if (changeFound) {
                     if (!checkOnly) {
                         PRINTF("Error : Multiple change output found");
@@ -334,6 +339,7 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
             } else {
                 // outputPos is the real output pointer (opposed to the change address output)
                 outputPos = currentPos;
+                recipientCount++;
             }
         }
         offset += 1 + btchip_context_D.currentOutput[offset];
@@ -342,6 +348,12 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
     if (btchip_context_D.tmpCtx.output.changeInitialized && !changeFound) {
         if (!checkOnly) {
             PRINTF("Error : change output not found");
+        }
+        goto error;
+    }
+    if (recipientCount != 1) {
+        if (!checkOnly) {
+            PRINTF("Error : unexpected number of recipient outputs");
         }
         goto error;
     }
