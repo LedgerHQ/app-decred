@@ -308,6 +308,10 @@ unsigned char bip32_print_path(unsigned char *bip32Path, char *out, unsigned cha
     unsigned int current_level;
     bool hardened;
 
+    if (max_out_len < 4) {
+        THROW(EXCEPTION_OVERFLOW);
+    }
+
     bip32PathLength = bip32Path[0];
     if (bip32PathLength > MAX_BIP32_PATH) {
         THROW(INVALID_PARAMETER);
