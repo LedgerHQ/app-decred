@@ -136,8 +136,6 @@ void btchip_retrieve_keypair_discard(unsigned char *privateComponent, unsigned c
                                              32,
                                              &btchip_private_key_D);
 
-            PRINTF("Using private component\n%.*H\n", 32, privateComponent);
-
             if (derivePublic) {
                 cx_ecfp_generate_pair(BTCHIP_CURVE, &btchip_public_key_D, &btchip_private_key_D, 1);
             }
