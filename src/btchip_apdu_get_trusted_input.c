@@ -30,6 +30,9 @@ unsigned short btchip_apdu_get_trusted_input() {
     apduLength = G_io_apdu_buffer[ISO_OFFSET_LC];
 
     if (G_io_apdu_buffer[ISO_OFFSET_P1] == GET_TRUSTED_INPUT_P1_FIRST) {
+        if (apduLength < 4) {
+            return BTCHIP_SW_INCORRECT_LENGTH;
+        }
         // Initialize
         btchip_context_D.transactionTargetInput =
             btchip_read_u32(G_io_apdu_buffer + ISO_OFFSET_CDATA, 1, 0);
@@ -45,6 +48,9 @@ unsigned short btchip_apdu_get_trusted_input() {
 
     if (G_io_apdu_buffer[ISO_OFFSET_P2] != 0x00) {
         return BTCHIP_SW_INCORRECT_P1_P2;
+    }
+    if (apduLength < dataOffset) {
+        return BTCHIP_SW_INCORRECT_LENGTH;
     }
     btchip_context_D.transactionBufferPointer = G_io_apdu_buffer + ISO_OFFSET_CDATA + dataOffset;
     btchip_context_D.transactionDataRemaining = apduLength - dataOffset;
