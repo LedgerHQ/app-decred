@@ -101,6 +101,16 @@ ENABLE_BLUETOOTH = 1
 ########################################
 ENABLE_NBGL_QRCODE = 1
 
+########################################
+#                 SSP                  #
+########################################
+ENABLE_STACK_PROTECTOR = 1
+
+########################################
+#        LINK TIME OPTIMIZATION        #
+########################################
+ENABLE_LINK_TIME_OPTIMIZATION = 1
+
 # Use only specific files from standard app
 DISABLE_STANDARD_APP_FILES = 1
 APP_SOURCE_FILES += ${BOLOS_SDK}/lib_standard_app/io.c
