@@ -150,6 +150,7 @@ unsigned short btchip_apdu_hash_sign() {
             btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
         }
         FINALLY {
+            explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
             btchip_set_check_internal_structure_integrity(1);
             return sw;
         }

@@ -282,6 +282,7 @@ unsigned short btchip_compute_hash() {
             sw = SW_TECHNICAL_DETAILS(0x0F);
         }
         FINALLY {
+            explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
             explicit_bzero(&btchip_context_D.transactionSummary,
                            sizeof(btchip_transaction_summary_t));
         }
