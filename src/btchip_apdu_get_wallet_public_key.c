@@ -58,14 +58,18 @@ unsigned short btchip_apdu_get_wallet_public_key() {
             return BTCHIP_SW_INCORRECT_P1_P2;
     }
 
-    if (G_io_apdu_buffer[ISO_OFFSET_LC] < 0x01) {
+    unsigned char pathLength = G_io_apdu_buffer[ISO_OFFSET_CDATA];
+    unsigned char expectedLc = 1 + 4 * pathLength + (display_request_token ? 4 : 0);
+
+    if (pathLength > MAX_BIP32_PATH || G_io_apdu_buffer[ISO_OFFSET_LC] != expectedLc) {
         return BTCHIP_SW_INCORRECT_LENGTH;
     }
-    memmove(keyPath, G_io_apdu_buffer + ISO_OFFSET_CDATA, MAX_BIP32_PATH_LENGTH);
+
+    explicit_bzero(keyPath, sizeof(keyPath));
+    memmove(keyPath, G_io_apdu_buffer + ISO_OFFSET_CDATA, 1 + 4 * pathLength);
 
     if (display_request_token) {
-        uint8_t request_token_offset =
-            ISO_OFFSET_CDATA + G_io_apdu_buffer[ISO_OFFSET_CDATA] * 4 + 1;
+        unsigned char request_token_offset = ISO_OFFSET_CDATA + 1 + 4 * pathLength;
         request_token = btchip_read_u32(G_io_apdu_buffer + request_token_offset, true, false);
     }
 
