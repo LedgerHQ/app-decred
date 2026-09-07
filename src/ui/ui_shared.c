@@ -342,6 +342,19 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
                 recipientCount++;
             }
         }
+        if (offset >= btchip_context_D.currentOutputOffset) {
+            if (!checkOnly) {
+                PRINTF("Error : script length byte out of bounds");
+            }
+            goto error;
+        }
+        if (offset + 1 + btchip_context_D.currentOutput[offset] >
+            btchip_context_D.currentOutputOffset) {
+            if (!checkOnly) {
+                PRINTF("Error : output script overruns buffer");
+            }
+            goto error;
+        }
         offset += 1 + btchip_context_D.currentOutput[offset];
         currentPos++;
     }
@@ -446,6 +459,15 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
             } else {
                 // amount + version
                 offset += 8 + 2;
+            }
+            if (offset >= btchip_context_D.currentOutputOffset) {
+                PRINTF("Error : script length byte out of bounds");
+                goto error;
+            }
+            if (offset + 1 + btchip_context_D.currentOutput[offset] >
+                btchip_context_D.currentOutputOffset) {
+                PRINTF("Error : output script overruns buffer");
+                goto error;
             }
             offset += 1 + btchip_context_D.currentOutput[offset];
             currentPos++;
