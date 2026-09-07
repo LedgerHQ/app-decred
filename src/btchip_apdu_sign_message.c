@@ -297,6 +297,14 @@ void btchip_bagl_user_action_message_signing(unsigned char confirming) {
         sw = btchip_compute_hash();
     } else {
         sw = BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
+        explicit_bzero(&btchip_context_D.transactionSummary,
+                        sizeof(btchip_transaction_summary_t));
+        btchip_context_D.hashedMessageLength = 0;
+        explicit_bzero(&btchip_context_D.messageHashPrefix,
+                        sizeof(btchip_context_D.messageHashPrefix));
+        explicit_bzero(&btchip_context_D.messageHashWitness,
+                        sizeof(btchip_context_D.messageHashWitness));
+        btchip_context_D.outLength = 0;
     }
     G_io_apdu_buffer[btchip_context_D.outLength++] = sw >> 8;
     G_io_apdu_buffer[btchip_context_D.outLength++] = sw;
