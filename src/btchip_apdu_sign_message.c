@@ -89,8 +89,17 @@ unsigned short btchip_apdu_sign_message_internal() {
                     unsigned char messageLengthSize;
                     explicit_bzero(&btchip_context_D.transactionSummary,
                                    sizeof(btchip_transaction_summary_t));
-                    if (G_io_apdu_buffer[offset] > MAX_BIP32_PATH) {
+                    uint8_t pathLen = G_io_apdu_buffer[offset];
+                    if (pathLen > MAX_BIP32_PATH) {
                         PRINTF("Invalid path\n");
+                        sw = BTCHIP_SW_INCORRECT_DATA;
+                        CLOSE_TRY;
+                        goto discard;
+                    }
+                    uint16_t pathBytes = 1 + (4 * (uint16_t) pathLen);
+                    uint16_t lenFieldSize = (p2 == P2_LEGACY) ? 1 : 2;
+                    if (apduLength < pathBytes + lenFieldSize) {
+                        PRINTF("Invalid data length\n");
                         sw = BTCHIP_SW_INCORRECT_DATA;
                         CLOSE_TRY;
                         goto discard;
@@ -101,8 +110,8 @@ unsigned short btchip_apdu_sign_message_internal() {
                         btchip_context_D.payToScriptHashVersion;
                     memmove(btchip_context_D.transactionSummary.summarydata.keyPath,
                             G_io_apdu_buffer + offset,
-                            MAX_BIP32_PATH_LENGTH);
-                    offset += (4 * G_io_apdu_buffer[offset]) + 1;
+                            pathBytes);
+                    offset += pathBytes;
                     if (p2 == P2_LEGACY) {
                         btchip_context_D.transactionSummary.messageLength =
                             G_io_apdu_buffer[offset];
@@ -157,7 +166,14 @@ unsigned short btchip_apdu_sign_message_internal() {
                             messageLengthSize,
                             NULL,
                             0);
-                    chunkLength = apduLength - (offset - ISO_OFFSET_CDATA);
+                    uint16_t consumed = offset - ISO_OFFSET_CDATA;
+                    if (consumed > apduLength) {
+                        PRINTF("Invalid data length\n");
+                        sw = BTCHIP_SW_INCORRECT_DATA;
+                        CLOSE_TRY;
+                        goto discard;
+                    }
+                    chunkLength = (unsigned char) (apduLength - consumed);
                     if ((btchip_context_D.hashedMessageLength + chunkLength) >
                         btchip_context_D.transactionSummary.messageLength) {
                         PRINTF("Invalid data length\n");
