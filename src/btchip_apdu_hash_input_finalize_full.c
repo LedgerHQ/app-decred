@@ -253,9 +253,19 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
                     // the client side
                     goto return_OK;
                 }
+                uint8_t changePathLen = G_io_apdu_buffer[ISO_OFFSET_CDATA];
+                if (changePathLen > MAX_BIP32_PATH) {
+                    sw = BTCHIP_SW_INCORRECT_DATA;
+                    goto discardTransaction;
+                }
+                uint16_t changePathBytes = 1 + (4 * (uint16_t) changePathLen);
+                if (apduLength < changePathBytes) {
+                    sw = BTCHIP_SW_INCORRECT_LENGTH;
+                    goto discardTransaction;
+                }
                 memmove(transactionSummary->summarydata.keyPath,
                         G_io_apdu_buffer + ISO_OFFSET_CDATA,
-                        MAX_BIP32_PATH_LENGTH);
+                        changePathBytes);
                 btchip_private_derive_keypair(transactionSummary->summarydata.keyPath, 1, NULL);
                 explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
                 if (((N_btchip.bkp.config.options & BTCHIP_OPTION_UNCOMPRESSED_KEYS) != 0)) {
