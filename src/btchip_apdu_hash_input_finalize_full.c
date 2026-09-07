@@ -415,7 +415,9 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
             btchip_context_D.outLength = btchip_context_D.currentOutputOffset;
         }
         FINALLY {
-            btchip_apdu_hash_input_finalize_full_reset();
+            if (!(btchip_context_D.io_flags & IO_ASYNCH_REPLY)) {
+                btchip_apdu_hash_input_finalize_full_reset();
+            }
             return sw;
         }
     }
@@ -466,6 +468,11 @@ unsigned char btchip_bagl_user_action(unsigned char confirming) {
         }
 
         while (btchip_context_D.remainingOutputs != 0) {
+            if (btchip_context_D.discardSize > btchip_context_D.currentOutputOffset) {
+                btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
+                sw = BTCHIP_SW_INCORRECT_DATA;
+                break;
+            }
             memmove(btchip_context_D.currentOutput,
                     btchip_context_D.currentOutput + btchip_context_D.discardSize,
                     btchip_context_D.currentOutputOffset - btchip_context_D.discardSize);
