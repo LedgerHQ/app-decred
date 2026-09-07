@@ -55,7 +55,18 @@ unsigned short btchip_apdu_get_trusted_input() {
     btchip_context_D.transactionBufferPointer = G_io_apdu_buffer + ISO_OFFSET_CDATA + dataOffset;
     btchip_context_D.transactionDataRemaining = apduLength - dataOffset;
 
-    transaction_parse(PARSE_MODE_TRUSTED_INPUT);
+    BEGIN_TRY {
+        TRY {
+            transaction_parse(PARSE_MODE_TRUSTED_INPUT);
+        }
+        CATCH_ALL {
+            btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
+            return BTCHIP_SW_INCORRECT_DATA;
+        }
+        FINALLY {
+        }
+    }
+    END_TRY;
 
     if (btchip_context_D.transactionContext.transactionState == BTCHIP_TRANSACTION_PARSED) {
         // unsigned char targetHash[32];
