@@ -225,14 +225,9 @@ unsigned short btchip_apdu_sign_message_internal() {
                     CLOSE_TRY;
                     goto discard;
                 }
-                if (checkBitId(btchip_context_D.transactionSummary.summarydata.keyPath) !=
-                    BITID_NONE) {
-                    sw = btchip_compute_hash();
-                } else {
-                    btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
-                    CLOSE_TRY;
-                    return BTCHIP_SW_OK;
-                }
+                btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
+                CLOSE_TRY;
+                return BTCHIP_SW_OK;
             }
         }
         CATCH_ALL {
