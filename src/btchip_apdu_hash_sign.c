@@ -145,6 +145,7 @@ unsigned short btchip_apdu_hash_sign() {
             G_io_apdu_buffer[btchip_context_D.outLength++] = sighashType;
 
             sw = BTCHIP_SW_OK;
+            btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
 
             // Then discard the transaction and reply
         }
