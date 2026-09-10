@@ -31,7 +31,7 @@ include $(BOLOS_SDK)/Makefile.defines
 # Application version
 APPVERSION_M= 1
 APPVERSION_N= 4
-APPVERSION_P= 0
+APPVERSION_P= 1
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
