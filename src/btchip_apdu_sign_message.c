@@ -34,6 +34,21 @@
 
 unsigned short btchip_compute_hash(void);
 
+static void buffer_message_chunk(const unsigned char *chunk, unsigned short chunkLength) {
+    if (!btchip_context_D.messageDisplayable) {
+        return;
+    }
+    for (unsigned short i = 0; i < chunkLength; i++) {
+        if ((chunk[i] < 0x20 || chunk[i] > 0x7E) && (chunk[i] != '\n')) {
+            btchip_context_D.messageDisplayable = 0;
+            return;
+        }
+    }
+    memmove(btchip_context_D.messageBuffer + btchip_context_D.hashedMessageLength,
+            chunk,
+            chunkLength);
+}
+
 unsigned char checkBitId(unsigned char *bip32Path) {
     unsigned char i;
     unsigned char bip32PathLength = bip32Path[0];
@@ -128,6 +143,9 @@ unsigned short btchip_apdu_sign_message_internal() {
                         goto discard;
                     }
                     btchip_context_D.hashedMessageLength = 0;
+                    btchip_context_D.messageDisplayable =
+                        (btchip_context_D.transactionSummary.messageLength <=
+                         MAX_DISPLAYABLE_MESSAGE_LENGTH);
                     cx_sha256_init(&btchip_context_D.messageHashPrefix);
                     cx_sha256_init(&btchip_context_D.messageHashWitness);
                     chunkLength = btchip_context_D.coinIdLength + SIGNMAGIC_LENGTH;
@@ -193,6 +211,7 @@ unsigned short btchip_apdu_sign_message_internal() {
                             chunkLength,
                             NULL,
                             0);
+                    buffer_message_chunk(G_io_apdu_buffer + offset, chunkLength);
                     btchip_context_D.hashedMessageLength += chunkLength;
                     G_io_apdu_buffer[0] = 0x00;
                     if (btchip_context_D.hashedMessageLength ==
@@ -222,6 +241,7 @@ unsigned short btchip_apdu_sign_message_internal() {
                             apduLength,
                             NULL,
                             0);
+                    buffer_message_chunk(G_io_apdu_buffer + offset, apduLength);
                     btchip_context_D.hashedMessageLength += apduLength;
                     G_io_apdu_buffer[0] = 0x00;
                     if (btchip_context_D.hashedMessageLength ==
@@ -241,6 +261,13 @@ unsigned short btchip_apdu_sign_message_internal() {
                     CLOSE_TRY;
                     goto discard;
                 }
+                if (!btchip_context_D.messageDisplayable &&
+                    !(N_btchip.bkp.config.options & BTCHIP_OPTION_BLIND_SIGNING)) {
+                    PRINTF("Blind signing not enabled\n");
+                    sw = BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
+                    CLOSE_TRY;
+                    goto discard;
+                }
                 btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
                 CLOSE_TRY;
                 return BTCHIP_SW_OK;
@@ -251,6 +278,8 @@ unsigned short btchip_apdu_sign_message_internal() {
         }
     discard : {
         explicit_bzero(&btchip_context_D.transactionSummary, sizeof(btchip_transaction_summary_t));
+        explicit_bzero(btchip_context_D.messageBuffer, sizeof(btchip_context_D.messageBuffer));
+        btchip_context_D.messageDisplayable = 0;
     }
         FINALLY {
             return sw;
@@ -296,6 +325,8 @@ unsigned short btchip_compute_hash() {
             explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
             explicit_bzero(&btchip_context_D.transactionSummary,
                            sizeof(btchip_transaction_summary_t));
+            explicit_bzero(btchip_context_D.messageBuffer, sizeof(btchip_context_D.messageBuffer));
+            btchip_context_D.messageDisplayable = 0;
         }
     }
     END_TRY;
@@ -315,6 +346,8 @@ void btchip_bagl_user_action_message_signing(unsigned char confirming) {
                         sizeof(btchip_context_D.messageHashPrefix));
         explicit_bzero(&btchip_context_D.messageHashWitness,
                         sizeof(btchip_context_D.messageHashWitness));
+        explicit_bzero(btchip_context_D.messageBuffer, sizeof(btchip_context_D.messageBuffer));
+        btchip_context_D.messageDisplayable = 0;
         btchip_context_D.outLength = 0;
     }
     G_io_apdu_buffer[btchip_context_D.outLength++] = sw >> 8;

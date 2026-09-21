@@ -29,6 +29,7 @@
 #include "btchip_internal.h"
 
 #define SWITCH_KEY_EXPORT_TOKEN FIRST_USER_TOKEN
+#define BLIND_SIGNING_TOKEN (FIRST_USER_TOKEN + 1)
 
 #define SETTING_INFO_NB 3
 static const char *const infoTypes[SETTING_INFO_NB] = {"Version", "Developer", "Copyright"};
@@ -40,16 +41,51 @@ static const nbgl_contentInfoList_t infoList = {
     .infoContents = infoContents,
 };
 
+static nbgl_contentSwitch_t blindSigningSwitch = {0};
+static nbgl_content_t settingContentsArray[1] = {0};
+static nbgl_genericContents_t settingContents = {0};
+
 void onQuitCallback(void) {
     os_sched_exit(-1);
 }
 
+static void setting_toggle_callback(int token, uint8_t index, int page) {
+    UNUSED(index);
+    UNUSED(page);
+    if (token == BLIND_SIGNING_TOKEN) {
+        unsigned char options = N_btchip.bkp.config.options;
+        unsigned char enabled = (options & BTCHIP_OPTION_BLIND_SIGNING) == 0;
+        if (enabled) {
+            options |= BTCHIP_OPTION_BLIND_SIGNING;
+        } else {
+            options &= ~BTCHIP_OPTION_BLIND_SIGNING;
+        }
+        nvm_write((void*) &N_btchip.bkp.config.options, &options, 1);
+        blindSigningSwitch.initState = (nbgl_state_t) enabled;
+    }
+}
+
 void ui_idle(void) {
+    blindSigningSwitch.initState =
+        (N_btchip.bkp.config.options & BTCHIP_OPTION_BLIND_SIGNING) ? ON_STATE : OFF_STATE;
+    blindSigningSwitch.text = "Blind signing";
+    blindSigningSwitch.subText = "Allow signing messages that can't be shown in full";
+    blindSigningSwitch.token = BLIND_SIGNING_TOKEN;
+
+    settingContentsArray[0].type = SWITCHES_LIST;
+    settingContentsArray[0].content.switchesList.nbSwitches = 1;
+    settingContentsArray[0].content.switchesList.switches = &blindSigningSwitch;
+    settingContentsArray[0].contentActionCallback = setting_toggle_callback;
+
+    settingContents.callbackCallNeeded = false;
+    settingContents.contentsList = settingContentsArray;
+    settingContents.nbContents = 1;
+
     nbgl_useCaseHomeAndSettings(APPNAME,
                                 &ICON_APP,
                                 NULL,
                                 INIT_HOME_PAGE,
-                                NULL,
+                                &settingContents,
                                 &infoList,
                                 NULL,
                                 onQuitCallback);

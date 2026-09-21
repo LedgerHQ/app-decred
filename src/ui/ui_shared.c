@@ -157,17 +157,25 @@ uint8_t prepare_message_signature() {
             buffer,
             32);
 
+    if (btchip_context_D.messageDisplayable) {
+        unsigned short len = btchip_context_D.transactionSummary.messageLength;
+        memmove(vars.tmp.fullAddress, btchip_context_D.messageBuffer, len);
+        vars.tmp.fullAddress[len] = '\0';
+        strlcpy(vars.tmp.msgTitle, "Message", sizeof(vars.tmp.msgTitle));
+    } else {
 #ifdef HAVE_NBGL
-    snprintf(vars.tmp.fullAddress, sizeof(vars.tmp.fullAddress), "%.*H", 32, buffer);
+        snprintf(vars.tmp.fullAddress, sizeof(vars.tmp.fullAddress), "%.*H", 32, buffer);
 #else
-    snprintf(vars.tmp.fullAddress,
-             sizeof(vars.tmp.fullAddress),
-             "%.*H...%.*H",
-             8,
-             buffer,
-             8,
-             buffer + 32 - 8);
+        snprintf(vars.tmp.fullAddress,
+                 sizeof(vars.tmp.fullAddress),
+                 "%.*H...%.*H",
+                 8,
+                 buffer,
+                 8,
+                 buffer + 32 - 8);
 #endif
+        strlcpy(vars.tmp.msgTitle, "Message hash", sizeof(vars.tmp.msgTitle));
+    }
     return 1;
 }
 

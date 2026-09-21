@@ -120,7 +120,7 @@ static void reviewStart(void) {
             msgs.reviewStart = "Finalize\n transaction";
             break;
         case TX_TYPE_SIGN_MESSAGE:
-            pairs[0].item = "Message Hash";
+            pairs[0].item = btchip_context_D.messageDisplayable ? "Message" : "Message Hash";
             pairs[0].value = vars.tmp.fullAddress;
             pairList.nbPairs = 1;
             msgs.reviewStart = "Sign\nMessage";

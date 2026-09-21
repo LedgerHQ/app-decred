@@ -31,11 +31,10 @@ def test_decred_sign_message(scenario_navigator: NavigateWithScenario):
 
     # magic = "\x18 Signed Message:\n"
     message = "Message to be signed"
-    data = chr(len(message)) + message
-    hex_str_data = hexlify(bytes(data, "ascii"))
+    hex_str_data = hexlify(bytes(message, "ascii"))
     hex_str_sign_msg = (
         b"058000002c8000002A800000000000000100000001"
-        + hexlify(struct.pack(">h", int(len(hex_str_data.decode("ascii")) / 2)))
+        + hexlify(struct.pack(">h", len(message)))
         + hex_str_data
     )
     str_sign_msg = hex_str_sign_msg.decode("ascii")
@@ -63,7 +62,7 @@ def test_decred_sign_message(scenario_navigator: NavigateWithScenario):
 
     result = scenario_navigator.backend.last_async_response
 
-    expected = "3045022100e841839bef7147f0bb79e7e301a0bfdb2ff8b1c4a195d9a18c4f167c70dd63e6022061898f34c11561ccd1ad74d627195aa5f08d7fff8f78eb9de605e433d8532783"
+    expected = "3145022100fa1413642c251a1030c2f00304e41f80e7617f993acf233ce48ccb7ab6be51ba02201052f852488af7bab0eef9bb331c1255a5307de7576482fd4a97fa791bb19bfe"
     assert result.status == 0x9000
     if expected not in hexlify(result.data).decode("utf-8"):
         print(
@@ -71,3 +70,29 @@ def test_decred_sign_message(scenario_navigator: NavigateWithScenario):
             % (expected, hexlify(result.data).decode("utf-8"))
         )
         exit()
+
+
+# Message longer than MAX_DISPLAYABLE_MESSAGE_LENGTH (200) can't be shown in clear, and
+# blind signing is disabled by default, so the device must reject it with no UI shown.
+def test_decred_sign_message_blind_signing_rejected(scenario_navigator: NavigateWithScenario):
+    scenario_navigator.backend.raise_policy = RaisePolicy.RAISE_NOTHING
+
+    message = "A" * 201
+    hex_str_data = hexlify(bytes(message, "ascii"))
+    hex_str_sign_msg = (
+        b"058000002c8000002A800000000000000100000001"
+        + hexlify(struct.pack(">h", len(message)))
+        + hex_str_data
+    )
+    str_sign_msg = hex_str_sign_msg.decode("ascii")
+
+    packet = (
+        "e04e0001"
+        + hexlify(bytes([int(len(str_sign_msg) / 2)])).decode("utf-8")
+        + str_sign_msg
+    )
+    scenario_navigator.backend.exchange_raw(data=bytearray.fromhex(packet))
+
+    packet = "e04e80000100"
+    result = scenario_navigator.backend.exchange_raw(data=bytearray.fromhex(packet))
+    assert result.status == 0x6985

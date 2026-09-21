@@ -18,6 +18,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "btchip_context.h"
 #include "btchip_filesystem_tx.h"
 #include "ux.h"
 
@@ -77,9 +78,10 @@ typedef union {
         // char addressSummary[40]; // beginning of the output address ... end
         // of
 
-        char fullAddress[43];  // the address
+        char fullAddress[MAX_DISPLAYABLE_MESSAGE_LENGTH + 1];  // the address
         char fullAmount[20];   // full amount
         char feesAmount[20];   // fees
+        char msgTitle[16];     // BAGL sign-message title
     } tmp;
 
     struct {

@@ -34,7 +34,7 @@ UX_STEP_NOCB(ux_sign_flow_1_step,
 UX_STEP_NOCB(ux_sign_flow_2_step,
              bnnn_paging,
              {
-                 .title = "Message hash",
+                 .title = vars.tmp.msgTitle,
                  .text = vars.tmp.fullAddress,
              });
 UX_STEP_VALID(ux_sign_flow_3_step,
