@@ -78,7 +78,8 @@ static bool check_output_displayable() {
         PRINTF("Error: Unrecognized input script\n");
         THROW(EXCEPTION);
     }
-    if (btchip_context_D.tmpCtx.output.changeInitialized && !isOpReturn) {
+    if (btchip_context_D.tmpCtx.output.changeInitialized &&
+        btchip_context_D.tmpCtx.output.changeAccepted && !isOpReturn) {
         bool changeFound = false;
         unsigned char addressOffset =
             (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH : OUTPUT_SCRIPT_REGULAR_PRE_LENGTH);
@@ -290,6 +291,8 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
                     btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
                     btchip_context_D.outputParsingState = BTCHIP_BIP44_CHANGE_PATH_VALIDATION;
                     ui_tx_request_change_path_approval(transactionSummary->summarydata.keyPath);
+                } else {
+                    btchip_context_D.tmpCtx.output.changeAccepted = 1;
                 }
 
                 goto return_OK;
@@ -422,6 +425,19 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
         }
     }
     END_TRY;
+}
+
+void btchip_user_action_change_path(unsigned char confirming) {
+    if (confirming) {
+        btchip_context_D.tmpCtx.output.changeAccepted = 1;
+        btchip_bagl_user_action_display(1);
+        return;
+    }
+
+    explicit_bzero(&btchip_context_D.tmpCtx.output, sizeof(btchip_context_D.tmpCtx.output));
+    btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
+    btchip_context_D.outputParsingState = BTCHIP_OUTPUT_PARSING_NUMBER_OUTPUTS;
+    btchip_bagl_user_action_display(0);
 }
 
 unsigned short btchip_apdu_hash_input_finalize_full() {

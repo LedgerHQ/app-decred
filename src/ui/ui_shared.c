@@ -104,6 +104,24 @@ unsigned int io_seproxyhal_touch_display_token_cancel(const void *e) {
     return 0;  // DO NOT REDRAW THE BUTTON
 }
 
+unsigned int io_seproxyhal_touch_change_path_cancel(const void *e) {
+    UNUSED(e);
+    btchip_user_action_change_path(0);
+#ifndef HAVE_NBGL
+    ui_idle();
+#endif
+    return 0;  // DO NOT REDRAW THE BUTTON
+}
+
+unsigned int io_seproxyhal_touch_change_path_ok(const void *e) {
+    UNUSED(e);
+    btchip_user_action_change_path(1);
+#ifndef HAVE_NBGL
+    ui_idle();
+#endif
+    return 0;  // DO NOT REDRAW THE BUTTON
+}
+
 unsigned int io_seproxyhal_touch_display_token_ok(const void *e) {
     UNUSED(e);
     // Set the valid token flag

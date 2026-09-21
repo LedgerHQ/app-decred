@@ -101,6 +101,8 @@ unsigned int io_seproxyhal_touch_message_signature_verify_cancel(const void *e);
 unsigned int io_seproxyhal_touch_message_signature_verify_ok(const void *e);
 unsigned int io_seproxyhal_touch_display_token_cancel(const void *e);
 unsigned int io_seproxyhal_touch_display_token_ok(const void *e);
+unsigned int io_seproxyhal_touch_change_path_cancel(const void *e);
+unsigned int io_seproxyhal_touch_change_path_ok(const void *e);
 
 uint8_t prepare_fees();
 uint8_t prepare_message_signature();

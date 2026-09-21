@@ -184,10 +184,10 @@ unsigned int ui_tx_confirm_single_output() {
 
 static void changePathWarningChoice(bool reject) {
     if (reject) {
-        io_seproxyhal_touch_display_cancel(NULL);
+        io_seproxyhal_touch_change_path_cancel(NULL);
         nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_REJECTED, ui_idle);
     } else {
-        io_seproxyhal_touch_display_ok(NULL);
+        io_seproxyhal_touch_change_path_ok(NULL);
     }
 }
 
