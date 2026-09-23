@@ -53,7 +53,7 @@ void btchip_apdu_hash_input_finalize_full_reset(void) {
 static bool check_output_displayable() {
     PRINTF("Check if output is displayable\n");
     bool displayable = true;
-    unsigned char amount[8], isOpReturn, isP2sh, j, nullAmount = 1;
+    unsigned char amount[8], isOpReturn, isP2sh, isRegular, j, nullAmount = 1;
 
     for (j = 0; j < 8; j++) {
         if (btchip_context_D.currentOutput[j] != 0) {
@@ -76,22 +76,23 @@ static bool check_output_displayable() {
     isOpReturn = btchip_output_script_is_op_return(
         btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
     isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
+    isRegular =
+        btchip_output_script_is_regular(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
     btchip_output_script_is_op_create(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
     btchip_output_script_is_op_call(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
 
-    if (!btchip_output_script_is_regular(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH) &&
-        !isP2sh && !(nullAmount && isOpReturn)) {
+    if (!isRegular && !isP2sh && !(nullAmount && isOpReturn)) {
         PRINTF("Error: Unrecognized input script\n");
         THROW(EXCEPTION);
     }
     if (btchip_context_D.tmpCtx.output.changeInitialized &&
         btchip_context_D.tmpCtx.output.changeAccepted && !isOpReturn) {
         bool changeFound = false;
-        unsigned char addressOffset =
-            (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH : OUTPUT_SCRIPT_REGULAR_PRE_LENGTH);
-        if (!isP2sh && memcmp(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH + addressOffset,
-                              btchip_context_D.tmpCtx.output.changeAddress + 1,
-                              20) == 0) {
+        // Only a canonical P2PKH script may be classified as change
+        if (isRegular && memcmp(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH +
+                                    OUTPUT_SCRIPT_REGULAR_PRE_LENGTH,
+                                btchip_context_D.tmpCtx.output.changeAddress + 1,
+                                20) == 0) {
             changeFound = true;
         }
 

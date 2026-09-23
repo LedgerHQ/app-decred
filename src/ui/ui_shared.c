@@ -302,7 +302,7 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
     for (i = 0; i < numberOutputs; i++) {
         unsigned char nullAmount = 1;
         unsigned int j;
-        unsigned char isOpReturn, isP2sh;
+        unsigned char isOpReturn, isP2sh, isRegular;
         unsigned char isOpCreate, isOpCall;
 
         for (j = 0; j < 8; j++) {
@@ -328,10 +328,10 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
 
         isOpReturn = btchip_output_script_is_op_return(btchip_context_D.currentOutput + offset);
         isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput + offset);
+        isRegular = btchip_output_script_is_regular(btchip_context_D.currentOutput + offset);
         isOpCreate = btchip_output_script_is_op_create(btchip_context_D.currentOutput + offset);
         isOpCall = btchip_output_script_is_op_call(btchip_context_D.currentOutput + offset);
-        PRINTF("REGULAR SCRIPT: %d\n",
-               btchip_output_script_is_regular(btchip_context_D.currentOutput + offset));
+        PRINTF("REGULAR SCRIPT: %d\n", isRegular);
         // Always notify OP_RETURN to the user
         if (nullAmount && isOpReturn) {
             if (!checkOnly) {
@@ -339,14 +339,12 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
             }
             goto error;
         }
-        if (!btchip_output_script_is_regular(btchip_context_D.currentOutput + offset) && !isP2sh &&
-            !(nullAmount && isOpReturn) && (!isOpCreate && !isOpCall)) {
+        if (!isRegular && !isP2sh && !(nullAmount && isOpReturn) && (!isOpCreate && !isOpCall)) {
             if (!checkOnly) {
                 PRINTF("Error : Unrecognized input script");
             }
             goto error;
-        } else if (!btchip_output_script_is_regular(btchip_context_D.currentOutput + offset) &&
-                   !isP2sh && !(nullAmount && isOpReturn)) {
+        } else if (!isRegular && !isP2sh && !(nullAmount && isOpReturn)) {
             if (!checkOnly) {
                 PRINTF("Error : Unrecognized input script");
             }
@@ -354,11 +352,11 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
         }
         if (!isOpReturn) {
             unsigned char isChangeOutput = 0;
-            if (btchip_context_D.tmpCtx.output.changeInitialized) {
-                unsigned char addressOffset =
-                    (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH : OUTPUT_SCRIPT_REGULAR_PRE_LENGTH);
+            // Only a canonical P2PKH script may be classified as change
+            if (btchip_context_D.tmpCtx.output.changeInitialized && isRegular) {
                 isChangeOutput =
-                    (memcmp(btchip_context_D.currentOutput + offset + addressOffset,
+                    (memcmp(btchip_context_D.currentOutput + offset +
+                                OUTPUT_SCRIPT_REGULAR_PRE_LENGTH,
                             btchip_context_D.tmpCtx.output.changeAddress + 1,
                             20) == 0);
             }
