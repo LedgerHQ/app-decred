@@ -77,7 +77,20 @@ unsigned short btchip_apdu_get_wallet_public_key() {
         return BTCHIP_SW_SECURITY_STATUS_NOT_SATISFIED;
     }
 
-    btchip_private_derive_keypair(keyPath, 1, chainCode);
+    BEGIN_TRY {
+        TRY {
+            btchip_private_derive_keypair(keyPath, 1, chainCode);
+        }
+        CATCH_ALL {
+            // A path the OS refuses must not reach app_dispatch's halting handler
+            explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
+            return BTCHIP_SW_INCORRECT_DATA;
+        }
+        FINALLY {
+        }
+    }
+    END_TRY;
+
     explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
     G_io_apdu_buffer[0] = 65;
 
