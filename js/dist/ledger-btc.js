@@ -350,28 +350,35 @@ LedgerBtc.prototype.hashOutputFull_async = function(outputScript) {
 	});
 }
 
-LedgerBtc.prototype.signTransaction_async = function (path, lockTime, sigHashType) {
+LedgerBtc.prototype.signTransaction_async = function (path, lockTime, sigHashType, expiry) {
 	if (typeof lockTime == "undefined") {
 		lockTime = LedgerBtc.DEFAULT_LOCKTIME;
+	}
+	if (typeof expiry == "undefined") {
+		expiry = LedgerBtc.DEFAULT_EXPIRY;
 	}
 	if (typeof sigHashType == "undefined") {
 		sigHashType = LedgerBtc.SIGHASH_ALL;
 	}
 	var splitPath = LedgerBtc.splitPath(path);
-	var buffer = Buffer.alloc(5 + 1 + splitPath.length * 4 + 1 + 4 + 1);
+	// Decred HASH_SIGN data: path, 4-byte locktime, 4-byte expiry, 1-byte sighash.
+	var dataLength = 1 + splitPath.length * 4 + 4 + 4 + 1;
+	var buffer = Buffer.alloc(5 + dataLength);
 	var offset = 0;
 	buffer[offset++] = 0xe0;
 	buffer[offset++] = 0x48;
 	buffer[offset++] = 0x00;
 	buffer[offset++] = 0x00;
-	buffer[offset++] = 1 + splitPath.length * 4 + 1 + 4 + 1;
+	buffer[offset++] = dataLength;
 	buffer[offset++] = splitPath.length;
 	splitPath.forEach(function (element) {
 		buffer.writeUInt32BE(element, offset);
 		offset += 4;
 	});
-	buffer[offset++] = 0x00; // authorization length
-	buffer.writeUInt32LE(lockTime, offset);
+	// These APDU fields are read big-endian by the app, unlike the transaction wire format.
+	buffer.writeUInt32BE(lockTime, offset);
+	offset += 4;
+	buffer.writeUInt32BE(expiry, offset);
 	offset += 4;
 	buffer[offset++] = sigHashType;
 	var self = this;
@@ -382,7 +389,7 @@ LedgerBtc.prototype.signTransaction_async = function (path, lockTime, sigHashTyp
 	})
 }
 
-LedgerBtc.prototype.createPaymentTransactionNew_async = function(inputs, associatedKeysets, changePath, outputScript, lockTime, sigHashType) {
+LedgerBtc.prototype.createPaymentTransactionNew_async = function(inputs, associatedKeysets, changePath, outputScript, lockTime, sigHashType, expiry) {
 	// Inputs are provided as arrays of [transaction, output_index, optional redeem script, optional sequence]
 	// associatedKeysets are provided as arrays of [path]	
 	var nullScript = Buffer.alloc(0);
@@ -401,6 +408,9 @@ LedgerBtc.prototype.createPaymentTransactionNew_async = function(inputs, associa
 
 	if (typeof lockTime == "undefined") {
 		lockTime = LedgerBtc.DEFAULT_LOCKTIME;
+	}
+	if (typeof expiry == "undefined") {
+		expiry = LedgerBtc.DEFAULT_EXPIRY;
 	}
 	if (typeof sigHashType == "undefined") {
 		sigHashType = LedgerBtc.SIGHASH_ALL;
@@ -469,7 +479,7 @@ LedgerBtc.prototype.createPaymentTransactionNew_async = function(inputs, associa
 				}).then (function () {
 					return self.hashOutputFull_async(outputScript);
 				}).then (function (resultHash) {
-					return self.signTransaction_async(associatedKeysets[i], lockTime, sigHashType).then(function (signature) {
+					return self.signTransaction_async(associatedKeysets[i], lockTime, sigHashType, expiry).then(function (signature) {
 						signatures.push(signature);
 						targetTransaction['inputs'][i]['script'] = nullScript;
 						if (firstRun) {
@@ -490,13 +500,17 @@ LedgerBtc.prototype.createPaymentTransactionNew_async = function(inputs, associa
 			targetTransaction['inputs'][i]['prevout'] = trustedInputs[i]['value'].slice(4, 4 + 0x24);
 		}
 
+		// Transaction wire format keeps locktime and expiry little-endian.
 		var lockTimeBuffer = Buffer.alloc(4);
 		lockTimeBuffer.writeUInt32LE(lockTime, 0);
+		var expiryBuffer = Buffer.alloc(4);
+		expiryBuffer.writeUInt32LE(expiry, 0);
 
 		var result = Buffer.concat([
 			self.serializeTransaction(targetTransaction),
 			outputScript,
-			lockTimeBuffer]);
+			lockTimeBuffer,
+			expiryBuffer]);
 
 		return result.toString('hex');
 	}).fail(function (failure) {
@@ -510,7 +524,7 @@ LedgerBtc.prototype.createPaymentTransactionNew_async = function(inputs, associa
 	return deferred.promise;
 }
 
-LedgerBtc.prototype.signP2SHTransaction_async = function(inputs, associatedKeysets, outputScript, lockTime, sigHashType) {
+LedgerBtc.prototype.signP2SHTransaction_async = function(inputs, associatedKeysets, outputScript, lockTime, sigHashType, expiry) {
 	// Inputs are provided as arrays of [transaction, output_index, redeem script, optional sequence]
 	// associatedKeysets are provided as arrays of [path]	
 	var nullScript = Buffer.alloc(0);
@@ -529,6 +543,9 @@ LedgerBtc.prototype.signP2SHTransaction_async = function(inputs, associatedKeyse
 
 	if (typeof lockTime == "undefined") {
 		lockTime = LedgerBtc.DEFAULT_LOCKTIME;
+	}
+	if (typeof expiry == "undefined") {
+		expiry = LedgerBtc.DEFAULT_EXPIRY;
 	}
 	if (typeof sigHashType == "undefined") {
 		sigHashType = LedgerBtc.SIGHASH_ALL;
@@ -581,7 +598,7 @@ LedgerBtc.prototype.signP2SHTransaction_async = function(inputs, associatedKeyse
 			return self.startUntrustedHashTransactionInput_async(firstRun, targetTransaction, trustedInputs).then(function () {
 					return self.hashOutputFull_async(outputScript);
 				}).then (function (resultHash) {
-					return self.signTransaction_async(associatedKeysets[i], lockTime, sigHashType).then(function (signature) {
+					return self.signTransaction_async(associatedKeysets[i], lockTime, sigHashType, expiry).then(function (signature) {
 						signatures.push(signature.slice(0, signature.length - 1).toString('hex'));
 						targetTransaction['inputs'][i]['script'] = nullScript;
 						if (firstRun) {
@@ -725,6 +742,7 @@ LedgerBtc.prototype.displayTransactionDebug = function(transaction) {
 
 LedgerBtc.MAX_SCRIPT_BLOCK = 50;
 LedgerBtc.DEFAULT_LOCKTIME = 0;
+LedgerBtc.DEFAULT_EXPIRY = 0;
 LedgerBtc.DEFAULT_SEQUENCE = 0xffffffff;
 LedgerBtc.SIGHASH_ALL = 1;
 
