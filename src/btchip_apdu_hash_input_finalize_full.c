@@ -67,6 +67,12 @@ static bool check_output_displayable() {
                                   btchip_context_D.totalOutputAmount,
                                   amount);
     }
+    // Only version 0 scripts may reach the v0 pattern recognizers below
+    if (btchip_context_D.currentOutput[OUTPUT_AMOUNT_LENGTH] != 0 ||
+        btchip_context_D.currentOutput[OUTPUT_AMOUNT_LENGTH + 1] != 0) {
+        PRINTF("Error: Unsupported output script version\n");
+        THROW(EXCEPTION);
+    }
     isOpReturn = btchip_output_script_is_op_return(
         btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
     isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);

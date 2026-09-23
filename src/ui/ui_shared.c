@@ -318,6 +318,14 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
         btchip_swap_bytes(script_version, btchip_context_D.currentOutput + offset, 2);
         offset += 2;  // skip script_version
 
+        // Only version 0 scripts may reach the v0 pattern recognizers below
+        if (script_version[0] != 0 || script_version[1] != 0) {
+            if (!checkOnly) {
+                PRINTF("Error : Unsupported output script version");
+            }
+            goto error;
+        }
+
         isOpReturn = btchip_output_script_is_op_return(btchip_context_D.currentOutput + offset);
         isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput + offset);
         isOpCreate = btchip_output_script_is_op_create(btchip_context_D.currentOutput + offset);
