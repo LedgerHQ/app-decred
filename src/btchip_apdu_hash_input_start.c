@@ -60,6 +60,7 @@ unsigned short btchip_apdu_hash_input_start() {
             // Initialize for screen pairing
             explicit_bzero(&btchip_context_D.tmpCtx.output, sizeof(btchip_context_D.tmpCtx.output));
             btchip_context_D.tmpCtx.output.changeAccepted = 1;
+            btchip_apdu_hash_input_finalize_full_reset();
         }
     } else if (G_io_apdu_buffer[ISO_OFFSET_P2] != P2_CONTINUE) {
         return BTCHIP_SW_INCORRECT_P1_P2;
