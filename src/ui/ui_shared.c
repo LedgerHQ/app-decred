@@ -104,6 +104,24 @@ unsigned int io_seproxyhal_touch_display_token_cancel(const void *e) {
     return 0;  // DO NOT REDRAW THE BUTTON
 }
 
+unsigned int io_seproxyhal_touch_change_path_cancel(const void *e) {
+    UNUSED(e);
+    btchip_user_action_change_path(0);
+#ifndef HAVE_NBGL
+    ui_idle();
+#endif
+    return 0;  // DO NOT REDRAW THE BUTTON
+}
+
+unsigned int io_seproxyhal_touch_change_path_ok(const void *e) {
+    UNUSED(e);
+    btchip_user_action_change_path(1);
+#ifndef HAVE_NBGL
+    ui_idle();
+#endif
+    return 0;  // DO NOT REDRAW THE BUTTON
+}
+
 unsigned int io_seproxyhal_touch_display_token_ok(const void *e) {
     UNUSED(e);
     // Set the valid token flag
@@ -157,17 +175,25 @@ uint8_t prepare_message_signature() {
             buffer,
             32);
 
+    if (btchip_context_D.messageDisplayable) {
+        unsigned short len = btchip_context_D.transactionSummary.messageLength;
+        memmove(vars.tmp.fullAddress, btchip_context_D.messageBuffer, len);
+        vars.tmp.fullAddress[len] = '\0';
+        strlcpy(vars.tmp.msgTitle, "Message", sizeof(vars.tmp.msgTitle));
+    } else {
 #ifdef HAVE_NBGL
-    snprintf(vars.tmp.fullAddress, sizeof(vars.tmp.fullAddress), "%.*H", 32, buffer);
+        snprintf(vars.tmp.fullAddress, sizeof(vars.tmp.fullAddress), "%.*H", 32, buffer);
 #else
-    snprintf(vars.tmp.fullAddress,
-             sizeof(vars.tmp.fullAddress),
-             "%.*H...%.*H",
-             8,
-             buffer,
-             8,
-             buffer + 32 - 8);
+        snprintf(vars.tmp.fullAddress,
+                 sizeof(vars.tmp.fullAddress),
+                 "%.*H...%.*H",
+                 8,
+                 buffer,
+                 8,
+                 buffer + 32 - 8);
 #endif
+        strlcpy(vars.tmp.msgTitle, "Message hash", sizeof(vars.tmp.msgTitle));
+    }
     return 1;
 }
 
@@ -244,7 +270,7 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
     unsigned int currentPos = 0;
     unsigned char amount[8], totalOutputAmount[8], fees[8];
     char tmp[80];
-    unsigned char outputPos = 0, changeFound = 0;
+    unsigned char outputPos = 0, changeFound = 0, recipientCount = 0;
     unsigned char script_version[2];  // Decred thing
 
     if (btchip_context_D.transactionContext.relaxed &&
@@ -276,7 +302,7 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
     for (i = 0; i < numberOutputs; i++) {
         unsigned char nullAmount = 1;
         unsigned int j;
-        unsigned char isOpReturn, isP2sh;
+        unsigned char isOpReturn, isP2sh, isRegular;
         unsigned char isOpCreate, isOpCall;
 
         for (j = 0; j < 8; j++) {
@@ -292,12 +318,20 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
         btchip_swap_bytes(script_version, btchip_context_D.currentOutput + offset, 2);
         offset += 2;  // skip script_version
 
+        // Only version 0 scripts may reach the v0 pattern recognizers below
+        if (script_version[0] != 0 || script_version[1] != 0) {
+            if (!checkOnly) {
+                PRINTF("Error : Unsupported output script version");
+            }
+            goto error;
+        }
+
         isOpReturn = btchip_output_script_is_op_return(btchip_context_D.currentOutput + offset);
         isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput + offset);
+        isRegular = btchip_output_script_is_regular(btchip_context_D.currentOutput + offset);
         isOpCreate = btchip_output_script_is_op_create(btchip_context_D.currentOutput + offset);
         isOpCall = btchip_output_script_is_op_call(btchip_context_D.currentOutput + offset);
-        PRINTF("REGULAR SCRIPT: %d\n",
-               btchip_output_script_is_regular(btchip_context_D.currentOutput + offset));
+        PRINTF("REGULAR SCRIPT: %d\n", isRegular);
         // Always notify OP_RETURN to the user
         if (nullAmount && isOpReturn) {
             if (!checkOnly) {
@@ -305,25 +339,29 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
             }
             goto error;
         }
-        if (!btchip_output_script_is_regular(btchip_context_D.currentOutput + offset) && !isP2sh &&
-            !(nullAmount && isOpReturn) && (!isOpCreate && !isOpCall)) {
+        if (!isRegular && !isP2sh && !(nullAmount && isOpReturn) && (!isOpCreate && !isOpCall)) {
             if (!checkOnly) {
                 PRINTF("Error : Unrecognized input script");
             }
             goto error;
-        } else if (!btchip_output_script_is_regular(btchip_context_D.currentOutput + offset) &&
-                   !isP2sh && !(nullAmount && isOpReturn)) {
+        } else if (!isRegular && !isP2sh && !(nullAmount && isOpReturn)) {
             if (!checkOnly) {
                 PRINTF("Error : Unrecognized input script");
             }
             goto error;
         }
-        if (btchip_context_D.tmpCtx.output.changeInitialized && !isOpReturn) {
-            unsigned char addressOffset =
-                (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH : OUTPUT_SCRIPT_REGULAR_PRE_LENGTH);
-            if (memcmp(btchip_context_D.currentOutput + offset + addressOffset,
-                       btchip_context_D.tmpCtx.output.changeAddress + 1,
-                       20) == 0) {
+        if (!isOpReturn) {
+            unsigned char isChangeOutput = 0;
+            // Only a canonical P2PKH script may be classified as change
+            if (btchip_context_D.tmpCtx.output.changeInitialized &&
+                btchip_context_D.tmpCtx.output.changeAccepted && isRegular) {
+                isChangeOutput =
+                    (memcmp(btchip_context_D.currentOutput + offset +
+                                OUTPUT_SCRIPT_REGULAR_PRE_LENGTH,
+                            btchip_context_D.tmpCtx.output.changeAddress + 1,
+                            20) == 0);
+            }
+            if (isChangeOutput) {
                 if (changeFound) {
                     if (!checkOnly) {
                         PRINTF("Error : Multiple change output found");
@@ -334,7 +372,21 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
             } else {
                 // outputPos is the real output pointer (opposed to the change address output)
                 outputPos = currentPos;
+                recipientCount++;
             }
+        }
+        if (offset >= btchip_context_D.currentOutputOffset) {
+            if (!checkOnly) {
+                PRINTF("Error : script length byte out of bounds");
+            }
+            goto error;
+        }
+        if (offset + 1 + btchip_context_D.currentOutput[offset] >
+            btchip_context_D.currentOutputOffset) {
+            if (!checkOnly) {
+                PRINTF("Error : output script overruns buffer");
+            }
+            goto error;
         }
         offset += 1 + btchip_context_D.currentOutput[offset];
         currentPos++;
@@ -342,6 +394,12 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
     if (btchip_context_D.tmpCtx.output.changeInitialized && !changeFound) {
         if (!checkOnly) {
             PRINTF("Error : change output not found");
+        }
+        goto error;
+    }
+    if (recipientCount != 1) {
+        if (!checkOnly) {
+            PRINTF("Error : unexpected number of recipient outputs");
         }
         goto error;
     }
@@ -434,6 +492,15 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
             } else {
                 // amount + version
                 offset += 8 + 2;
+            }
+            if (offset >= btchip_context_D.currentOutputOffset) {
+                PRINTF("Error : script length byte out of bounds");
+                goto error;
+            }
+            if (offset + 1 + btchip_context_D.currentOutput[offset] >
+                btchip_context_D.currentOutputOffset) {
+                PRINTF("Error : output script overruns buffer");
+                goto error;
             }
             offset += 1 + btchip_context_D.currentOutput[offset];
             currentPos++;

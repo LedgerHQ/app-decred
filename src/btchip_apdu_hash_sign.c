@@ -54,14 +54,18 @@ unsigned short btchip_apdu_hash_sign() {
             }
 
             // Read parameters
-            if (G_io_apdu_buffer[ISO_OFFSET_CDATA] > MAX_BIP32_PATH) {
+            unsigned char pathLength = G_io_apdu_buffer[ISO_OFFSET_CDATA];
+            unsigned char expectedLc = 1 + 4 * pathLength + 4 + 4 + 1;
+            if (pathLength > MAX_BIP32_PATH ||
+                G_io_apdu_buffer[ISO_OFFSET_LC] != expectedLc) {
                 sw = BTCHIP_SW_INCORRECT_DATA;
             discardTransaction:
                 CLOSE_TRY;
                 goto catch_discardTransaction;
             }
-            memmove(keyPath, G_io_apdu_buffer + ISO_OFFSET_CDATA, MAX_BIP32_PATH_LENGTH);
-            parameters += (4 * G_io_apdu_buffer[ISO_OFFSET_CDATA]) + 1;
+            explicit_bzero(keyPath, sizeof(keyPath));
+            memmove(keyPath, G_io_apdu_buffer + ISO_OFFSET_CDATA, 1 + 4 * pathLength);
+            parameters += (4 * pathLength) + 1;
 
             lockTime = btchip_read_u32(parameters, 1, 0);
             parameters += 4;
@@ -141,6 +145,7 @@ unsigned short btchip_apdu_hash_sign() {
             G_io_apdu_buffer[btchip_context_D.outLength++] = sighashType;
 
             sw = BTCHIP_SW_OK;
+            btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
 
             // Then discard the transaction and reply
         }
@@ -150,6 +155,7 @@ unsigned short btchip_apdu_hash_sign() {
             btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
         }
         FINALLY {
+            explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
             btchip_set_check_internal_structure_integrity(1);
             return sw;
         }

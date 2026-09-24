@@ -34,7 +34,7 @@ UX_STEP_NOCB(ux_sign_flow_1_step,
 UX_STEP_NOCB(ux_sign_flow_2_step,
              bnnn_paging,
              {
-                 .title = "Message hash",
+                 .title = vars.tmp.msgTitle,
                  .text = vars.tmp.fullAddress,
              });
 UX_STEP_VALID(ux_sign_flow_3_step,
@@ -190,7 +190,7 @@ UX_STEP_NOCB(ux_request_change_path_approval_flow_2_step,
              });
 UX_STEP_VALID(ux_request_change_path_approval_flow_3_step,
               pbb,
-              io_seproxyhal_touch_display_cancel(NULL),
+              io_seproxyhal_touch_change_path_cancel(NULL),
               {
                   &C_icon_crossmark,
                   "Reject if you're",
@@ -198,7 +198,7 @@ UX_STEP_VALID(ux_request_change_path_approval_flow_3_step,
               });
 UX_STEP_VALID(ux_request_change_path_approval_flow_4_step,
               pb,
-              io_seproxyhal_touch_display_ok(NULL),
+              io_seproxyhal_touch_change_path_ok(NULL),
               {
                   &C_icon_validate_14,
                   "Approve",

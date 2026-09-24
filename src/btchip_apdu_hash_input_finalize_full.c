@@ -30,9 +30,19 @@
 #define FLAG_SIGNATURE        0x01
 #define FLAG_CHANGE_VALIDATED 0x80
 
+// Layout of a serialized output: amount, then script version (Decred particularity),
+// then a CompactSize varint giving the script length, then the script itself.
+#define OUTPUT_AMOUNT_LENGTH         8
+#define OUTPUT_SCRIPT_VERSION_LENGTH 2
+#define OUTPUT_HEADER_LENGTH         (OUTPUT_AMOUNT_LENGTH + OUTPUT_SCRIPT_VERSION_LENGTH)
+// CompactSize 0xFD case: 1 marker byte, then a 2-byte little-endian value
+#define OUTPUT_SCRIPT_SIZE_FD_MARKER_LENGTH 1
+#define OUTPUT_SCRIPT_SIZE_FD_VALUE_LENGTH  2
+#define OUTPUT_SCRIPT_SIZE_FD_VALUE_OFFSET  (OUTPUT_HEADER_LENGTH + OUTPUT_SCRIPT_SIZE_FD_MARKER_LENGTH)
+
 extern uint8_t prepare_full_output(uint8_t checkOnly);
 
-static void btchip_apdu_hash_input_finalize_full_reset(void) {
+void btchip_apdu_hash_input_finalize_full_reset(void) {
     btchip_context_D.currentOutputOffset = 0;
     btchip_context_D.outputParsingState = BTCHIP_OUTPUT_PARSING_NUMBER_OUTPUTS;
     explicit_bzero(btchip_context_D.totalOutputAmount, sizeof(btchip_context_D.totalOutputAmount));
@@ -43,7 +53,7 @@ static void btchip_apdu_hash_input_finalize_full_reset(void) {
 static bool check_output_displayable() {
     PRINTF("Check if output is displayable\n");
     bool displayable = true;
-    unsigned char amount[8], isOpReturn, isP2sh, j, nullAmount = 1;
+    unsigned char amount[8], isOpReturn, isP2sh, isRegular, j, nullAmount = 1;
 
     for (j = 0; j < 8; j++) {
         if (btchip_context_D.currentOutput[j] != 0) {
@@ -52,29 +62,37 @@ static bool check_output_displayable() {
         }
     }
     if (!nullAmount) {
-        btchip_swap_bytes(amount, btchip_context_D.currentOutput, 8);
+        btchip_swap_bytes(amount, btchip_context_D.currentOutput, OUTPUT_AMOUNT_LENGTH);
         transaction_amount_add_be(btchip_context_D.totalOutputAmount,
                                   btchip_context_D.totalOutputAmount,
                                   amount);
     }
+    // Only version 0 scripts may reach the v0 pattern recognizers below
+    if (btchip_context_D.currentOutput[OUTPUT_AMOUNT_LENGTH] != 0 ||
+        btchip_context_D.currentOutput[OUTPUT_AMOUNT_LENGTH + 1] != 0) {
+        PRINTF("Error: Unsupported output script version\n");
+        THROW(EXCEPTION);
+    }
     isOpReturn = btchip_output_script_is_op_return(
-        btchip_context_D.currentOutput + 8 + 2);  // +2 for script version, decred particularity
-    isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput + 8 + 2);
-    btchip_output_script_is_op_create(btchip_context_D.currentOutput + 8 + 2);
-    btchip_output_script_is_op_call(btchip_context_D.currentOutput + 8 + 2);
+        btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
+    isP2sh = btchip_output_script_is_p2sh(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
+    isRegular =
+        btchip_output_script_is_regular(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
+    btchip_output_script_is_op_create(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
+    btchip_output_script_is_op_call(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH);
 
-    if (!btchip_output_script_is_regular(btchip_context_D.currentOutput + 8 + 2) && !isP2sh &&
-        !(nullAmount && isOpReturn)) {
+    if (!isRegular && !isP2sh && !(nullAmount && isOpReturn)) {
         PRINTF("Error: Unrecognized input script\n");
         THROW(EXCEPTION);
     }
-    if (btchip_context_D.tmpCtx.output.changeInitialized && !isOpReturn) {
+    if (btchip_context_D.tmpCtx.output.changeInitialized &&
+        btchip_context_D.tmpCtx.output.changeAccepted && !isOpReturn) {
         bool changeFound = false;
-        unsigned char addressOffset =
-            (isP2sh ? OUTPUT_SCRIPT_P2SH_PRE_LENGTH : OUTPUT_SCRIPT_REGULAR_PRE_LENGTH);
-        if (!isP2sh && memcmp(btchip_context_D.currentOutput + 8 + 2 + addressOffset,
-                              btchip_context_D.tmpCtx.output.changeAddress + 1,
-                              20) == 0) {
+        // Only a canonical P2PKH script may be classified as change
+        if (isRegular && memcmp(btchip_context_D.currentOutput + OUTPUT_HEADER_LENGTH +
+                                    OUTPUT_SCRIPT_REGULAR_PRE_LENGTH,
+                                btchip_context_D.tmpCtx.output.changeAddress + 1,
+                                20) == 0) {
             changeFound = true;
         }
 
@@ -139,30 +157,34 @@ static bool handle_output_state() {
             PRINTF("BTCHIP_OUTPUT_PARSING_OUTPUT:\n");
 
             unsigned int scriptSize;
-            if (btchip_context_D.currentOutputOffset < 9) {
+            if (btchip_context_D.currentOutputOffset < OUTPUT_HEADER_LENGTH + 1) {
                 break;
             }
-            if (btchip_context_D.currentOutput[8 + 2] < 0xFD) {
-                scriptSize = btchip_context_D.currentOutput[8 + 2];
+            if (btchip_context_D.currentOutput[OUTPUT_HEADER_LENGTH] < 0xFD) {
+                scriptSize = btchip_context_D.currentOutput[OUTPUT_HEADER_LENGTH];
                 discardSize = 1;
-            } else if (btchip_context_D.currentOutput[8 + 2] == 0xFD) {
-                if (btchip_context_D.currentOutputOffset < 9 + 2) {
+            } else if (btchip_context_D.currentOutput[OUTPUT_HEADER_LENGTH] == 0xFD) {
+                if (btchip_context_D.currentOutputOffset <
+                    OUTPUT_SCRIPT_SIZE_FD_VALUE_OFFSET + OUTPUT_SCRIPT_SIZE_FD_VALUE_LENGTH) {
                     break;
                 }
-                scriptSize = btchip_read_u32(btchip_context_D.currentOutput + 9, 0, 0);
+                scriptSize = btchip_context_D.currentOutput[OUTPUT_SCRIPT_SIZE_FD_VALUE_OFFSET] |
+                             (btchip_context_D.currentOutput[OUTPUT_SCRIPT_SIZE_FD_VALUE_OFFSET + 1]
+                              << 8);
                 discardSize = 3;
             } else {
                 // Unrealistically large script
                 THROW(EXCEPTION);
             }
-            if (btchip_context_D.currentOutputOffset < 8 + 2 + discardSize + scriptSize) {
+            if (btchip_context_D.currentOutputOffset <
+                OUTPUT_HEADER_LENGTH + discardSize + scriptSize) {
                 discardSize = 0;
                 break;
             }
 
             processed = true;
 
-            discardSize += 8 + 2 + scriptSize;
+            discardSize += OUTPUT_HEADER_LENGTH + scriptSize;
 
             if (check_output_displayable()) {
                 btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
@@ -239,10 +261,21 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
                     // the client side
                     goto return_OK;
                 }
+                uint8_t changePathLen = G_io_apdu_buffer[ISO_OFFSET_CDATA];
+                if (changePathLen > MAX_BIP32_PATH) {
+                    sw = BTCHIP_SW_INCORRECT_DATA;
+                    goto discardTransaction;
+                }
+                uint16_t changePathBytes = 1 + (4 * (uint16_t) changePathLen);
+                if (apduLength < changePathBytes) {
+                    sw = BTCHIP_SW_INCORRECT_LENGTH;
+                    goto discardTransaction;
+                }
                 memmove(transactionSummary->summarydata.keyPath,
                         G_io_apdu_buffer + ISO_OFFSET_CDATA,
-                        MAX_BIP32_PATH_LENGTH);
+                        changePathBytes);
                 btchip_private_derive_keypair(transactionSummary->summarydata.keyPath, 1, NULL);
+                explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
                 if (((N_btchip.bkp.config.options & BTCHIP_OPTION_UNCOMPRESSED_KEYS) != 0)) {
                     keyLength = 65;
                 } else {
@@ -265,6 +298,8 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
                     btchip_context_D.io_flags |= IO_ASYNCH_REPLY;
                     btchip_context_D.outputParsingState = BTCHIP_BIP44_CHANGE_PATH_VALIDATION;
                     ui_tx_request_change_path_approval(transactionSummary->summarydata.keyPath);
+                } else {
+                    btchip_context_D.tmpCtx.output.changeAccepted = 1;
                 }
 
                 goto return_OK;
@@ -390,11 +425,26 @@ unsigned short btchip_apdu_hash_input_finalize_full_internal(
             btchip_context_D.outLength = btchip_context_D.currentOutputOffset;
         }
         FINALLY {
-            btchip_apdu_hash_input_finalize_full_reset();
+            if (!(btchip_context_D.io_flags & IO_ASYNCH_REPLY)) {
+                btchip_apdu_hash_input_finalize_full_reset();
+            }
             return sw;
         }
     }
     END_TRY;
+}
+
+void btchip_user_action_change_path(unsigned char confirming) {
+    if (confirming) {
+        btchip_context_D.tmpCtx.output.changeAccepted = 1;
+        btchip_bagl_user_action_display(1);
+        return;
+    }
+
+    explicit_bzero(&btchip_context_D.tmpCtx.output, sizeof(btchip_context_D.tmpCtx.output));
+    btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
+    btchip_context_D.outputParsingState = BTCHIP_OUTPUT_PARSING_NUMBER_OUTPUTS;
+    btchip_bagl_user_action_display(0);
 }
 
 unsigned short btchip_apdu_hash_input_finalize_full() {
@@ -441,6 +491,11 @@ unsigned char btchip_bagl_user_action(unsigned char confirming) {
         }
 
         while (btchip_context_D.remainingOutputs != 0) {
+            if (btchip_context_D.discardSize > btchip_context_D.currentOutputOffset) {
+                btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
+                sw = BTCHIP_SW_INCORRECT_DATA;
+                break;
+            }
             memmove(btchip_context_D.currentOutput,
                     btchip_context_D.currentOutput + btchip_context_D.discardSize,
                     btchip_context_D.currentOutputOffset - btchip_context_D.discardSize);

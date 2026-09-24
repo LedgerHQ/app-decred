@@ -90,6 +90,7 @@ unsigned short btchip_apdu_hash_input_start(void);
 unsigned short btchip_apdu_hash_input_finalize(void);
 unsigned short btchip_apdu_hash_sign(void);
 unsigned short btchip_apdu_hash_input_finalize_full(void);
+void btchip_apdu_hash_input_finalize_full_reset(void);
 unsigned short btchip_apdu_get_public_key(void);
 unsigned short btchip_apdu_sign_message(void);
 

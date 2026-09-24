@@ -31,6 +31,18 @@ void settings_pubkey_export_change(unsigned int enabled) {
     nvm_write((void*) &N_btchip.pubKeyRequestRestriction, &enabled, 1);
     ui_idle();
 }
+
+void settings_blind_signing_change(unsigned int enabled) {
+    unsigned char options = N_btchip.bkp.config.options;
+    if (enabled) {
+        options |= BTCHIP_OPTION_BLIND_SIGNING;
+    } else {
+        options &= ~BTCHIP_OPTION_BLIND_SIGNING;
+    }
+    nvm_write((void*) &N_btchip.bkp.config.options, &options, 1);
+    ui_idle();
+}
+
 //////////////////////////////////////////////////////////////////////////////////////
 // Public keys export submenu:
 
@@ -59,10 +71,36 @@ void settings_pubkey_export_selector(unsigned int idx) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
+// Blind signing submenu:
+
+const char* const settings_blind_signing_getter_values[] = {"Enabled", "Disabled", "Back"};
+
+const char* settings_blind_signing_getter(unsigned int idx) {
+    if (idx < ARRAYLEN(settings_blind_signing_getter_values)) {
+        return settings_blind_signing_getter_values[idx];
+    }
+    return NULL;
+}
+
+void settings_blind_signing_selector(unsigned int idx) {
+    switch (idx) {
+        case 0:
+            settings_blind_signing_change(1);
+            break;
+        case 1:
+            settings_blind_signing_change(0);
+            break;
+        default:
+            ux_menulist_init(0, settings_submenu_getter, settings_submenu_selector);
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
 // Settings menu:
 
 const char* const settings_submenu_getter_values[] = {
     "Public keys export",
+    "Blind signing",
     "Back",
 };
 
@@ -80,6 +118,14 @@ void settings_submenu_selector(unsigned int idx) {
                                     settings_pubkey_export_getter,
                                     settings_pubkey_export_selector,
                                     N_btchip.pubKeyRequestRestriction);
+            break;
+        case 1:
+            ux_menulist_init_select(0,
+                                    settings_blind_signing_getter,
+                                    settings_blind_signing_selector,
+                                    (N_btchip.bkp.config.options & BTCHIP_OPTION_BLIND_SIGNING)
+                                        ? 0
+                                        : 1);
             break;
         default:
             ui_idle();

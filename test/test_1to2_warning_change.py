@@ -219,7 +219,79 @@ def test_1to2_warning_sign(backend: BackendInterface):
         exit()
 
 
-""" 
+################# HASH INPUT FINALIZE WITH REJECTED CHANGE PATH WARNING #########################
+# V-020: rejecting the unusual change-path warning must abort the whole signing session,
+# not just that one APDU - a later output APDU must fail instead of silently continuing.
+def test_1to2_warning_finalize_reject(
+    backend: BackendInterface, device: Device, navigator: Navigator
+):
+    backend.raise_policy = RaisePolicy.RAISE_NOTHING
+
+    packets = [
+        "0100000001",
+        "01"
+        + "%0.2X" % len(trusted_input.data)
+        + hexlify(trusted_input.data).decode("utf-8")
+        + "00"
+        + "19",
+        "76a914b0809bbfc9c10ed4d70a0efe932e589ca11239d188acffffffff",
+    ]
+    packets[0] = (
+        "e0440000"
+        + hexlify(bytes([int(len(packets[0]) / 2)])).decode("utf-8")
+        + packets[0]
+    )
+    backend.exchange_raw(data=bytearray.fromhex(packets[0]))
+    for packet in packets[1:]:
+        packet = (
+            "e0448000" + hexlify(bytes([int(len(packet) / 2)])).decode("utf-8") + packet
+        )
+        backend.exchange_raw(data=bytearray.fromhex(packet))
+
+    change_path_packet = "058000002c8000002A800000000000000110000001"
+    change_path_packet = (
+        "e04aFF00"
+        + hexlify(bytes([int(len(change_path_packet) / 2)])).decode("utf-8")
+        + change_path_packet
+    )
+    test_name = Path(currentframe().f_code.co_name)
+    with backend.exchange_async_raw(data=bytearray.fromhex(change_path_packet)):
+        if device.is_nano:
+            navigator.navigate_until_text_and_compare(
+                NavInsID.RIGHT_CLICK,
+                [NavInsID.BOTH_CLICK],
+                "Reject if you're",
+                ROOT_SCREENSHOT_PATH,
+                test_name,
+                screen_change_after_last_instruction=False,
+            )
+        else:
+            navigator.navigate_and_compare(
+                ROOT_SCREENSHOT_PATH,
+                test_case_name=test_name,
+                instructions=[NavInsID.USE_CASE_CHOICE_CONFIRM],
+                screen_change_after_last_instruction=False,
+            )
+
+    result = backend.last_async_response
+    assert result.status == 0x6985
+
+    # The transaction must now be fully aborted: a later output APDU must fail
+    # instead of silently continuing towards signing.
+    output_packet = (
+        "02ac211e000000000000001976a914fdeea9711e6c81027d677b2ceddf5c14d84977d288ac"
+        "c0cf6a000000000000001976a9149e882fd6fe9ff8da3f0309b15ff009f1e534719888ac"
+    )
+    output_packet = (
+        "e04a8000"
+        + hexlify(bytes([int(len(output_packet) / 2)])).decode("utf-8")
+        + output_packet
+    )
+    result = backend.exchange_raw(data=bytearray.fromhex(output_packet))
+    assert result.status == 0x6985
+
+
+"""
 APDU EXCHANGE RECAP:
 
 HID => e042000009000000010100000001
