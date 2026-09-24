@@ -353,7 +353,8 @@ uint8_t prepare_full_output(uint8_t checkOnly) {
         if (!isOpReturn) {
             unsigned char isChangeOutput = 0;
             // Only a canonical P2PKH script may be classified as change
-            if (btchip_context_D.tmpCtx.output.changeInitialized && isRegular) {
+            if (btchip_context_D.tmpCtx.output.changeInitialized &&
+                btchip_context_D.tmpCtx.output.changeAccepted && isRegular) {
                 isChangeOutput =
                     (memcmp(btchip_context_D.currentOutput + offset +
                                 OUTPUT_SCRIPT_REGULAR_PRE_LENGTH,

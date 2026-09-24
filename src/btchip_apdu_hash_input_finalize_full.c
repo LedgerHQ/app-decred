@@ -157,7 +157,7 @@ static bool handle_output_state() {
             PRINTF("BTCHIP_OUTPUT_PARSING_OUTPUT:\n");
 
             unsigned int scriptSize;
-            if (btchip_context_D.currentOutputOffset < 9) {
+            if (btchip_context_D.currentOutputOffset < OUTPUT_HEADER_LENGTH + 1) {
                 break;
             }
             if (btchip_context_D.currentOutput[OUTPUT_HEADER_LENGTH] < 0xFD) {

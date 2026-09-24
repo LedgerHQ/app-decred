@@ -256,13 +256,20 @@ void btchip_private_derive_keypair(unsigned char *bip32Path,
         bip32PathInt[i] = btchip_read_u32(bip32Path, 1, 0);
         bip32Path += 4;
     }
-    os_perso_derive_node_bip32(CX_CURVE_256K1,
-                               bip32PathInt,
-                               bip32PathLength,
-                               privateComponent,
-                               out_chainCode);
-    btchip_retrieve_keypair_discard(privateComponent, derivePublic);
-    explicit_bzero(privateComponent, sizeof(privateComponent));
+    BEGIN_TRY {
+        TRY {
+            os_perso_derive_node_bip32(CX_CURVE_256K1,
+                                       bip32PathInt,
+                                       bip32PathLength,
+                                       privateComponent,
+                                       out_chainCode);
+            btchip_retrieve_keypair_discard(privateComponent, derivePublic);
+        }
+        FINALLY {
+            explicit_bzero(privateComponent, sizeof(privateComponent));
+        }
+    }
+    END_TRY;
 }
 
 /*
