@@ -31,7 +31,7 @@ include $(BOLOS_SDK)/Makefile.defines
 # Application version
 APPVERSION_M= 1
 APPVERSION_N= 4
-APPVERSION_P= 1
+APPVERSION_P= 2
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
@@ -46,9 +46,6 @@ ICON_APEX_P = icons/apex_app_$(COIN).png
 
 # Application allowed derivation curves.
 CURVE_APP_LOAD_PARAMS = secp256k1
-
-# Application allowed derivation paths.
-PATH_APP_LOAD_PARAMS = "44'/42'"
 
 # Setting to allow building variant applications
 VARIANT_PARAM = COIN
@@ -70,12 +67,16 @@ DEFINES_LIB = # Decred IS the lib
 DEFINES += COIN_P2PKH_VERSION=1855 COIN_P2SH_VERSION=1818 COIN_FAMILY=1 COIN_COINID=\"Decred\" COIN_COINID_HEADER=\"DECRED\" COIN_COLOR_HDR=0x5482ff COIN_COLOR_DB=0xB2E8CB COIN_COINID_NAME=\"Decred\" COIN_COINID_SHORT=\"DCR\" COIN_KIND=COIN_KIND_DECRED
 APPNAME = "Decred"
 HAVE_APPLICATION_FLAG_LIBRARY = 1
+# Application allowed derivation paths.
+PATH_APP_LOAD_PARAMS = "44'/42'"
 else ifeq ($(COIN),decred_testnet)
 # Decred testnet
 # All but Decred app use dependency onto the decred app/lib
 DEFINES_LIB = USE_LIB_DECRED
 DEFINES += COIN_P2PKH_VERSION=3873 COIN_P2SH_VERSION=3836 COIN_FAMILY=1 COIN_COINID=\"Decred\" COIN_COINID_HEADER=\"DECRED\" COIN_COLOR_HDR=0x5482ff COIN_COLOR_DB=0xB2E8CB COIN_COINID_NAME=\"Decred\" COIN_COINID_SHORT=\"TDCR\" COIN_KIND=COIN_KIND_DECRED_TESTNET
 APPNAME = "Decred Test"
+# Application allowed derivation paths: dedicated testnet coin_type, not mainnet's.
+PATH_APP_LOAD_PARAMS = "44'/1'"
 else
 ifeq ($(filter clean,$(MAKECMDGOALS)),)
 $(error Unsupported COIN - use decred, decred_testnet)
@@ -100,6 +101,16 @@ ENABLE_BLUETOOTH = 1
 #         NBGL custom features         #
 ########################################
 ENABLE_NBGL_QRCODE = 1
+
+########################################
+#                 SSP                  #
+########################################
+ENABLE_STACK_PROTECTOR = 1
+
+########################################
+#        LINK TIME OPTIMIZATION        #
+########################################
+ENABLE_LINK_TIME_OPTIMIZATION = 1
 
 # Use only specific files from standard app
 DISABLE_STANDARD_APP_FILES = 1

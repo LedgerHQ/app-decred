@@ -64,15 +64,17 @@ unsigned char btchip_output_script_is_op_return(unsigned char *buffer) {
 }
 
 unsigned char btchip_output_script_is_op_create(unsigned char *buffer) {
+    uint16_t offset = (uint16_t) (buffer - btchip_context_D.currentOutput);
     return (!btchip_output_script_is_regular(buffer) && !btchip_output_script_is_p2sh(buffer) &&
             !btchip_output_script_is_op_return(buffer) && (buffer[0] <= 0xEA) &&
-            (buffer[buffer[0]] == 0xC1));
+            ((offset + buffer[0]) < MAX_OUTPUT_TO_CHECK) && (buffer[buffer[0]] == 0xC1));
 }
 
 unsigned char btchip_output_script_is_op_call(unsigned char *buffer) {
+    uint16_t offset = (uint16_t) (buffer - btchip_context_D.currentOutput);
     return (!btchip_output_script_is_regular(buffer) && !btchip_output_script_is_p2sh(buffer) &&
             !btchip_output_script_is_op_return(buffer) && (buffer[0] <= 0xEA) &&
-            (buffer[buffer[0]] == 0xC2));
+            ((offset + buffer[0]) < MAX_OUTPUT_TO_CHECK) && (buffer[buffer[0]] == 0xC2));
 }
 
 unsigned char btchip_rng_u8_modulo(unsigned char modulo) {
@@ -135,8 +137,6 @@ void btchip_retrieve_keypair_discard(unsigned char *privateComponent, unsigned c
                                              privateComponent,
                                              32,
                                              &btchip_private_key_D);
-
-            PRINTF("Using private component\n%.*H\n", 32, privateComponent);
 
             if (derivePublic) {
                 cx_ecfp_generate_pair(BTCHIP_CURVE, &btchip_public_key_D, &btchip_private_key_D, 1);
@@ -256,13 +256,20 @@ void btchip_private_derive_keypair(unsigned char *bip32Path,
         bip32PathInt[i] = btchip_read_u32(bip32Path, 1, 0);
         bip32Path += 4;
     }
-    os_perso_derive_node_bip32(CX_CURVE_256K1,
-                               bip32PathInt,
-                               bip32PathLength,
-                               privateComponent,
-                               out_chainCode);
-    btchip_retrieve_keypair_discard(privateComponent, derivePublic);
-    explicit_bzero(privateComponent, sizeof(privateComponent));
+    BEGIN_TRY {
+        TRY {
+            os_perso_derive_node_bip32(CX_CURVE_256K1,
+                                       bip32PathInt,
+                                       bip32PathLength,
+                                       privateComponent,
+                                       out_chainCode);
+            btchip_retrieve_keypair_discard(privateComponent, derivePublic);
+        }
+        FINALLY {
+            explicit_bzero(privateComponent, sizeof(privateComponent));
+        }
+    }
+    END_TRY;
 }
 
 /*
@@ -309,6 +316,10 @@ unsigned char bip32_print_path(unsigned char *bip32Path, char *out, unsigned cha
     unsigned char i, offset;
     unsigned int current_level;
     bool hardened;
+
+    if (max_out_len < 4) {
+        THROW(EXCEPTION_OVERFLOW);
+    }
 
     bip32PathLength = bip32Path[0];
     if (bip32PathLength > MAX_BIP32_PATH) {

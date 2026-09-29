@@ -28,6 +28,7 @@
 #define MAX_OUTPUT_TO_CHECK 200
 #define MAX_COIN_ID 13
 #define MAX_SHORT_COIN_ID 5
+#define MAX_DISPLAYABLE_MESSAGE_LENGTH 200
 
 #define MAGIC_TRUSTED_INPUT 0x32
 #define MAGIC_DEV_KEY 0x01
@@ -41,7 +42,8 @@ enum btchip_options_e {
     BTCHIP_OPTION_DETERMINISTIC_SIGNATURE = 0x02,
     BTCHIP_OPTION_FREE_SIGHASHTYPE = 0x04,
     BTCHIP_OPTION_SKIP_2FA_P2SH = 0x08,
-    BTCHIP_OPTION_ALLOW_ARBITRARY_CHANGE = 0x10
+    BTCHIP_OPTION_ALLOW_ARBITRARY_CHANGE = 0x10,
+    BTCHIP_OPTION_BLIND_SIGNING = 0x20
 };
 
 /**
@@ -206,6 +208,8 @@ struct btchip_context_s {
 
 
     unsigned short hashedMessageLength;
+    unsigned char messageBuffer[MAX_DISPLAYABLE_MESSAGE_LENGTH];
+    unsigned char messageDisplayable;
 
     union {
         btchip_tmp_output_t output;

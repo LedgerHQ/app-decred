@@ -26,4 +26,7 @@ void btchip_bagl_user_action_message_signing(unsigned char confirming);
 
 void btchip_bagl_user_action_display(unsigned char confirming);
 
+// UI response to the unusual change-path warning
+void btchip_user_action_change_path(unsigned char confirming);
+
 #endif /* _BTCHIP_BAGL_H_ */

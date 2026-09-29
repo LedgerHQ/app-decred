@@ -34,6 +34,7 @@ unsigned short btchip_apdu_hash_input_start() {
         btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
         btchip_set_check_internal_structure_integrity(1);
         btchip_context_D.transactionHashOption = TRANSACTION_HASH_BOTH;
+        btchip_apdu_hash_input_finalize_full_reset();
     } else if (G_io_apdu_buffer[ISO_OFFSET_P1] != P1_NEXT) {
         return BTCHIP_SW_INCORRECT_P1_P2;
     }
@@ -65,10 +66,26 @@ unsigned short btchip_apdu_hash_input_start() {
         return BTCHIP_SW_INCORRECT_P1_P2;
     }
 
+    if ((G_io_apdu_buffer[ISO_OFFSET_P1] == P1_FIRST) && (apduLength < 4)) {
+        btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
+        return BTCHIP_SW_INCORRECT_LENGTH;
+    }
+
     btchip_context_D.transactionBufferPointer = G_io_apdu_buffer + ISO_OFFSET_CDATA;
     btchip_context_D.transactionDataRemaining = apduLength;
 
-    transaction_parse(PARSE_MODE_SIGNATURE);
+    BEGIN_TRY {
+        TRY {
+            transaction_parse(PARSE_MODE_SIGNATURE);
+        }
+        CATCH_ALL {
+            btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
+            return BTCHIP_SW_INCORRECT_DATA;
+        }
+        FINALLY {
+        }
+    }
+    END_TRY;
 
     return BTCHIP_SW_OK;
 }

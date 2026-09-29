@@ -55,12 +55,18 @@ void btchip_context_init() {
         btchip_context_D.payToAddressVersion = G_coin_config->p2pkh_version;
         btchip_context_D.payToScriptHashVersion = G_coin_config->p2sh_version;
         btchip_context_D.coinFamily = G_coin_config->family;
-        btchip_context_D.coinIdLength = strlen(PIC(G_coin_config->coinid));
-        memmove(btchip_context_D.coinId, PIC(G_coin_config->coinid), btchip_context_D.coinIdLength);
-        btchip_context_D.shortCoinIdLength = strlen(PIC(G_coin_config->name_short));
-        memmove(btchip_context_D.shortCoinId,
-                PIC(G_coin_config->name_short),
-                btchip_context_D.shortCoinIdLength);
+        uint8_t coinIdLength = strnlen(PIC(G_coin_config->coinid), MAX_COIN_ID + 1);
+        if (coinIdLength == 0 || coinIdLength > MAX_COIN_ID) {
+            THROW(INVALID_PARAMETER);
+        }
+        uint8_t shortCoinIdLength = strnlen(PIC(G_coin_config->name_short), MAX_SHORT_COIN_ID + 1);
+        if (shortCoinIdLength == 0 || shortCoinIdLength > MAX_SHORT_COIN_ID) {
+            THROW(INVALID_PARAMETER);
+        }
+        btchip_context_D.coinIdLength = coinIdLength;
+        memmove(btchip_context_D.coinId, PIC(G_coin_config->coinid), coinIdLength);
+        btchip_context_D.shortCoinIdLength = shortCoinIdLength;
+        memmove(btchip_context_D.shortCoinId, PIC(G_coin_config->name_short), shortCoinIdLength);
     }
     if (!N_btchip.storageInitialized) {
         unsigned char initialized = 1, denied = 1;

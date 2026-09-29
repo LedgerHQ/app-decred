@@ -85,3 +85,12 @@ apduProcessingFunction const DISPATCHER_FUNCTIONS[] = {
     btchip_apdu_get_firmware_version,
     btchip_apdu_get_coin_version,
 };
+
+_Static_assert(sizeof(DISPATCHER_CLA) / sizeof(DISPATCHER_CLA[0]) == DISPATCHER_APDUS,
+               "DISPATCHER_APDUS out of sync with DISPATCHER_CLA");
+_Static_assert(sizeof(DISPATCHER_INS) / sizeof(DISPATCHER_INS[0]) == DISPATCHER_APDUS,
+               "DISPATCHER_APDUS out of sync with DISPATCHER_INS");
+_Static_assert(sizeof(DISPATCHER_DATA_IN) / sizeof(DISPATCHER_DATA_IN[0]) == DISPATCHER_APDUS,
+               "DISPATCHER_APDUS out of sync with DISPATCHER_DATA_IN");
+_Static_assert(sizeof(DISPATCHER_FUNCTIONS) / sizeof(DISPATCHER_FUNCTIONS[0]) == DISPATCHER_APDUS,
+               "DISPATCHER_APDUS out of sync with DISPATCHER_FUNCTIONS");
