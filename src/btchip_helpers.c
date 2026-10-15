@@ -142,6 +142,10 @@ void btchip_retrieve_keypair_discard(unsigned char *privateComponent, unsigned c
                 cx_ecfp_generate_pair(BTCHIP_CURVE, &btchip_public_key_D, &btchip_private_key_D, 1);
             }
         }
+        CATCH_OTHER(e) {
+            explicit_bzero(&btchip_private_key_D, sizeof(btchip_private_key_D));
+            THROW(e);
+        }
         FINALLY {
         }
     }
