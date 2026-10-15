@@ -42,8 +42,13 @@ unsigned short btchip_apdu_get_trusted_input() {
         btchip_set_check_internal_structure_integrity(1);
         dataOffset = 4;
         btchip_context_D.transactionHashOption = TRANSACTION_HASH_FULL;
+        btchip_context_D.transactionParseMode = PARSE_MODE_TRUSTED_INPUT;
     } else if (G_io_apdu_buffer[ISO_OFFSET_P1] != GET_TRUSTED_INPUT_P1_NEXT) {
         return BTCHIP_SW_INCORRECT_P1_P2;
+    } else if (btchip_context_D.transactionParseMode != PARSE_MODE_TRUSTED_INPUT) {
+        btchip_context_D.transactionContext.transactionState = BTCHIP_TRANSACTION_NONE;
+        btchip_context_D.transactionParseMode = 0;
+        return BTCHIP_SW_CONDITIONS_OF_USE_NOT_SATISFIED;
     }
 
     if (G_io_apdu_buffer[ISO_OFFSET_P2] != 0x00) {
