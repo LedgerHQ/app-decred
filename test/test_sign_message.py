@@ -125,7 +125,9 @@ def test_decred_sign_message(scenario_navigator: NavigateWithScenario):
 
 # Message longer than MAX_DISPLAYABLE_MESSAGE_LENGTH (200) can't be shown in clear, and
 # blind signing is disabled by default, so the device must reject it with no UI shown.
-def test_decred_sign_message_blind_signing_rejected(scenario_navigator: NavigateWithScenario):
+def test_decred_sign_message_blind_signing_rejected(
+    scenario_navigator: NavigateWithScenario,
+):
     scenario_navigator.backend.raise_policy = RaisePolicy.RAISE_NOTHING
 
     packet = _sign_message_prepare_packet(LOREM_IPSUM)
@@ -137,7 +139,9 @@ def test_decred_sign_message_blind_signing_rejected(scenario_navigator: Navigate
 
 
 ################# SIGN MESSAGE - LONG MESSAGE, BLIND SIGNING ENABLED #########################
-def test_decred_sign_message_blind_signing_enabled(scenario_navigator: NavigateWithScenario):
+def test_decred_sign_message_blind_signing_enabled(
+    scenario_navigator: NavigateWithScenario,
+):
     scenario_navigator.backend.raise_policy = RaisePolicy.RAISE_NOTHING
     backend = scenario_navigator.backend
     device = scenario_navigator.device

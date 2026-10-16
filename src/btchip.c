@@ -55,7 +55,8 @@ void app_dispatch(void) {
                 goto sendSW;
             }
             if (DISPATCHER_DATA_IN[dispatched]) {
-                if (G_io_apdu_buffer[ISO_OFFSET_LC] == 0x00 || btchip_context_D.inLength - 5 == 0) {
+                if (G_io_apdu_buffer[ISO_OFFSET_LC] == 0x00 ||
+                    btchip_context_D.inLength != ISO_OFFSET_CDATA + G_io_apdu_buffer[ISO_OFFSET_LC]) {
                     btchip_context_D.sw = BTCHIP_SW_INCORRECT_LENGTH;
                     goto sendSW;
                 }
