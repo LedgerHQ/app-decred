@@ -175,6 +175,8 @@ struct btchip_context_s {
     BLAKE256_CTX transactionHashAuthorization;
     /** Current hash to perform (TRANSACTION_HASH_) */
     unsigned char transactionHashOption;
+    /** Parser mode bound by the last FIRST command (PARSE_MODE_) */
+    uint8_t transactionParseMode;
 
     unsigned char transactionVersion[4];
     unsigned char inputValue[8];
